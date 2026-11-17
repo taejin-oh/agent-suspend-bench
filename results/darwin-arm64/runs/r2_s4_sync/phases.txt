@@ -1,0 +1,85 @@
+parsed 384 timing breakdown records out of 384 JSON log entries
+
+== Phase percentiles (ms) ==
+layer   op          class    kind    scope           phase                n      p50      p90      p95      max
+atelet  checkpoint  gvisor   latest  -               sandbox_assets      96      0.1      0.3      0.4      0.7
+atelet  checkpoint  gvisor   latest  -               worker_checkpoint    96    256.5    429.1    459.0   1483.5
+atelet  checkpoint  gvisor   latest  -               persist             96   2158.4   2749.7   3091.9   3469.9
+atelet  checkpoint  gvisor   latest  -               cleanup             96      2.1      4.9      7.1     17.7
+atelet  checkpoint  gvisor   latest  -               unattributed        96      0.2      0.6      0.8     10.3
+atelet  checkpoint  gvisor   latest  -               total               96   2457.3   3021.6   3291.3   3906.8
+atelet  restore     gvisor   latest  -               volume_mount         4      0.0      0.0      0.0      0.0
+atelet  restore     gvisor   latest  -               manifest_fetch       4      0.4      2.6      3.0      3.5
+atelet  restore     gvisor   latest  -               sandbox_assets       4      0.5      4.3      5.1      5.9
+atelet  restore     gvisor   latest  -               download             4      0.6      6.9      8.2      9.6
+atelet  restore     gvisor   latest  -               oci_unpack           4      0.7      6.4      7.6      8.8
+atelet  restore     gvisor   latest  -               worker_restore       4     82.6    122.1    127.9    133.8
+atelet  restore     gvisor   latest  -               total                4     84.3    135.6    144.1    152.6
+atelet  restore     gvisor   local   -               volume_mount        92      0.0      0.0      0.0      0.1
+atelet  restore     gvisor   local   -               manifest_fetch      92      0.1      0.4      0.9      3.0
+atelet  restore     gvisor   local   -               sandbox_assets      92      0.5      1.2      2.5     14.3
+atelet  restore     gvisor   local   -               oci_unpack          92      1.1      2.6      3.1      8.9
+atelet  restore     gvisor   local   -               worker_restore      92    390.1    844.0   1094.2   1570.0
+atelet  restore     gvisor   local   -               total               92    394.2    846.8   1098.8   1572.1
+ateworker checkpoint  gvisor   latest  -               prep                96      1.0      2.7      3.4     13.4
+ateworker checkpoint  gvisor   latest  -               checkpoint          96    221.7    388.8    409.1   1426.2
+ateworker checkpoint  gvisor   latest  -               teardown            96     24.1     50.7     64.5    133.7
+ateworker checkpoint  gvisor   latest  -               unattributed        96      1.2      3.6      5.1     10.2
+ateworker checkpoint  gvisor   latest  -               total               96    255.5    427.3    456.7   1480.4
+ateworker restore     gvisor   latest  -               prep                 4      0.5      0.7      0.7      0.8
+ateworker restore     gvisor   latest  -               egress_prepare       4      8.1     11.3     11.3     11.3
+ateworker restore     gvisor   latest  -               net_setup            4      3.5      5.5      5.9      6.2
+ateworker restore     gvisor   latest  -               sandbox_create       4     11.5     15.0     15.6     16.2
+ateworker restore     gvisor   latest  -               sandbox_restore      4     15.9     21.2     22.2     23.2
+ateworker restore     gvisor   latest  -               app_rootfs           4      1.8      3.6      3.9      4.2
+ateworker restore     gvisor   latest  -               app_create           4      3.1      6.1      6.8      7.4
+ateworker restore     gvisor   latest  -               app_restore          4     22.8     25.3     25.5     25.7
+ateworker restore     gvisor   latest  -               wakeup_probe         4      2.5      6.4      7.1      7.8
+ateworker restore     gvisor   latest  -               activate             4      0.0      0.1      0.1      0.1
+ateworker restore     gvisor   latest  -               total                4     74.8     89.3     91.1     92.9
+ateworker restore     gvisor   local   -               prep                92      0.7      1.9      2.3     16.6
+ateworker restore     gvisor   local   -               egress_prepare      92      9.0     20.3     29.1     50.7
+ateworker restore     gvisor   local   -               net_setup           92      5.5     18.9     28.1     72.5
+ateworker restore     gvisor   local   -               sandbox_create      92     12.5     29.0     32.8    424.7
+ateworker restore     gvisor   local   -               sandbox_restore     92     24.6     51.1     70.9    461.5
+ateworker restore     gvisor   local   -               app_rootfs          92      1.9      3.9      5.8     12.2
+ateworker restore     gvisor   local   -               app_create          92      8.2     18.7     21.7     40.6
+ateworker restore     gvisor   local   -               app_restore         92     84.5    147.3    166.7    186.3
+ateworker restore     gvisor   local   -               wakeup_probe        92    175.6    605.1    728.5   1058.3
+ateworker restore     gvisor   local   -               activate            92      0.1      0.5      0.7      3.9
+ateworker restore     gvisor   local   -               total               92    385.9    837.2   1089.6   1567.4
+
+== Slowest 3 operations (waterfall, ms) ==
+checkpoint actor=2a9c719c-07b6-4b06-9024-a071286302b2 template=glutton class=gvisor scope=- kind=latest total=3906.8
+  atelet sandbox_assets       0.1
+  atelet worker_checkpoint    434.2
+    ateworker  prep               0.9
+    ateworker  checkpoint       401.5
+    ateworker  teardown          30.1
+    ateworker  unattributed       0.5
+    (gap)  rpc/queueing       1.3
+  atelet persist           3469.9
+  atelet cleanup              2.2
+  atelet unattributed         0.4
+checkpoint actor=1270ac64-7a43-49cf-b6c8-edc7f9c6ffcb template=glutton class=gvisor scope=- kind=latest total=3895.7
+  atelet sandbox_assets       0.1
+  atelet worker_checkpoint    429.8
+    ateworker  prep               1.1
+    ateworker  checkpoint       393.4
+    ateworker  teardown          29.9
+    ateworker  unattributed       3.7
+    (gap)  rpc/queueing       1.7
+  atelet persist           3458.7
+  atelet cleanup              7.0
+  atelet unattributed         0.2
+checkpoint actor=3a614c13-2e2d-4f31-a568-a9434deb1020 template=glutton class=gvisor scope=- kind=latest total=3881.5
+  atelet sandbox_assets       0.0
+  atelet worker_checkpoint    414.9
+    ateworker  prep               0.3
+    ateworker  checkpoint       368.8
+    ateworker  teardown          39.9
+    ateworker  unattributed       3.1
+    (gap)  rpc/queueing       2.8
+  atelet persist           3458.7
+  atelet cleanup              7.7
+  atelet unattributed         0.1

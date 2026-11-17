@@ -1,0 +1,63 @@
+{
+  "v": 5,
+  "createdOnFiles": {
+    "v": 1,
+    "at": "2026-11-18T01:00:00Z"
+  },
+  "lists": "css",
+  "format": {
+    "v": 1,
+    "shared": [
+      "project/deck.css"
+    ]
+  },
+  "title": "Agent Substrate 재우기/깨우기 부하 사전 검증",
+  "cover": "cover",
+  "order": [
+    "cover",
+    "question",
+    "summary",
+    "what",
+    "how",
+    "method",
+    "verified",
+    "load",
+    "contention",
+    "phases",
+    "cause",
+    "storage",
+    "limits",
+    "plan",
+    "scale",
+    "next"
+  ],
+  "sections": {
+    "s1": {
+      "description": "표지, 확인하려는 질문, 결론 요약: 세 가지 확인 질문의 답은 예이고 본 질문은 서버 검증에 남아 있다.",
+      "start": "cover"
+    },
+    "s2": {
+      "description": "Agent Substrate가 무엇이고 재우기가 저장 장치에 어떤 쓰기를 만드는지, 그리고 이를 가상 Actor로 모사한 방법.",
+      "start": "what"
+    },
+    "s3": {
+      "description": "직접 측정한 결과: 동작 확인, 부하 세 가지의 지연, 시간이 쓰인 구간, 원인 확인 실험, 쓰기량과 점유량.",
+      "start": "verified"
+    },
+    "s4": {
+      "description": "결과의 한계, 재현 절차, 서버 검증에서 볼 지표와 다음 단계.",
+      "start": "limits"
+    }
+  },
+  "faces": {
+    "noto-sans-kr": {
+      "family": "Noto Sans KR",
+      "href": "https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap"
+    },
+    "jetbrains-mono": {
+      "family": "JetBrains Mono",
+      "href": "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap"
+    }
+  },
+  "designSystems": []
+}

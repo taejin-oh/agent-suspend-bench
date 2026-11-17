@@ -1,0 +1,8 @@
+name=r2_s1_sync users=1 duration_s=120 extra=lifecycle_mode=sync
+start=2026-11-17T22:13:03Z
+{
+  "host": null,
+  "message": "Swarming started",
+  "success": true
+}
+end=2026-11-17T22:15:04Z

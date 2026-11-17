@@ -1,0 +1,667 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agent Substrate 재우기/깨우기 부하 사전 검증</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+* { margin: 0; box-sizing: content-box; }
+html, body { height: 100%; background: #0B151C; overflow: hidden; }
+body { font: 32px/1.2 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', Arial, sans-serif; }
+#stage { position: absolute; left: 50%; top: 50%; width: 1920px; height: 1080px; transform-origin: 0 0; }
+#stage > section { width: 1920px; height: 1080px; overflow: hidden; box-sizing: border-box; position: absolute; left: 0; top: 0; display: none; }
+#stage > section.on { display: flex; }
+aside { display: none; }
+h1 { font-size: 96px; font-weight: 600; }
+h2 { font-size: 64px; font-weight: 600; }
+h3 { font-size: 44px; font-weight: 600; }
+p, li, h1, h2, h3, td, th { overflow-wrap: break-word; text-wrap: pretty; word-break: keep-all; }
+table { width: 100%; border-collapse: separate; border-spacing: 0; border: solid #0002; border-width: 2px 0 0 2px; }
+th, td { padding: .35em .6em; text-align: left; border: solid #0002; border-width: 0 2px 2px 0; }
+th { font-weight: 700; }
+.xarrow { width: 60px; height: 24px; display: flex; align-items: center; flex: none; align-self: center; }
+.xarrow span { display: block; width: 100%; height: 3px; background: currentColor; position: relative; }
+.xarrow span::after { content: ''; position: absolute; right: -2px; top: -7px; border-left: 14px solid currentColor; border-top: 8.5px solid transparent; border-bottom: 8.5px solid transparent; }
+body { font-family: 'Noto Sans KR', Arial, sans-serif; color: #16242E; }
+
+section {
+  background: #F6F5F0;
+  padding: 128px 128px 160px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  counter-increment: page;
+}
+section::after {
+  content: counter(page);
+  position: absolute;
+  right: 128px;
+  bottom: 64px;
+  font-size: 24px;
+  color: #55626B;
+}
+section.dark { background: #10202B; color: #EEF2F0; }
+section.dark::after { color: #9DB0B8; }
+section.tone { background: #ECEAE2; }
+section.accent { background: #0C6B5D; color: #F6F5F0; }
+section.accent::after { color: #CFE6E0; }
+section.nonum::after { content: none; }
+
+.foot { position: absolute; left: 128px; bottom: 64px; width: 1480px; font-size: 24px; color: #55626B; }
+.dark .foot { color: #9DB0B8; }
+.accent .foot { color: #CFE6E0; }
+
+.eyebrow { font-size: 24px; font-weight: 700; letter-spacing: 2px; color: #0C6B5D; }
+.dark .eyebrow { color: #6FD0BC; }
+.accent .eyebrow { color: #CFE6E0; }
+
+h1 { font-size: 84px; font-weight: 700; line-height: 1.22; letter-spacing: -2px; }
+h2 { font-size: 58px; font-weight: 700; line-height: 1.22; letter-spacing: -1px; }
+h3 { font-size: 34px; font-weight: 700; line-height: 1.3; }
+
+.lead { font-size: 32px; line-height: 1.5; color: #44535C; }
+.dark .lead { color: #BFD0D4; }
+.accent .lead { color: #E3F1ED; }
+.body { font-size: 28px; line-height: 1.5; color: #44535C; }
+.small { font-size: 24px; line-height: 1.45; color: #44535C; }
+.dark .small { color: #9DB0B8; }
+.mono { font-family: 'JetBrains Mono', 'Courier New', monospace; }
+.hl { color: #0C6B5D; }
+.warn { color: #AD430C; }
+.dark .hl { color: #6FD0BC; }
+.dark .warn { color: #F2A36B; }
+
+.spacer { flex: 1; }
+.row { display: flex; gap: 32px; }
+.col { display: flex; flex-direction: column; gap: 16px; }
+
+.card {
+  flex: 1;
+  background: #FCFCFA;
+  border: 2px solid #C2BEB0;
+  border-radius: 16px;
+  padding: 35px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.card.tight { padding: 27px; gap: 10px; }
+.card.key { border: 3px solid #0C6B5D; padding: 34px; }
+.card.alert { border: 3px solid #AD430C; padding: 34px; }
+.card.key.tight, .card.alert.tight { padding: 26px; }
+.card.wide { flex: none; }
+.dark .card { background: #182C39; border: 1px solid #2D4756; }
+.card .ctxt { font-size: 28px; line-height: 1.5; color: #44535C; }
+.card .csmall { font-size: 24px; line-height: 1.45; color: #44535C; }
+.dark .card .ctxt { color: #BFD0D4; }
+.card .label { font-size: 24px; font-weight: 700; letter-spacing: 1px; color: #0C6B5D; }
+.card.alert .label { color: #AD430C; }
+.dark .card .label { color: #6FD0BC; }
+.numrow { display: flex; align-items: baseline; gap: 12px; }
+.card .num { font-size: 72px; font-weight: 700; line-height: 1.05; color: #0C6B5D; letter-spacing: -2px; }
+.card .num.warnnum { color: #AD430C; }
+.card .unit { font-size: 30px; font-weight: 700; color: #16242E; }
+
+.pill { font-size: 24px; font-weight: 700; padding: 6px 18px; border-radius: 24px; background: #D8ECE7; color: #0A5A4E; align-self: flex-start; }
+.pill.no { background: #F6DFD1; color: #8F3608; }
+
+table { font-size: 27px; color: #16242E; line-height: 1.4; }
+tr.head { background: #E4E1D6; }
+tr.band { background: #FCFCFA; }
+tr.mark { background: #D8ECE7; }
+tr.hot { background: #FBEBDF; font-weight: 700; }
+tr.hot td { font-weight: 700; }
+td.r, th.r { text-align: right; }
+
+.node { box-sizing: border-box; background: #FCFCFA; border: 2px solid #9AA7AD; border-radius: 14px; padding: 32px 30px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
+.node.disk { background: #FBEBDF; border: 3px solid #AD430C; }
+.node .ntitle { font-size: 30px; font-weight: 700; line-height: 1.3; }
+.node .ntxt { font-size: 26px; line-height: 1.4; color: #44535C; }
+.chain { display: flex; align-items: stretch; gap: 12px; }
+
+.bars { height: 430px; display: flex; align-items: flex-end; gap: 20px; border-bottom: 2px solid #9AA7AD; }
+.bar { width: 120px; background: #0C6B5D; border-radius: 6px 6px 0 0; }
+.bar.p95 { background: #9FCFC5; }
+.bar.hot { background: #AD430C; }
+.bar.hot95 { background: #E3A47C; }
+.barval { font-size: 28px; font-weight: 700; text-align: center; width: 120px; }
+.barval.hotval { color: #AD430C; }
+.barlab { font-size: 24px; color: #44535C; text-align: center; width: 120px; }
+.group { display: flex; flex-direction: column; gap: 12px; align-items: center; }
+.gname { font-size: 28px; font-weight: 700; text-align: center; }
+.gsub { font-size: 24px; color: #44535C; text-align: center; }
+
+.step { display: flex; gap: 24px; align-items: baseline; padding: 6px 14px; }
+.step .sno { font-size: 28px; font-weight: 700; color: #0C6B5D; width: 44px; }
+.step .scmd { font-size: 24px; flex: 1; color: #16242E; }
+.step .swhat { font-size: 28px; color: #16242E; width: 820px; }
+.step .stime { font-size: 24px; color: #44535C; width: 300px; text-align: right; }
+.step.gate { background: #D8ECE7; border-radius: 8px; }
+.step.gate .swhat { color: #16242E; font-weight: 700; }
+
+.code { font-family: 'JetBrains Mono', 'Courier New', monospace; font-size: 24px; line-height: 1.5; background: #10202B; color: #E6EEF0; border-radius: 12px; padding: 22px 28px; }
+
+@keyframes rise { from { opacity: 0; transform: translateY(24px); } }
+.rise { animation: rise 0.5s ease-out both; }
+.d1 { animation-delay: 120ms; }
+.d2 { animation-delay: 240ms; }
+.d3 { animation-delay: 360ms; }
+
+.stat { font-size: 72px; font-weight: 700; line-height: 1.05; letter-spacing: -2px; color: #AD430C; }
+.statunit { font-size: 30px; font-weight: 700; color: #16242E; }
+.q { flex: 1; display: flex; flex-direction: column; gap: 10px; }
+.q .qno { font-size: 24px; font-weight: 700; letter-spacing: 2px; color: #CFE6E0; }
+.q .qtxt { font-size: 32px; font-weight: 700; line-height: 1.4; }
+.qhead { font-size: 24px; font-weight: 700; letter-spacing: 1px; color: #CFE6E0; }
+.dark .lead.bright { color: #EEF2F0; }
+.hrow { display: flex; align-items: center; gap: 0; }
+.hlab { width: 330px; font-size: 28px; font-weight: 700; }
+.hseg { height: 60px; background: #8E9BA2; }
+.hseg.up { background: #AD430C; }
+.hseg.etc { background: #D5D2C6; }
+.hval { font-size: 28px; font-weight: 700; padding-left: 20px; }
+.legend { display: flex; gap: 40px; align-items: center; }
+.lg { display: flex; gap: 12px; align-items: center; }
+.lgbox { width: 28px; height: 28px; background: #8E9BA2; }
+.lgbox.up { background: #AD430C; }
+.lgbox.etc { background: #D5D2C6; }
+.lgbox.ok { background: #0C6B5D; }
+.lgbox.oklight { background: #9FCFC5; }
+.stat.ok { color: #0C6B5D; }
+.dark .card .ctxt.bright { color: #EEF2F0; }
+.lgtxt { font-size: 26px; color: #16242E; }
+.banner { background: #10202B; color: #EEF2F0; border-radius: 16px; padding: 26px 36px; font-size: 28px; line-height: 1.5; }
+.banner.light { background: #E4E1D6; color: #16242E; }
+
+#stage > section::after { content: attr(data-n); }
+#stage > section.nonum::after { content: none; }
+#bar { position: fixed; left: 0; bottom: 0; height: 4px; background: #6FD0BC; transition: width .2s; z-index: 5; }
+#notes { position: fixed; left: 0; right: 0; bottom: 0; max-height: 34%; overflow: auto; background: rgba(11,21,28,.94); color: #E6EEF0; font-size: 20px; line-height: 1.6; padding: 18px 28px; display: none; z-index: 6; }
+#help { position: fixed; right: 14px; top: 10px; color: #7E929B; font: 13px/1.4 Arial, sans-serif; z-index: 6; opacity: .8; }
+@media print {
+  @page { size: 1920px 1080px; margin: 0; }
+  html, body { height: auto; overflow: visible; background: none; }
+  #stage { position: static; transform: none !important; width: auto; height: auto; }
+  #stage > section { position: relative; display: flex !important; page-break-after: always; break-after: page; }
+  #bar, #notes, #help { display: none !important; }
+  .rise { animation: none !important; }
+}
+</style>
+</head>
+<body>
+<div id="stage">
+<section data-n="1" id="cover" class="dark nonum" data-transition="fade">
+<p class="eyebrow">AGENT SUBSTRATE · 사전 검증 결과</p>
+<div class="spacer"></div>
+<h1>다수의 Agent가 잠들고 깨기를 반복할 때<br>스토리지에 걸리는 부담</h1>
+<p class="lead">오픈소스 런타임 Agent Substrate로 만든 측정 방법과 사전 검증 결과</p>
+<div class="spacer"></div>
+<p class="small">2026-11-18</p>
+<aside>안녕하세요. 오늘은 AI Agent를 대량으로 운영할 때 스토리지에 어떤 부담이 생기는지, 그것을 어떻게 측정할 수 있는지를 말씀드리겠습니다. 순서는 네 부분입니다. 무엇을 확인하려 했는지, 측정에 쓴 Agent Substrate가 무엇인지, 작은 환경에서 직접 측정한 결과, 그리고 본 검증을 어떻게 진행할지입니다. 오늘 보여드리는 수치는 모두 직접 측정한 원본 데이터에서 가져왔고, 공식 문서에서 인용한 수치는 따로 표시했습니다.</aside>
+</section>
+<section data-n="2" id="question" class="accent" data-transition="fade">
+<p class="eyebrow">확인하려는 것</p>
+<h1>다수의 Agent가 잠들고 깨기를 반복하면<br>스토리지에 문제가 생기는가</h1>
+<p class="lead">Agent Substrate는 Kubernetes용 오픈소스 런타임이다. 쉬는 Agent의 메모리와 파일을 디스크에 저장하고 자리에서 내린다(재우기, suspend). 요청이 오면 복원한다(깨우기, resume). 재울 때마다 스토리지에 쓰기가 생긴다.</p>
+<p class="lead">여기서 문제란 실패가 생기거나, 재우기와 깨우기가 크게 느려지거나, 필요한 쓰기 속도와 용량이 장치의 한계를 넘는&nbsp;것을&nbsp;말한다.</p>
+<div class="spacer"></div>
+<p class="qhead">작은 환경에서 먼저 확인한 세 가지 (실제 규모의 검증은 Linux 서버에서 한다)</p>
+<div class="row" style="gap:48px">
+<div class="q"><p class="qno">질문 1</p><p class="qtxt">설치되고, 재우기와 깨우기가 끝까지 동작하는가</p></div>
+<div class="q"><p class="qno">질문 2</p><p class="qtxt">실제 Agent를 돌리지 않고 이 부하를 만들 수 있는가</p></div>
+<div class="q"><p class="qno">질문 3</p><p class="qtxt">부담과 지연을 수치로 측정할 수 있는가</p></div>
+</div>
+<aside>확인하려는 것은 한 문장입니다. 많은 Agent가 깨어났다 잠들기를 반복하면 스토리지에 문제가 생기는가. Agent Substrate는 쉬는 Agent를 통째로 저장해서 자리에서 내리는 런타임입니다. 이 동작을 재우기, 다시 올리는 동작을 깨우기라고 부르겠습니다. 재울 때마다 스토리지에 쓰기가 생기기 때문에, Agent가 많아지면 이 쓰기가 감당할 수 있는 수준인지가 궁금해집니다. 여기서 문제라고 하는 것은 세 가지입니다. 실패가 생기는 것, 재우기와 깨우기가 크게 느려지는 것, 그리고 필요한 쓰기 속도나 용량이 장치의 한계를 넘는 것입니다. 실제 Agent를 대량으로 돌려 보면 가장 확실하지만, LLM을 대량으로 호출하면 비용이 크고 결과도 매번 달라집니다. 그래서 실제 규모의 검증에 앞서 작은 환경에서 세 가지를 먼저 확인했습니다. 오늘 발표는 이 세 질문에 대한 답이고, 맨 위의 본 질문은 서버 검증에서 답할 예정입니다.</aside>
+</section>
+<section data-n="3" id="summary" data-transition="fade">
+<p class="eyebrow">결론 먼저</p>
+<h2>작은 환경에서 세 가지를 확인했다</h2>
+<div class="row">
+<div class="card key rise">
+<p class="label">질문 1 · 동작하는가</p>
+<div class="numrow"><p class="num">0건</p><p class="unit">실패</p></div>
+<h3>설치부터 깨우기까지 동작한다</h3>
+<p class="ctxt">소스 수정 없이 설치됐다. 재우기와 깨우기 요청 2,046회가 모두 성공했다. 상태가 이어지는지는 예제 1개로 3회 확인했다.</p>
+</div>
+<div class="card key rise d1">
+<p class="label">질문 2 · 만들 수 있는가</p>
+<div class="numrow"><p class="num">0회</p><p class="unit">LLM 호출</p></div>
+<h3>실제 Agent 없이 만들 수 있다</h3>
+<p class="ctxt">시나리오 파일만으로 가상 Agent 12개를 재우고 깨웠다. 실제 Agent와 얼마나 닮았는지는 검증하지 않았다.</p>
+</div>
+<div class="card alert rise d2">
+<p class="label">질문 3 · 측정되는가</p>
+<div class="numrow"><p class="num warnnum">0.83 → 8.9</p><p class="unit">초</p></div>
+<h3>지연과 쓰기량이 측정된다</h3>
+<p class="ctxt">동시에 재우자 재우기 시간(중앙값)이 약 11배가 됐다. 주된 원인이 디스크가 아닌 설정임을 찾았다. 1회 쓰기는 약&nbsp;320&nbsp;MiB.</p>
+</div>
+</div>
+<div class="banner">
+<b>본 질문의 답은 아직 없다.</b> 가상 머신 1대, 가상 Agent 12개 규모의 결과다. Linux 서버에서 규모를 키워 확인한다.
+</div>
+<p class="foot">출처: 자체 측정 (2026년 11월). 횟수는 부하 실행 8회의 합계, 시간은 업로드까지 기다리는 방식으로 잰 값</p>
+<aside>결론부터 말씀드립니다. 첫째 질문의 답은 예입니다. 소스 수정 없이 설치됐고, 재우기와 깨우기 요청 2,046회가 실패 없이 끝났습니다. 상태가 이어지는지는 예제 하나로 세 번 확인했습니다. 둘째 질문도 예입니다. 다만 쓰기 경로에 한해서입니다. LLM을 한 번도 호출하지 않고 시나리오 파일만으로 가상 Agent 12개를 재우고 깨웠습니다. 이 가상 부하가 실제 Agent와 얼마나 닮았는지는 검증하지 못했습니다. 셋째 질문도 예입니다. 여러 개를 동시에 재우면 재우기 한 번에 걸리는 시간이 늘어나는 것이 측정됐습니다. 하나만 돌릴 때 중앙값 0.83초이던 것이, 계속 바꿔 가며 재우고 깨우는 부하에서는 8.9초가 됐습니다. 이 값은 저장본을 원격 스토리지에 올리는 것까지 기다리는 방식으로 잰 값입니다. 소스에서 업로드를 제한하는 설정을 찾았고, 그 설정을 올리자 2.3초가 됐으며 되돌리자 다시 느려졌습니다. 이 부분은 뒤에서 자세히 보겠습니다. 중요한 점은, 스토리지에 문제가 생기는가 하는 본 질문에는 아직 답하지 않았다는 것입니다. 지금 결과는 가상 머신 한 대에서 얻은 값입니다.</aside>
+</section>
+<section data-n="4" id="what" data-transition="fade">
+<p class="eyebrow">AGENT SUBSTRATE란</p>
+<h2>쉬는 Agent를 디스크로 내려, 적은 자리로 많은 Agent를 돌린다</h2>
+<p class="lead">Agent는 대부분의 시간을 모델·도구·사람의 응답을 기다리며 보낸다. 그 시간 동안 자리를 비우게 하는 것이 핵심이다. Kubernetes 위에서 동작하는 오픈소스다 (Apache-2.0).</p>
+<div class="row">
+<div class="card">
+<p class="label">ACTOR</p>
+<h3>Agent 인스턴스 하나</h3>
+<p class="ctxt">메모리와 파일 상태를 가진 작업 단위. 수가 매우 많고 대부분 쉬고 있다.</p>
+</div>
+<div class="card">
+<p class="label">WORKER</p>
+<h3>미리 띄워 둔 빈 자리</h3>
+<p class="ctxt">격리 실행 환경(sandbox)을 가진 Kubernetes 실행 단위(pod). Actor보다 훨씬 적게 둔다.</p>
+</div>
+<div class="card">
+<p class="label">SNAPSHOT</p>
+<h3>재울 때 남기는 저장본</h3>
+<p class="ctxt">메모리와 파일 상태 전체. checkpoint라고도 한다. 오늘은 이것을 쓰는 부담을 다룬다.</p>
+</div>
+</div>
+<div class="banner light">
+<b>공식 문서에 제시된 수치</b> (이번에 측정한 값이 아님): 컨테이너 대비 10배 밀도 · 깨우기 500ms 미만 · 초당 500회 이상 깨우기
+</div>
+<p class="foot">출처: github.com/agent-substrate/substrate 의 README, docs/concepts/architecture.md</p>
+<aside>Agent Substrate는 Kubernetes 위에서 도는 오픈소스 런타임입니다. 핵심 아이디어는 단순합니다. Agent는 대부분의 시간을 모델이나 도구, 사람의 응답을 기다리며 보냅니다. 그 시간 동안은 상태를 통째로 저장해서 자리에서 내리고, 요청이 오면 빈 자리에 다시 올립니다. 그래서 많은 Agent를 적은 자리에 겹쳐 올릴 수 있습니다. 용어 세 개만 기억하시면 됩니다. Actor는 Agent 인스턴스 하나입니다. Worker는 미리 띄워 둔 빈 자리입니다. Snapshot은 재울 때 남기는 저장본으로, 메모리와 파일 상태 전체가 들어 있습니다. 이 프로젝트를 고른 이유는, 재우기와 깨우기를 전제로 설계된 공개 런타임이라 우리가 보려는 부하를 그대로 만들 수 있기 때문입니다. 아래 수치는 공식 문서에 제시된 것이고 제가 측정한 값이 아닙니다. 해당 문서에는 측정 조건이 함께 적혀 있지 않아서, 오늘 제 측정값과 직접 비교할 수는 없습니다.</aside>
+</section>
+<section data-n="5" id="how" data-transition="fade">
+<p class="eyebrow">동작 방식</p>
+<h2>재울 때마다 상태 전체를 두 곳에 쓴다</h2>
+<p class="lead">먼저 노드의 로컬 디스크에, 그다음 압축해서 객체 스토리지에. 주황색 두 곳이 쓰기가 생기는 지점이다.</p>
+<div class="chain">
+<div class="node">
+<p class="ntitle">1. 실행 중</p>
+<p class="ntxt">Actor가 worker 안의 sandbox에서 동작한다.</p>
+</div>
+<div class="xarrow" style="color:#5A6870"><span></span></div>
+<div class="node">
+<p class="ntitle">2. 재우기 요청</p>
+<p class="ntxt">sandbox를 멈추고 상태를 덤프한다.</p>
+</div>
+<div class="xarrow" style="color:#AD430C"><span></span></div>
+<div class="node disk">
+<p class="ntitle">3. 로컬 디스크</p>
+<p class="ntxt">snapshot을 노드에 쓴다. sandbox는 정리된다.</p>
+</div>
+<div class="xarrow" style="color:#AD430C"><span></span></div>
+<div class="node disk">
+<p class="ntitle">4. 객체 스토리지</p>
+<p class="ntxt">zstd로 압축해 올린다. 최신 것만 둔다.</p>
+</div>
+</div>
+<div class="row">
+<div class="card">
+<p class="label">깨우기 (반대 방향)</p>
+<p class="ctxt">요청이 오면 빈 worker에 snapshot을 복원한다. 같은 노드에 로컬 사본이 있으면 그것을 쓰고, 없으면 객체 스토리지에서 내려받는다. 재우기가 끝나야 다시 깨울 수 있다.</p>
+</div>
+<div class="card">
+<p class="label">재우기 방식 두 가지</p>
+<p class="ctxt">sync는 4번 업로드가 끝나야 재우기가 완료된다. 기본값인 async는 3번까지만 기다리고 업로드는 뒤에 한다. 이번에는 업로드 부담까지 보이도록 sync로 쟀다.</p>
+</div>
+</div>
+<p class="foot">출처: Substrate 문서 docs/concepts/architecture.md, 소스 internal/objectstoreplugin</p>
+<aside>왜 스토리지가 문제가 될 수 있는지 보여주는 그림입니다. Actor 하나를 재울 때 메모리와 파일 상태가 먼저 노드의 로컬 디스크에 쓰입니다. 이것을 덤프라고 부르겠습니다. 그다음 zstd로 압축돼서 객체 스토리지로 올라갑니다. 즉 재우기 한 번에 쓰기가 두 곳에서 생깁니다. 깨우기는 반대 방향입니다. 같은 노드에 로컬 사본이 남아 있으면 그것으로 복원하고, 없으면 객체 스토리지에서 내려받습니다. 한 가지 더, 재우기가 끝나야 그 Actor를 다시 깨울 수 있습니다. 그래서 재우기가 길어지면 그 사이에 온 요청이 기다리게 됩니다. 재우기 방식은 둘입니다. sync는 업로드까지 기다립니다. 기본값인 async는 로컬 디스크에 쓰는 것까지만 기다리고, 업로드는 기본 5분 뒤에 따로 합니다. 이번에는 업로드 부담이 재우기 시간에 그대로 드러나도록 sync로 측정했습니다. 기본값이 아닌 방식으로 쟀다는 점은 결과를 보실 때 기억해 주시기 바랍니다.</aside>
+</section>
+<section data-n="6" id="method" data-transition="fade">
+<p class="eyebrow">검증 방법</p>
+<h2>Agent는 모사, snapshot 쓰기는 실제</h2>
+<p class="lead">LLM은 호출하지 않는다. 시나리오대로 자원을 쓰는 가상 Actor를 실제 Agent Substrate 위에서 재우고 깨운다. 쓰기 경로는 실제이고, 크기와 압축률은 시나리오가 정한다.</p>
+<div class="row">
+<div class="card">
+<p class="label">가상 ACTOR</p>
+<h3>시나리오 파일대로 동작</h3>
+<p class="ctxt">Substrate에 포함된 부하 도구를 썼다. 단계마다 메모리 채우기, 디스크 쓰기, CPU 사용, 대기 시간을 지정한다.</p>
+<p class="csmall">이번 시나리오: 5단계, 메모리 64&nbsp;MiB(무작위&nbsp;데이터), 디스크&nbsp;약&nbsp;24&nbsp;MiB</p>
+</div>
+<div class="card">
+<p class="label">환경</p>
+<h3>가상 머신 1대의 Kubernetes</h3>
+<p class="ctxt">시험용 Kubernetes(kind)에 Substrate를 소스 수정 없이 설치했다. S3 호환 객체 스토리지(rustfs)도 같은 클러스터 안에 둔다.</p>
+<p class="csmall">worker 4개, 격리 방식은 gVisor(오픈소스 sandbox)</p>
+</div>
+<div class="card key">
+<p class="label">부하 두 가지</p>
+<h3>일반 부하와 교체 부하</h3>
+<p class="ctxt"><b>일반.</b> 각 Actor가 5단계를 반복하고, 단계가 끝날 때마다 재웠다가 깨운다. 1개와 4개로 실행.</p>
+<p class="ctxt"><b>교체(turnover).</b> 12개 중 3개만 깨어 있게 둔다. 1초에 한 번, 깨어 있는 하나를 재우고 자던 하나를 깨운다.</p>
+</div>
+</div>
+<p class="foot">측정 환경: Apple M4의 가상 머신(10 vCPU, 메모리 8 GB). 쓰기는 모두 데이터 디스크 1개에 합쳐진다. Substrate commit d283af4e</p>
+<aside>방법의 핵심은, Agent는 모사하지만 snapshot 쓰기는 실제로 일어난다는 점입니다. Substrate에 포함된 부하 도구가 시나리오 파일대로 메모리와 디스크를 쓰는 가상 Actor를 만듭니다. 이번 시나리오는 다섯 단계이고, 메모리 64 MiB를 무작위 데이터로 채우고 디스크에 약 24 MiB를 씁니다. 이걸 재울 때는 실제로 메모리가 디스크에 쓰이고 객체 스토리지로 올라갑니다. 다만 Actor의 크기와 데이터의 압축률은 시나리오가 정한 값이라 실제 Agent와 다를 수 있습니다. 환경은 가상 머신 한 대 안의 시험용 Kubernetes입니다. 객체 스토리지도 같은 클러스터 안에 두었습니다. 부하는 두 가지입니다. 일반 부하는 각 Actor가 단계를 하나 끝낼 때마다 잠드는 방식으로, Actor 1개와 4개로 각각 돌렸습니다. 교체 부하가 우리가 보려는 상황입니다. 12개 중 3개만 깨어 있게 두고, 1초에 한 번씩 깨어 있는 하나를 재우고 자던 하나를 깨웁니다.</aside>
+</section>
+<section data-n="7" id="verified" data-transition="fade">
+<p class="eyebrow">직접 확인한 것</p>
+<h2>가상 머신 1대에서 설치부터 부하까지 실패 없이 끝났다</h2>
+<table>
+<tr class="head"><th style="width:5%">#</th><th style="width:37%">확인한 것</th><th style="width:58%">결과</th></tr>
+<tr class="band"><td>1</td><td>Kubernetes 클러스터 생성</td><td>성공</td></tr>
+<tr class="band"><td>2</td><td>Agent Substrate 설치</td><td>소스 수정 없이 설치, 구성 요소 모두 정상 기동</td></tr>
+<tr class="band"><td>3</td><td>worker 기동 (gVisor sandbox)</td><td>정상. Linux 자원 격리 기능인 cgroup v2가 필요하다</td></tr>
+<tr class="mark"><td>4</td><td>재우기/깨우기 3회 반복 (예제 Actor 1개)</td><td>상태 보존: 메모리, 파일, 루트 파일시스템에 둔 카운터가 1 → 4로 이어짐</td></tr>
+<tr class="band"><td>5</td><td>가상 Actor와 부하 도구 배포</td><td>성공</td></tr>
+<tr class="band"><td>6</td><td>일반 부하: Actor 1개, 4개 (각 2분)</td><td>재우기 129회, 깨우기 125회, 실패 0건</td></tr>
+<tr class="band"><td>7</td><td>교체 부하: 12개 중 3개 깨어 있음 (5분)</td><td>재우기 176회(시작할 때 12회 포함), 깨우기 176회, 실패 0건</td></tr>
+<tr class="band"><td>8</td><td>4개 부하와 교체 부하를 한 번 더 실행</td><td>같은 경향 (교체 부하의 재우기 중앙값 9.8초와 8.9초)</td></tr>
+<tr class="band"><td>9</td><td>업로드 메모리 한도를 올려 같은 부하 실행</td><td>실패 0건, 재우기 중앙값 8.9초 → 2.3초. 되돌리자 다시 11초</td></tr>
+</table>
+<p class="foot">출처: 자체 측정 (2026년 11월). 실패 수는 부하 도구 기준이며, 깨우기는 도구가 최대 1분까지 다시 시도한다</p>
+<aside>직접 확인한 것 아홉 가지입니다. 클러스터 생성, Substrate 설치, worker 기동, 재우기와 깨우기의 상태 보존, 부하 도구 배포, 그리고 부하 두 종류입니다. 4번이 가장 기본적인 확인입니다. 예제 Actor 하나를 세 번 재웠다 깨웠는데, 메모리와 파일, 루트 파일시스템에 각각 둔 카운터가 1, 2, 3, 4로 이어졌습니다. 재웠다 깨워도 초기화되지 않고 상태가 보존된다는 뜻입니다. 이 예제 Actor는 메모리를 수 MiB만 쓰고, 재우기에 0.25초에서 0.32초가 걸렸습니다. 실패 수는 부하 도구가 본 기준이고, 깨우기는 도구가 최대 1분까지 다시 시도합니다. 4개 부하와 교체 부하는 두 차례 돌렸고 경향이 같았습니다. 1개 기준 실행은 한 번입니다. 마지막 9번은 재우기가 느려지는 원인을 확인하려고 설정 하나를 바꿔 다시 돌린 것으로, 뒤에서 따로 말씀드립니다. Substrate 소스는 수정하지 않았습니다.</aside>
+</section>
+<section data-n="8" id="load" data-transition="fade">
+<p class="eyebrow">결과 1 · 부하 실행</p>
+<h2>실패는 없었고, 재우기가 겹칠수록 시간이 길어졌다</h2>
+<table>
+<tr class="head"><th style="width:37%">항목</th><th class="r" style="width:19%">일반, Actor 1개</th><th class="r" style="width:19%">일반, Actor 4개</th><th class="r" style="width:25%">교체, 12개 중 3개</th></tr>
+<tr class="band"><td>재우기 횟수 (초당)</td><td class="r">37회 (0.31회)</td><td class="r">92회 (0.77회)</td><td class="r">164회 (0.72회)</td></tr>
+<tr class="hot"><td>재우기 시간: 중앙값 / p95</td><td class="r">0.83초 / 1.2초</td><td class="r">2.7초 / 3.7초</td><td class="r">8.9초 / 16초</td></tr>
+<tr class="band"><td>동시에 진행 중인 재우기 (계산값)</td><td class="r">0.3개</td><td class="r">2.1개</td><td class="r">6.4개</td></tr>
+<tr class="band"><td>깨우기 시간: 중앙값 / p95</td><td class="r">0.14초 / 0.58초</td><td class="r">0.46초 / 1.3초</td><td class="r">1.6초 / 3.2초</td></tr>
+<tr class="band"><td>디스크 쓰기 속도 (평균)</td><td class="r">104 MiB/s</td><td class="r">232 MiB/s</td><td class="r">231 MiB/s</td></tr>
+<tr class="band"><td>디스크 사용률: 평균 / 최대</td><td class="r">15% / 54%</td><td class="r">33% / 63%</td><td class="r">63% / 94%</td></tr>
+<tr class="band"><td>CPU 사용률 (평균)</td><td class="r">12%</td><td class="r">28%</td><td class="r">39%</td></tr>
+</table>
+<p class="small">p95는 100번 중 95번이 이 값 이하라는 뜻이다. 재우기 시간은 업로드 완료까지, 깨우기 시간은 요청부터 응답 가능까지다. 디스크 사용률은 디스크가 I/O를 처리하고 있던 시간의 비율이다. 평균은 부하가 걸린 구간(일반 2분, 교체 3분&nbsp;48초) 기준이다.</p>
+<p class="foot">출처: 자체 측정 (2026년 11월). 동시에 진행 중인 재우기 = 초당 재우기 횟수 × 재우기 시간 중앙값</p>
+<aside>부하 세 가지의 결과입니다. 왼쪽부터 Actor 하나만 돌린 경우, 네 개를 동시에 돌린 경우, 그리고 12개 중 3개만 깨워 두고 교체한 경우입니다. 셋 다 실패는 없었습니다. 눈여겨볼 행은 색칠한 재우기 시간입니다. 하나일 때 중앙값 0.83초, 네 개일 때 2.7초, 교체 부하에서 8.9초입니다. p95는 100번 중 95번이 그 값 이하라는 뜻으로, 교체 부하에서 16초입니다. 첫 행도 보시기 바랍니다. 교체 부하는 1초에 한 번을 목표로 했는데 실제로는 초당 0.72회만 처리됐습니다. 네 개일 때의 초당 0.77회와 거의 같습니다. 디스크 쓰기 속도도 둘 다 초당 230 MiB 정도로 같습니다. 셋째 행은 동시에 진행 중인 재우기가 평균 몇 개였는지를 계산한 값으로, 교체 부하에서는 여섯 개 안팎이었습니다. 재우기 시간에서 계산한 어림값입니다. 아래 두 행은 그때 디스크와 CPU가 얼마나 바빴는지입니다. 디스크 사용률은 디스크가 I/O를 처리하고 있던 시간의 비율이고, 용량이 찼다는 뜻이 아닙니다.</aside>
+</section>
+<section data-n="9" id="contention" data-transition="fade">
+<p class="eyebrow">결과 2 · 핵심 관찰</p>
+<h2>재우기가 겹치면 0.83초가 8.9초가 된다</h2>
+<div class="row" style="gap:64px">
+<div class="col" style="gap:20px">
+<div class="legend"><p class="lgtxt"><b>재우기 시간(초)</b></p><div class="lg"><div class="lgbox ok"></div><p class="lgtxt">중앙값</p></div><div class="lg"><div class="lgbox oklight"></div><p class="lgtxt">p95</p></div><p class="lgtxt">(교체 부하는 주황)</p></div>
+<div class="row" style="gap:72px; align-items:flex-end">
+<div class="group">
+<div class="bars">
+<div class="col" style="gap:8px"><p class="barval">0.83</p><div class="bar" style="height:20px"></div></div>
+<div class="col" style="gap:8px"><p class="barval">1.2</p><div class="bar p95" style="height:29px"></div></div>
+</div>
+<p class="gname">일반, 1개</p>
+<p class="gsub">겹침 평균 0.3개</p>
+</div>
+<div class="group">
+<div class="bars">
+<div class="col" style="gap:8px"><p class="barval">2.7</p><div class="bar" style="height:64px"></div></div>
+<div class="col" style="gap:8px"><p class="barval">3.7</p><div class="bar p95" style="height:88px"></div></div>
+</div>
+<p class="gname">일반, 4개</p>
+<p class="gsub">겹침 평균 2.1개</p>
+</div>
+<div class="group">
+<div class="bars">
+<div class="col" style="gap:8px"><p class="barval hotval">8.9</p><div class="bar hot" style="height:211px"></div></div>
+<div class="col" style="gap:8px"><p class="barval hotval">16</p><div class="bar hot95" style="height:380px"></div></div>
+</div>
+<p class="gname">교체, 12개 중 3개</p>
+<p class="gsub">겹침 평균 6.4개</p>
+</div>
+</div>
+</div>
+<div class="col" style="flex:1; gap:20px">
+<div class="numrow"><p class="stat">약 11배</p><p class="statunit">중앙값 0.83초 → 8.9초</p></div>
+<p class="body">세 경우 모두 같은 시나리오, 같은 재우기 방식(sync)이다.</p>
+<p class="body">교체 부하는 초당 1회를 목표로 했지만 실제 처리는 초당&nbsp;0.72회였다. 재우기 약 6개가 겹쳐 진행된 셈이다(계산값).</p>
+<p class="body">깨우기도 중앙값 0.14초에서 1.6초로 느려졌다.</p>
+<p class="body"><b>실패는 없었다.</b> <span class="warn">다만 가상 머신 1대, 12개&nbsp;규모의 값이다.</span></p>
+</div>
+</div>
+<p class="foot">출처: 자체 측정 (2026년 11월). 겹침은 계산값. 가장 긴 재우기는 교체 부하에서 17.3초</p>
+<aside>오늘 가장 중요한 장입니다. 같은 시나리오의 Actor를 재우는 데 걸리는 시간이 상황에 따라 이렇게 달라졌습니다. 진한 막대가 중앙값, 옅은 막대가 p95입니다. 맨 왼쪽은 Actor 하나만 돌려서 재우기가 거의 겹치지 않는 경우로, 중앙값 0.83초입니다. 가운데는 네 개를 동시에 돌린 경우로 2.7초. 오른쪽이 교체 부하로 8.9초, p95는 16초입니다. 막대 아래 숫자는 평균 몇 개의 재우기가 동시에 진행 중이었는지를 어림한 값입니다. 겹침이 늘수록 재우기 시간도 늘어납니다. 다만 이 겹침은 재우기 시간에서 계산한 값이라 따로 잰 것은 아닙니다. 교체 부하는 초당 한 번을 목표로 했지만 실제로는 초당 0.72회가 처리됐습니다. 실패는 없었지만, 이 값은 가상 머신 한 대에서 12개 규모로, 업로드까지 기다리는 방식으로 얻은 것입니다. 그러면 이 시간이 어디서 쓰였는지를 다음 장에서 보겠습니다.</aside>
+</section>
+<section data-n="10" id="phases" data-transition="fade">
+<p class="eyebrow">결과 3 · 시간이 쓰인 곳</p>
+<h2>재우기 시간의 80~90%는 압축·업로드 구간이다</h2>
+<div class="legend">
+<div class="lg"><div class="lgbox"></div><p class="lgtxt">덤프: 상태를 로컬 디스크에 쓰기</p></div>
+<div class="lg"><div class="lgbox up"></div><p class="lgtxt">압축·업로드: 압축해 객체 스토리지에 올리기 (대기 포함)</p></div>
+<div class="lg"><div class="lgbox etc"></div><p class="lgtxt">그 밖</p></div>
+</div>
+<div class="col" style="gap:14px">
+<div class="hrow"><p class="hlab">일반, 1개</p><div class="hseg" style="width:14px"></div><div class="hseg up" style="width:72px"></div><div class="hseg etc" style="width:4px"></div><p class="hval">0.72초 · 업로드 80%</p></div>
+<div class="hrow"><p class="hlab">일반, 4개</p><div class="hseg" style="width:32px"></div><div class="hseg up" style="width:270px"></div><div class="hseg etc" style="width:5px"></div><p class="hval">2.5초 · 업로드 88%</p></div>
+<div class="hrow"><p class="hlab">교체, 12개 중 3개</p><div class="hseg" style="width:72px"></div><div class="hseg up" style="width:898px"></div><div class="hseg etc" style="width:27px"></div><p class="hval">8.0초 · 업로드 90%</p></div>
+</div>
+<div class="row">
+<div class="card">
+<p class="label">모든 구간이 함께 느려졌다</p>
+<p class="ctxt">1개일 때와 교체 부하를 비교하면 덤프는 약&nbsp;5배, 압축·업로드는 약&nbsp;13배, 로컬 사본으로 깨우기도 약&nbsp;13배가 됐다.</p>
+</div>
+<div class="card">
+<p class="label">디스크와 CPU는 평균으로 여유가 있었다</p>
+<p class="ctxt">교체 부하에서 디스크 사용률은 평균 63%, 최대 94%였고 CPU는 평균&nbsp;39%였다. 메모리도 가용량이 2.5&nbsp;GiB 이상 남아 있었다.</p>
+</div>
+<div class="card alert">
+<p class="label">그러면 무엇이 막았나</p>
+<p class="ctxt">Substrate 소스에서 후보를 찾았다. 업로드에 쓰는 메모리에 한도가 있어, 넘치면 업로드가 줄을 선다. 다음 장에서 이 한도를 바꿔 확인한다.</p>
+</div>
+</div>
+<p class="foot">출처: 자체 측정 (2026년 11월). Substrate가 재우기마다 남기는 구간별 기록의 중앙값. 노드 안에서 잰 시간이고 집계 대상도 조금 달라 앞 장의 값보다 짧다</p>
+<aside>재우기 시간을 구간별로 나눠 봤습니다. Substrate는 재우기 한 번마다 구간별 시간을 기록으로 남깁니다. 회색이 상태를 로컬 디스크에 쓰는 덤프 구간이고, 주황색이 압축해서 객체 스토리지로 올리는 구간입니다. 교체 부하에서 재우기 8초 가운데 약 90퍼센트가 압축과 업로드 구간이었습니다. 앞 장의 8.9초와 숫자가 조금 다른 것은, 이 값은 노드 안에서 잰 시간이고 앞 장은 요청한 쪽에서 잰 시간이기 때문으로 보입니다. 집계 대상도 조금 다릅니다. 다만 업로드만 느려진 것은 아닙니다. 덤프는 약 5배, 로컬 사본으로 깨우는 시간도 약 13배가 됐습니다. 그런데 그때 디스크 사용률은 평균 63퍼센트, CPU는 평균 39퍼센트였습니다. 순간 최대는 94퍼센트까지 갔지만, 평균으로는 여유가 있었습니다. 디스크가 처리 한계에 이르러 느려졌다고 볼 근거는 없었습니다. 그래서 Substrate 소스를 읽어 봤고, 업로드에 쓰는 메모리에 한도가 있어서 그것을 넘으면 업로드가 줄을 서게 된다는 것을 찾았습니다. 이것이 원인인지 다음 장에서 직접 바꿔서 확인했습니다.</aside>
+</section>
+<section data-n="11" id="cause" data-transition="fade">
+<p class="eyebrow">결과 4 · 원인 확인</p>
+<h2>업로드 메모리 한도를 올리자 8.9초가 2.3초가 됐다</h2>
+<div class="row" style="gap:64px">
+<div class="col" style="gap:20px">
+<div class="legend"><p class="lgtxt"><b>교체 부하의 시간(초)</b></p><div class="lg"><div class="lgbox up"></div><p class="lgtxt">기본 한도 512&nbsp;MiB</p></div><div class="lg"><div class="lgbox ok"></div><p class="lgtxt">한도 2&nbsp;GiB</p></div></div>
+<div class="row" style="gap:72px; align-items:flex-end">
+<div class="group">
+<div class="bars">
+<div class="col" style="gap:8px"><p class="barval hotval">8.9</p><div class="bar hot" style="height:211px"></div></div>
+<div class="col" style="gap:8px"><p class="barval">2.3</p><div class="bar" style="height:55px"></div></div>
+</div>
+<p class="gname">재우기 중앙값</p>
+</div>
+<div class="group">
+<div class="bars">
+<div class="col" style="gap:8px"><p class="barval hotval">16</p><div class="bar hot" style="height:380px"></div></div>
+<div class="col" style="gap:8px"><p class="barval">7.1</p><div class="bar" style="height:169px"></div></div>
+</div>
+<p class="gname">재우기 p95</p>
+</div>
+<div class="group">
+<div class="bars">
+<div class="col" style="gap:8px"><p class="barval hotval">1.6</p><div class="bar hot" style="height:38px"></div></div>
+<div class="col" style="gap:8px"><p class="barval">2.2</p><div class="bar" style="height:52px"></div></div>
+</div>
+<p class="gname">깨우기 중앙값</p>
+</div>
+</div>
+</div>
+<div class="col" style="flex:1; gap:20px">
+<div class="numrow"><p class="stat ok">8.9 → 2.3</p><p class="statunit">초 · 재우기 중앙값</p></div>
+<p class="body"><b>바꾼 것은 설정 하나다.</b> Substrate는 업로드에 쓰는 메모리를 노드당 512&nbsp;MiB로 제한하고, 넘치면 업로드를 기다리게 한다. 이 한도만 2&nbsp;GiB로 올려 같은 부하를 다시 돌렸다.</p>
+<p class="body">압축·업로드 구간의 중앙값이 7.2초에서 0.84초가 됐다. 한도를 기본값으로 되돌리자 재우기 중앙값은 다시 11초가 됐다. 이 환경에서 지연의 주된 원인은 디스크가 아니라 이 한도였다.</p>
+<p class="body warn"><b>다 풀린 것은 아니다.</b> 재우기는 겹침이 없을 때(0.83초)의 약&nbsp;3배이고, 깨우기는 오히려 느려졌다. 한도를 올린 실행은 한&nbsp;번이다.</p>
+</div>
+</div>
+<p class="foot">출처: 자체 측정 (2026년 11월). 실패는 모두 0건. 처리량은 초당 0.72회에서 0.77회로 거의 그대로였다</p>
+<aside>원인을 실험으로 확인해 본 장입니다. Substrate는 업로드할 때 압축과 전송에 쓰는 메모리를 노드당 512 MiB로 제한합니다. 업로드마다 이 한도에서 메모리를 예약하고, 남은 것이 없으면 기다립니다. 그래서 여러 개가 겹치면 줄을 서게 됩니다. 설정 이름은 upload-memory-budget입니다. 이 한도 하나만 2 GiB로 올리고, 같은 교체 부하를 다시 돌렸습니다. 주황색이 기본 한도, 초록색이 올린 뒤입니다. 재우기 중앙값이 8.9초에서 2.3초로, p95는 16초에서 7.1초로 줄었습니다. 구간별로 보면 압축과 업로드 구간의 중앙값이 7.2초에서 0.84초가 됐습니다. 그리고 한도를 기본값으로 되돌려 다시 돌리자 재우기 중앙값이 11초로 돌아갔습니다. 즉 이 환경에서 앞에서 본 지연의 주된 원인은 디스크가 아니라 이 설정이었습니다. 한 가지 덧붙이면, 이 설정은 동시에 올릴 수 있는 업로드 수와 업로드 하나의 압축 병렬도를 함께 바꿉니다. 어느 쪽 효과가 큰지는 나누어 보지 않았습니다. 처리량은 초당 0.72회에서 0.77회로 거의 그대로였기 때문에, 이 한도가 처리량까지 정했다고는 말할 수 없습니다. 다만 다 풀린 것은 아닙니다. 재우기는 여전히 겹침이 없을 때의 약 3배이고, 깨우기는 중앙값 1.6초에서 2.2초로 오히려 느려졌습니다. 업로드가 동시에 여러 개 돌면서 CPU와 메모리를 더 쓰기 때문으로 보입니다. 그리고 한도를 올린 실행은 한 번뿐입니다. 여기서 얻은 교훈은 두 가지입니다. 작은 환경에서 먼저 닿은 한계는 스토리지 장치가 아니라 소프트웨어 설정이었다는 것, 그리고 이 측정 방법으로 그런 원인을 찾아낼 수 있다는 것입니다.</aside>
+</section>
+<section data-n="12" id="storage" data-transition="fade">
+<p class="eyebrow">결과 5 · 스토리지 부담</p>
+<h2>재우기 한 번에 약 320 MiB를 쓴다</h2>
+<div class="row">
+<div class="card alert">
+<p class="label">재우기 1회당 쓰기</p>
+<div class="numrow"><p class="num warnnum">약 320</p><p class="unit">MiB</p></div>
+<p class="ctxt">snapshot 크기의 약 2배다. 로컬 디스크와 객체 스토리지에 한&nbsp;번씩 쓴다. 부하마다 303~336&nbsp;MiB였다.</p>
+</div>
+<div class="card">
+<p class="label">SNAPSHOT 1개</p>
+<div class="numrow"><p class="num">약 160</p><p class="unit">MiB</p></div>
+<p class="ctxt">시나리오를 끝까지 돈 Actor 기준이다. 압축 효과는 약&nbsp;5%뿐이었다. 무작위 데이터로 채운 영향으로 보인다.</p>
+</div>
+<div class="card">
+<p class="label">교체 부하의 쓰기 속도</p>
+<div class="numrow"><p class="num">231</p><p class="unit">MiB/s</p></div>
+<p class="ctxt">초당 0.72회 재우기에서 3분&nbsp;48초 동안의 평균이다. 하루 계속되면 약&nbsp;19&nbsp;TiB가 된다(계산값).</p>
+</div>
+</div>
+<div class="row">
+<div class="card">
+<p class="label">점유량</p>
+<p class="ctxt">부하가 멈추면 Actor당 snapshot 하나만 남는다. 12개에 로컬과 객체 스토리지 각 1.8&nbsp;GiB. 교체 중에는 로컬이 최대 3.2&nbsp;GiB까지 늘었다.</p>
+</div>
+<div class="card">
+<p class="label">해석할 때 주의</p>
+<p class="ctxt">쓰기량은 가상 머신의 데이터 디스크 전체에서 잰 값이다. 로컬 디스크 쓰기와 객체 스토리지 쓰기가 합쳐져 있다.</p>
+</div>
+</div>
+<p class="foot">출처: 자체 측정 (2026년 11월). snapshot은 Actor당 로컬 157 MiB, 객체 스토리지 150 MiB. 로컬 사본은 기본 30분 뒤 지워진다</p>
+<aside>스토리지 쪽 수치입니다. 재우기 한 번에 디스크에 쓰이는 양이 약 320 MiB였습니다. snapshot 하나가 약 160 MiB인데, 로컬 디스크에 한 번 쓰고 객체 스토리지에 한 번 더 쓰기 때문에 약 두 배가 됩니다. 시나리오는 메모리를 64 MiB만 채우는데 snapshot은 그보다 큽니다. sandbox와 프로세스 자체의 메모리, 파일 변경분이 함께 저장되기 때문으로 보이지만, 구성을 따로 분석하지는 않았습니다. 압축 효과가 5퍼센트뿐인 것은 시나리오가 메모리를 무작위 데이터로 채우는 영향으로 보입니다. 실제 Agent의 메모리는 더 잘 압축될 수 있지만 측정하지는 않았습니다. 교체 부하에서 쓰기 속도는 평균 초당 231 MiB였습니다. 이 속도가 하루 계속되면 약 19 TiB입니다. 점유량은 부하가 멈춘 뒤 Actor당 snapshot 하나씩입니다. 로컬 사본은 기본 30분 뒤에 지워집니다. 주의할 점은, 이 환경에서는 로컬 디스크 쓰기와 객체 스토리지 쓰기가 전부 디스크 하나에 합쳐진다는 것입니다. 실제 구성에서는 둘을 따로 보고 각각의 장치에 맞춰 계산해야 합니다.</aside>
+</section>
+<section data-n="13" id="limits" data-transition="fade">
+<p class="eyebrow">결과의 한계</p>
+<h2>이 결과로는 알 수 없는 것</h2>
+<div class="row">
+<div class="card alert">
+<p class="label">아직 실행하지 않은 것</p>
+<p class="ctxt"><b>Linux 서버.</b> 스크립트는 Mac에서만 돌렸다.</p>
+<p class="ctxt"><b>규모.</b> Actor 12개, 메모리 64&nbsp;MiB까지만 했다.</p>
+<p class="ctxt"><b>async 방식.</b> 기본값이지만 측정하지 않았다.</p>
+<p class="ctxt"><b>microVM 격리.</b> gVisor만 확인했다.</p>
+</div>
+<div class="card">
+<p class="label">실제 환경과 다른 점</p>
+<p class="ctxt"><b>디스크.</b> 가상 디스크 1개에 모든 쓰기가 합쳐졌다.</p>
+<p class="ctxt"><b>노드.</b> 1개뿐이라 객체 스토리지에서 내려받아 깨우는 경로는 거의 쓰이지 않았다.</p>
+<p class="ctxt"><b>데이터.</b> 무작위 데이터로 채웠고 압축이 거의 되지 않았다.</p>
+</div>
+<div class="card">
+<p class="label">보지 않은 것</p>
+<p class="ctxt"><b>장치의 한계.</b> 디스크가 포화되는 지점까지 가지 못했다.</p>
+<p class="ctxt"><b>쓰기 수명과 읽기 부하.</b> 측정하지 않았다.</p>
+<p class="ctxt"><b>반복.</b> 1개 기준 실행과 한도를 올린 실행은 한&nbsp;번씩만 했다.</p>
+</div>
+</div>
+<div class="banner">
+<b>절대값이 아니라 경향만 본다.</b> 이 수치는 서버의 성능을 예측하지 않는다. 공식 문서의 수치와도 조건이 달라 직접 비교할 수 없다.
+</div>
+<aside>이 결과로는 알 수 없는 것을 분명히 해 둡니다. 첫째, 아직 실행하지 않은 것입니다. Linux 서버에서는 한 번도 돌리지 않았고, 12개를 넘는 규모, 더 큰 Actor, 기본값인 async 방식, 그리고 Substrate가 지원하는 또 하나의 격리 방식인 microVM도 해 보지 않았습니다. 둘째, 실제 환경과 다른 점입니다. 가상 디스크 하나에 모든 쓰기가 섞였고, 노드가 하나였고, 메모리를 무작위 데이터로 채웠습니다. 가상 디스크의 사용률은 실제 장치의 여유를 그대로 말해 주지 않습니다. 셋째, 보지 않은 것입니다. 디스크가 포화되는 지점까지 가지 못했기 때문에 스토리지 장치의 한계는 여전히 모릅니다. 쓰기 수명과 읽기 부하도 보지 않았습니다. 그래서 오늘 보여드린 절대값은 서버에서 어떤 값이 나올지 알려주지 않습니다. 공식 문서의 깨우기 500ms 미만이라는 수치와 비교하면, 겹침이 없을 때 제 측정값은 중앙값 0.14초였습니다. 하지만 공식 수치의 측정 조건이 문서에 없어서 직접 비교할 수는 없습니다.</aside>
+</section>
+<section data-n="14" id="plan" data-transition="fade">
+<p class="eyebrow">재현 절차</p>
+<h2>Mac에서는 일곱 단계로 처음부터 재현했다</h2>
+<div class="col" style="gap:4px">
+<div class="step"><p class="sno">0</p><p class="swhat">조건 점검</p><p class="scmd mono">00_preflight.sh</p></div>
+<div class="step"><p class="sno">1</p><p class="swhat">도구와 Substrate 소스 준비 (버전 고정)</p><p class="scmd mono">01_setup.sh</p></div>
+<div class="step"><p class="sno">2</p><p class="swhat">시험용 Kubernetes 클러스터 생성</p><p class="scmd mono">02_cluster.sh</p></div>
+<div class="step"><p class="sno">3</p><p class="swhat">Agent Substrate 설치</p><p class="scmd mono">03_deploy_substrate.sh</p></div>
+<div class="step gate"><p class="sno">4</p><p class="swhat">관문: 재우기/깨우기와 상태 보존 확인</p><p class="scmd mono">04_counter_cycle.sh</p></div>
+<div class="step"><p class="sno">5</p><p class="swhat">가상 Actor와 부하 도구 배포</p><p class="scmd mono">05_deploy_benchmark.sh</p></div>
+<div class="step"><p class="sno">6</p><p class="swhat">부하 실행, 지표 수집, 요약 작성</p><p class="scmd mono">06_run_load.sh</p></div>
+</div>
+<p class="body"><b>4번이 관문이다.</b> 통과하면 로컬 디스크 쓰기, 객체 스토리지 업로드, 같은 노드에서의 복원이 동작한다는 뜻이다.</p>
+<p class="body"><b>Linux에서 필요한 것.</b> cgroup v2, Docker, 외부 통신, 디스크 여유 60 GB 이상 권장. 관리자 권한과 KVM은 쓰지 않는다. Linux에서는 아직 실행하지 않았다.</p>
+<p class="foot">Mac에서 처음 실행할 때 클러스터 생성에 1분 33초, Substrate 설치에 7분 42초가 걸렸다</p>
+<aside>재현 절차입니다. 이 한계를 어떻게 메울지 말씀드리기 전에, 지금까지의 과정을 누구나 다시 해 볼 수 있다는 점을 먼저 보여드립니다. 스크립트 일곱 개를 0번부터 순서대로 실행하면 됩니다. Mac에서는 이 순서로 처음부터 다시 돌려 같은 결과를 얻었습니다. 4번이 관문입니다. 여기를 통과하면 그 환경에서 로컬 디스크 쓰기, 객체 스토리지 업로드, 같은 노드에서의 복원이 동작한다는 뜻이고, 그다음부터는 부하 규모를 키우는 일만 남습니다. 도구는 작업 폴더 안에 받기 때문에 관리자 권한을 쓰지 않습니다. 다만 Linux에서는 아직 한 번도 실행하지 않았습니다. 참고로 2번 단계는 같은 이름의 시험용 클러스터가 이미 있으면 지우고 다시 만듭니다.</aside>
+</section>
+<section data-n="15" id="scale" data-transition="fade">
+<p class="eyebrow">서버에서 볼 것</p>
+<h2>재우기 빈도와 snapshot 크기를 올리며 한계 지점을 찾는다</h2>
+<div class="banner">
+<b>로컬 디스크 쓰기 ≈ 초당 재우기 횟수 × snapshot 크기</b><br><b>객체 스토리지 쓰기 ≈ 초당 재우기 횟수 × 압축 후 크기</b><br>이번 값을 넣으면 0.72회 × (157 + 150) MiB ≈ 221 MiB/s. 디스크에서 잰 값은 231 MiB/s였다.
+</div>
+<div class="row">
+<div class="col" style="flex:1; gap:12px">
+<p class="eyebrow">조절하는 값</p>
+<table>
+<tr class="head"><th style="width:58%">무엇</th><th style="width:42%">이번 값</th></tr>
+<tr class="band"><td>초당 교체 수 (목표)</td><td>1회</td></tr>
+<tr class="band"><td>깨어 있는 Actor 수</td><td>3개</td></tr>
+<tr class="band"><td>전체 Actor 수</td><td>12개</td></tr>
+<tr class="band"><td>Actor가 채우는 메모리</td><td>64 MiB</td></tr>
+<tr class="band"><td>재우기 방식</td><td>sync</td></tr>
+</table>
+</div>
+<div class="card key tight">
+<p class="label">볼 지표</p>
+<p class="ctxt"><b>지연.</b> 겹침이 없을 때의 몇 배인가</p>
+<p class="ctxt"><b>실패.</b> 어디서 처음 생기는가</p>
+<p class="ctxt"><b>자원.</b> 그때 무엇이 한계에 가까운가</p>
+<p class="ctxt"><b>구간.</b> 덤프와 업로드 중 어느 쪽이 늘어나는가</p>
+<p class="ctxt"><b>점유량.</b> 로컬과 객체 스토리지가 얼마나 늘어나는가</p>
+</div>
+</div>
+<p class="foot">출처: 자체 측정 (2026년 11월). 디스크에서 잰 값에는 시나리오 자체의 디스크 쓰기도 들어 있다. 점유량은 Actor 수에 비례한다</p>
+<aside>그러면 서버에서 무엇을 볼지 말씀드리겠습니다. 쓰기 속도는 두 식으로 어림할 수 있습니다. 로컬 디스크 쓰기는 초당 재우기 횟수에 snapshot 크기를 곱한 값이고, 객체 스토리지 쓰기는 초당 재우기 횟수에 압축 후 크기를 곱한 값입니다. 이번 값을 넣으면 합쳐서 초당 221 MiB가 나오고, 디스크에서 실제로 잰 값은 231 MiB였습니다. 그래서 쓰기 속도를 정하는 것은 재우기 빈도와 snapshot 크기이고, 점유량은 Actor 수에 비례합니다. 예를 들어 snapshot이 1 GiB이고 초당 10회 재운다면 로컬과 객체 스토리지에 각각 초당 약 10 GiB가 필요합니다. 이것은 계산값이고 측정한 값은 아닙니다. 서버에서는 왼쪽 표의 값을 단계적으로 올립니다. 볼 지표는 다섯 가지입니다. 지연이 기준값의 몇 배가 되는지, 실패가 어디서 처음 생기는지, 그때 어떤 자원이 한계에 가까운지, 덤프와 업로드 중 어느 구간이 늘어나는지, 그리고 스토리지 점유량이 얼마나 느는지입니다.</aside>
+</section>
+<section data-n="16" id="next" class="dark">
+<p class="eyebrow">정리와 다음 단계</p>
+<h2>다음 단계: Linux 서버에서 규모를 키워 한계를 찾는다</h2>
+<div class="row">
+<div class="card">
+<p class="label">1 · 먼저</p>
+<h3>서버에서 관문 통과</h3>
+<p class="ctxt">Linux 서버에서 점검, 설치, 상태 보존 확인까지 실행한다. 환경 문제가 있으면 여기서 드러난다.</p>
+</div>
+<div class="card">
+<p class="label">2 · 그다음</p>
+<h3>기준값을 잡고 규모 확대</h3>
+<p class="ctxt">이번과 같은 조건으로 기준값을 잡는다. 그 뒤 재우기 빈도와 Actor 크기를 올리고, async 방식도 측정한다.</p>
+</div>
+<div class="card">
+<p class="label">3 · 설정과 장치를 나눠 보기</p>
+<h3>장치의 한계를 따로 잰다</h3>
+<p class="ctxt">업로드 메모리 한도 같은 설정을 먼저 맞춘다. 그다음 snapshot 전용 디스크와 별도 객체 스토리지를 두어 장치의 한계를 잰다.</p>
+</div>
+</div>
+<div class="card wide">
+<p class="label">오늘의 요점</p>
+<p class="ctxt bright">실제 Agent 없이 이 부하를 만들 수 있고, 지연과 쓰기량이 측정된다. 이번에 먼저 닿은 한계는 디스크가 아니라 설정이었다. 스토리지가 한계에 닿는 지점은 서버 검증에서 확인한다.</p>
+</div>
+<p class="foot">재현 스크립트와 원본 측정 데이터는 Git 리포지토리로 정리해 두었다</p>
+<aside>정리하겠습니다. 다음 단계는 세 가지입니다. 먼저 Linux 서버에서 0번부터 4번까지 돌려 관문을 통과시킵니다. 그다음 이번과 같은 조건으로 한 번 돌려 기준값을 잡고, 재우기 빈도와 Actor 크기를 올립니다. 기본값인 async 방식도 이때 측정합니다. 마지막으로 설정과 장치를 나눠서 봅니다. 업로드 메모리 한도 같은 설정을 먼저 맞추고, 그다음 snapshot 전용 디스크와 별도의 객체 스토리지를 두어서 장치 자체의 한계를 잽니다. 오늘의 요점은 세 가지입니다. 실제 Agent 없이도 이 부하를 만들 수 있고 지연과 쓰기량이 측정된다는 것, 이번 환경에서 먼저 닿은 한계는 디스크가 아니라 소프트웨어 설정이었다는 것, 그리고 스토리지가 한계에 닿는 지점은 서버 검증에서 확인한다는 것입니다. 재현 스크립트와 원본 측정 데이터는 Git 리포지토리로 정리해 두었습니다. 감사합니다.</aside>
+</section>
+</div>
+<div id="bar"></div>
+<div id="notes"></div>
+<div id="help">←/→ 이동 · N 발표자 노트 · F 전체 화면 · P 인쇄(PDF)</div>
+<script>
+(function () {
+  var stage = document.getElementById('stage');
+  var secs = Array.prototype.slice.call(stage.children);
+  var notes = document.getElementById('notes');
+  var bar = document.getElementById('bar');
+  var help = document.getElementById('help');
+  var i = 0;
+  function fit() {
+    var s = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+    stage.style.transform = 'scale(' + s + ') translate(-50%, -50%)';
+  }
+  function show(n) {
+    i = Math.max(0, Math.min(secs.length - 1, n));
+    secs.forEach(function (el, k) { el.classList.toggle('on', k === i); });
+    var a = secs[i].querySelector('aside');
+    notes.textContent = (i + 1) + ' / ' + secs.length + '  ' + (a ? a.textContent : '');
+    bar.style.width = ((i + 1) / secs.length * 100) + '%';
+    if (location.hash !== '#' + (i + 1)) history.replaceState(null, '', '#' + (i + 1));
+  }
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') show(i + 1);
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') show(i - 1);
+    else if (e.key === 'Home') show(0);
+    else if (e.key === 'End') show(secs.length - 1);
+    else if (e.key === 'n' || e.key === 'N') notes.style.display = notes.style.display === 'block' ? 'none' : 'block';
+    else if (e.key === 'f' || e.key === 'F') { if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen(); }
+    else if (e.key === 'p' || e.key === 'P') window.print();
+  });
+  document.addEventListener('click', function (e) { show(i + (e.clientX < window.innerWidth / 3 ? -1 : 1)); });
+  window.addEventListener('resize', fit);
+  setTimeout(function () { help.style.display = 'none'; }, 6000);
+  fit();
+  show((parseInt(location.hash.slice(1), 10) || 1) - 1);
+})();
+</script>
+</body>
+</html>

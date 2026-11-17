@@ -1,0 +1,8 @@
+name=r2_turnover_12_awake3 users=12 duration_s=300 extra=lifecycle_mode=sync agentsession_awake=3 target_rps=1
+start=2026-11-17T22:18:09Z
+{
+  "host": null,
+  "message": "Swarming started",
+  "success": true
+}
+end=2026-11-17T22:23:11Z

@@ -1,0 +1,14 @@
+<section id="question" class="accent" data-transition="fade">
+<p class="eyebrow">확인하려는 것</p>
+<h1>다수의 Agent가 잠들고 깨기를 반복하면<br>스토리지에 문제가 생기는가</h1>
+<p class="lead">Agent Substrate는 Kubernetes용 오픈소스 런타임이다. 쉬는 Agent의 메모리와 파일을 디스크에 저장하고 자리에서 내린다(재우기, suspend). 요청이 오면 복원한다(깨우기, resume). 재울 때마다 스토리지에 쓰기가 생긴다.</p>
+<p class="lead">여기서 문제란 실패가 생기거나, 재우기와 깨우기가 크게 느려지거나, 필요한 쓰기 속도와 용량이 장치의 한계를 넘는&nbsp;것을&nbsp;말한다.</p>
+<div class="spacer"></div>
+<p class="qhead">작은 환경에서 먼저 확인한 세 가지 (실제 규모의 검증은 Linux 서버에서 한다)</p>
+<div class="row" style="gap:48px">
+<div class="q"><p class="qno">질문 1</p><p class="qtxt">설치되고, 재우기와 깨우기가 끝까지 동작하는가</p></div>
+<div class="q"><p class="qno">질문 2</p><p class="qtxt">실제 Agent를 돌리지 않고 이 부하를 만들 수 있는가</p></div>
+<div class="q"><p class="qno">질문 3</p><p class="qtxt">부담과 지연을 수치로 측정할 수 있는가</p></div>
+</div>
+<aside>확인하려는 것은 한 문장입니다. 많은 Agent가 깨어났다 잠들기를 반복하면 스토리지에 문제가 생기는가. Agent Substrate는 쉬는 Agent를 통째로 저장해서 자리에서 내리는 런타임입니다. 이 동작을 재우기, 다시 올리는 동작을 깨우기라고 부르겠습니다. 재울 때마다 스토리지에 쓰기가 생기기 때문에, Agent가 많아지면 이 쓰기가 감당할 수 있는 수준인지가 궁금해집니다. 여기서 문제라고 하는 것은 세 가지입니다. 실패가 생기는 것, 재우기와 깨우기가 크게 느려지는 것, 그리고 필요한 쓰기 속도나 용량이 장치의 한계를 넘는 것입니다. 실제 Agent를 대량으로 돌려 보면 가장 확실하지만, LLM을 대량으로 호출하면 비용이 크고 결과도 매번 달라집니다. 그래서 실제 규모의 검증에 앞서 작은 환경에서 세 가지를 먼저 확인했습니다. 오늘 발표는 이 세 질문에 대한 답이고, 맨 위의 본 질문은 서버 검증에서 답할 예정입니다.</aside>
+</section>

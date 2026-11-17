@@ -1,0 +1,30 @@
+<section id="phases" data-transition="fade">
+<p class="eyebrow">결과 3 · 시간이 쓰인 곳</p>
+<h2>재우기 시간의 80~90%는 압축·업로드 구간이다</h2>
+<div class="legend">
+<div class="lg"><div class="lgbox"></div><p class="lgtxt">덤프: 상태를 로컬 디스크에 쓰기</p></div>
+<div class="lg"><div class="lgbox up"></div><p class="lgtxt">압축·업로드: 압축해 객체 스토리지에 올리기 (대기 포함)</p></div>
+<div class="lg"><div class="lgbox etc"></div><p class="lgtxt">그 밖</p></div>
+</div>
+<div class="col" style="gap:14px">
+<div class="hrow"><p class="hlab">일반, 1개</p><div class="hseg" style="width:14px"></div><div class="hseg up" style="width:72px"></div><div class="hseg etc" style="width:4px"></div><p class="hval">0.72초 · 업로드 80%</p></div>
+<div class="hrow"><p class="hlab">일반, 4개</p><div class="hseg" style="width:32px"></div><div class="hseg up" style="width:270px"></div><div class="hseg etc" style="width:5px"></div><p class="hval">2.5초 · 업로드 88%</p></div>
+<div class="hrow"><p class="hlab">교체, 12개 중 3개</p><div class="hseg" style="width:72px"></div><div class="hseg up" style="width:898px"></div><div class="hseg etc" style="width:27px"></div><p class="hval">8.0초 · 업로드 90%</p></div>
+</div>
+<div class="row">
+<div class="card">
+<p class="label">모든 구간이 함께 느려졌다</p>
+<p class="ctxt">1개일 때와 교체 부하를 비교하면 덤프는 약&nbsp;5배, 압축·업로드는 약&nbsp;13배, 로컬 사본으로 깨우기도 약&nbsp;13배가 됐다.</p>
+</div>
+<div class="card">
+<p class="label">디스크와 CPU는 평균으로 여유가 있었다</p>
+<p class="ctxt">교체 부하에서 디스크 사용률은 평균 63%, 최대 94%였고 CPU는 평균&nbsp;39%였다. 메모리도 가용량이 2.5&nbsp;GiB 이상 남아 있었다.</p>
+</div>
+<div class="card alert">
+<p class="label">그러면 무엇이 막았나</p>
+<p class="ctxt">Substrate 소스에서 후보를 찾았다. 업로드에 쓰는 메모리에 한도가 있어, 넘치면 업로드가 줄을 선다. 다음 장에서 이 한도를 바꿔 확인한다.</p>
+</div>
+</div>
+<p class="foot">출처: 자체 측정 (2026년 11월). Substrate가 재우기마다 남기는 구간별 기록의 중앙값. 노드 안에서 잰 시간이고 집계 대상도 조금 달라 앞 장의 값보다 짧다</p>
+<aside>재우기 시간을 구간별로 나눠 봤습니다. Substrate는 재우기 한 번마다 구간별 시간을 기록으로 남깁니다. 회색이 상태를 로컬 디스크에 쓰는 덤프 구간이고, 주황색이 압축해서 객체 스토리지로 올리는 구간입니다. 교체 부하에서 재우기 8초 가운데 약 90퍼센트가 압축과 업로드 구간이었습니다. 앞 장의 8.9초와 숫자가 조금 다른 것은, 이 값은 노드 안에서 잰 시간이고 앞 장은 요청한 쪽에서 잰 시간이기 때문으로 보입니다. 집계 대상도 조금 다릅니다. 다만 업로드만 느려진 것은 아닙니다. 덤프는 약 5배, 로컬 사본으로 깨우는 시간도 약 13배가 됐습니다. 그런데 그때 디스크 사용률은 평균 63퍼센트, CPU는 평균 39퍼센트였습니다. 순간 최대는 94퍼센트까지 갔지만, 평균으로는 여유가 있었습니다. 디스크가 처리 한계에 이르러 느려졌다고 볼 근거는 없었습니다. 그래서 Substrate 소스를 읽어 봤고, 업로드에 쓰는 메모리에 한도가 있어서 그것을 넘으면 업로드가 줄을 서게 된다는 것을 찾았습니다. 이것이 원인인지 다음 장에서 직접 바꿔서 확인했습니다.</aside>
+</section>

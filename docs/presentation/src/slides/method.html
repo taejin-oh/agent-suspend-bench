@@ -1,0 +1,27 @@
+<section id="method" data-transition="fade">
+<p class="eyebrow">검증 방법</p>
+<h2>Agent는 모사, snapshot 쓰기는 실제</h2>
+<p class="lead">LLM은 호출하지 않는다. 시나리오대로 자원을 쓰는 가상 Actor를 실제 Agent Substrate 위에서 재우고 깨운다. 쓰기 경로는 실제이고, 크기와 압축률은 시나리오가 정한다.</p>
+<div class="row">
+<div class="card">
+<p class="label">가상 ACTOR</p>
+<h3>시나리오 파일대로 동작</h3>
+<p class="ctxt">Substrate에 포함된 부하 도구를 썼다. 단계마다 메모리 채우기, 디스크 쓰기, CPU 사용, 대기 시간을 지정한다.</p>
+<p class="csmall">이번 시나리오: 5단계, 메모리 64&nbsp;MiB(무작위&nbsp;데이터), 디스크&nbsp;약&nbsp;24&nbsp;MiB</p>
+</div>
+<div class="card">
+<p class="label">환경</p>
+<h3>가상 머신 1대의 Kubernetes</h3>
+<p class="ctxt">시험용 Kubernetes(kind)에 Substrate를 소스 수정 없이 설치했다. S3 호환 객체 스토리지(rustfs)도 같은 클러스터 안에 둔다.</p>
+<p class="csmall">worker 4개, 격리 방식은 gVisor(오픈소스 sandbox)</p>
+</div>
+<div class="card key">
+<p class="label">부하 두 가지</p>
+<h3>일반 부하와 교체 부하</h3>
+<p class="ctxt"><b>일반.</b> 각 Actor가 5단계를 반복하고, 단계가 끝날 때마다 재웠다가 깨운다. 1개와 4개로 실행.</p>
+<p class="ctxt"><b>교체(turnover).</b> 12개 중 3개만 깨어 있게 둔다. 1초에 한 번, 깨어 있는 하나를 재우고 자던 하나를 깨운다.</p>
+</div>
+</div>
+<p class="foot">측정 환경: Apple M4의 가상 머신(10 vCPU, 메모리 8 GB). 쓰기는 모두 데이터 디스크 1개에 합쳐진다. Substrate commit d283af4e</p>
+<aside>방법의 핵심은, Agent는 모사하지만 snapshot 쓰기는 실제로 일어난다는 점입니다. Substrate에 포함된 부하 도구가 시나리오 파일대로 메모리와 디스크를 쓰는 가상 Actor를 만듭니다. 이번 시나리오는 다섯 단계이고, 메모리 64 MiB를 무작위 데이터로 채우고 디스크에 약 24 MiB를 씁니다. 이걸 재울 때는 실제로 메모리가 디스크에 쓰이고 객체 스토리지로 올라갑니다. 다만 Actor의 크기와 데이터의 압축률은 시나리오가 정한 값이라 실제 Agent와 다를 수 있습니다. 환경은 가상 머신 한 대 안의 시험용 Kubernetes입니다. 객체 스토리지도 같은 클러스터 안에 두었습니다. 부하는 두 가지입니다. 일반 부하는 각 Actor가 단계를 하나 끝낼 때마다 잠드는 방식으로, Actor 1개와 4개로 각각 돌렸습니다. 교체 부하가 우리가 보려는 상황입니다. 12개 중 3개만 깨어 있게 두고, 1초에 한 번씩 깨어 있는 하나를 재우고 자던 하나를 깨웁니다.</aside>
+</section>

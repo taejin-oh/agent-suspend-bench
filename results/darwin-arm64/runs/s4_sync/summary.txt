@@ -21,6 +21,11 @@ disk_util_pct: mean=33.2 p95=68.2 peak=100.0 seconds_over_90=1
 mem_available_MiB: start=3817 min=2477 end=3414 | dirty_pagecache_MiB_peak=280
 node_snapshots_dir_MiB: start=0 peak=1309 end=667
 object_store_atespaces_MiB: start=4 peak=1075 end=641
+## load window only (부하가 걸린 구간: turnover 는 교체 구간)
+window=start..end duration_s=120 device=vdb
+written_MiB=26408 write_MiB_per_s_mean=220
+disk_util_pct: mean=38 p95=69 peak_1s=100
+suspends=84 suspends_per_s=0.70 written_MiB_per_suspend=314 suspend_p50_s=2.80 suspends_in_flight_mean(rate*p50)=2.0
 ## worker pods after
 benchmark-worker-6f8c8b9657-2v6kg   1/1   Running   0     3m49s
 benchmark-worker-6f8c8b9657-g95qm   1/1   Running   0     3m49s

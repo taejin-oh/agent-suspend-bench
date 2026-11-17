@@ -1,0 +1,27 @@
+<section id="what" data-transition="fade">
+<p class="eyebrow">AGENT SUBSTRATE란</p>
+<h2>쉬는 Agent를 디스크로 내려, 적은 자리로 많은 Agent를 돌린다</h2>
+<p class="lead">Agent는 대부분의 시간을 모델·도구·사람의 응답을 기다리며 보낸다. 그 시간 동안 자리를 비우게 하는 것이 핵심이다. Kubernetes 위에서 동작하는 오픈소스다 (Apache-2.0).</p>
+<div class="row">
+<div class="card">
+<p class="label">ACTOR</p>
+<h3>Agent 인스턴스 하나</h3>
+<p class="ctxt">메모리와 파일 상태를 가진 작업 단위. 수가 매우 많고 대부분 쉬고 있다.</p>
+</div>
+<div class="card">
+<p class="label">WORKER</p>
+<h3>미리 띄워 둔 빈 자리</h3>
+<p class="ctxt">격리 실행 환경(sandbox)을 가진 Kubernetes 실행 단위(pod). Actor보다 훨씬 적게 둔다.</p>
+</div>
+<div class="card">
+<p class="label">SNAPSHOT</p>
+<h3>재울 때 남기는 저장본</h3>
+<p class="ctxt">메모리와 파일 상태 전체. checkpoint라고도 한다. 오늘은 이것을 쓰는 부담을 다룬다.</p>
+</div>
+</div>
+<div class="banner light">
+<b>공식 문서에 제시된 수치</b> (이번에 측정한 값이 아님): 컨테이너 대비 10배 밀도 · 깨우기 500ms 미만 · 초당 500회 이상 깨우기
+</div>
+<p class="foot">출처: github.com/agent-substrate/substrate 의 README, docs/concepts/architecture.md</p>
+<aside>Agent Substrate는 Kubernetes 위에서 도는 오픈소스 런타임입니다. 핵심 아이디어는 단순합니다. Agent는 대부분의 시간을 모델이나 도구, 사람의 응답을 기다리며 보냅니다. 그 시간 동안은 상태를 통째로 저장해서 자리에서 내리고, 요청이 오면 빈 자리에 다시 올립니다. 그래서 많은 Agent를 적은 자리에 겹쳐 올릴 수 있습니다. 용어 세 개만 기억하시면 됩니다. Actor는 Agent 인스턴스 하나입니다. Worker는 미리 띄워 둔 빈 자리입니다. Snapshot은 재울 때 남기는 저장본으로, 메모리와 파일 상태 전체가 들어 있습니다. 이 프로젝트를 고른 이유는, 재우기와 깨우기를 전제로 설계된 공개 런타임이라 우리가 보려는 부하를 그대로 만들 수 있기 때문입니다. 아래 수치는 공식 문서에 제시된 것이고 제가 측정한 값이 아닙니다. 해당 문서에는 측정 조건이 함께 적혀 있지 않아서, 오늘 제 측정값과 직접 비교할 수는 없습니다.</aside>
+</section>

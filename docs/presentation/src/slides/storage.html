@@ -1,0 +1,33 @@
+<section id="storage" data-transition="fade">
+<p class="eyebrow">결과 5 · 스토리지 부담</p>
+<h2>재우기 한 번에 약 320 MiB를 쓴다</h2>
+<div class="row">
+<div class="card alert">
+<p class="label">재우기 1회당 쓰기</p>
+<div class="numrow"><p class="num warnnum">약 320</p><p class="unit">MiB</p></div>
+<p class="ctxt">snapshot 크기의 약 2배다. 로컬 디스크와 객체 스토리지에 한&nbsp;번씩 쓴다. 부하마다 303~336&nbsp;MiB였다.</p>
+</div>
+<div class="card">
+<p class="label">SNAPSHOT 1개</p>
+<div class="numrow"><p class="num">약 160</p><p class="unit">MiB</p></div>
+<p class="ctxt">시나리오를 끝까지 돈 Actor 기준이다. 압축 효과는 약&nbsp;5%뿐이었다. 무작위 데이터로 채운 영향으로 보인다.</p>
+</div>
+<div class="card">
+<p class="label">교체 부하의 쓰기 속도</p>
+<div class="numrow"><p class="num">231</p><p class="unit">MiB/s</p></div>
+<p class="ctxt">초당 0.72회 재우기에서 3분&nbsp;48초 동안의 평균이다. 하루 계속되면 약&nbsp;19&nbsp;TiB가 된다(계산값).</p>
+</div>
+</div>
+<div class="row">
+<div class="card">
+<p class="label">점유량</p>
+<p class="ctxt">부하가 멈추면 Actor당 snapshot 하나만 남는다. 12개에 로컬과 객체 스토리지 각 1.8&nbsp;GiB. 교체 중에는 로컬이 최대 3.2&nbsp;GiB까지 늘었다.</p>
+</div>
+<div class="card">
+<p class="label">해석할 때 주의</p>
+<p class="ctxt">쓰기량은 가상 머신의 데이터 디스크 전체에서 잰 값이다. 로컬 디스크 쓰기와 객체 스토리지 쓰기가 합쳐져 있다.</p>
+</div>
+</div>
+<p class="foot">출처: 자체 측정 (2026년 11월). snapshot은 Actor당 로컬 157 MiB, 객체 스토리지 150 MiB. 로컬 사본은 기본 30분 뒤 지워진다</p>
+<aside>스토리지 쪽 수치입니다. 재우기 한 번에 디스크에 쓰이는 양이 약 320 MiB였습니다. snapshot 하나가 약 160 MiB인데, 로컬 디스크에 한 번 쓰고 객체 스토리지에 한 번 더 쓰기 때문에 약 두 배가 됩니다. 시나리오는 메모리를 64 MiB만 채우는데 snapshot은 그보다 큽니다. sandbox와 프로세스 자체의 메모리, 파일 변경분이 함께 저장되기 때문으로 보이지만, 구성을 따로 분석하지는 않았습니다. 압축 효과가 5퍼센트뿐인 것은 시나리오가 메모리를 무작위 데이터로 채우는 영향으로 보입니다. 실제 Agent의 메모리는 더 잘 압축될 수 있지만 측정하지는 않았습니다. 교체 부하에서 쓰기 속도는 평균 초당 231 MiB였습니다. 이 속도가 하루 계속되면 약 19 TiB입니다. 점유량은 부하가 멈춘 뒤 Actor당 snapshot 하나씩입니다. 로컬 사본은 기본 30분 뒤에 지워집니다. 주의할 점은, 이 환경에서는 로컬 디스크 쓰기와 객체 스토리지 쓰기가 전부 디스크 하나에 합쳐진다는 것입니다. 실제 구성에서는 둘을 따로 보고 각각의 장치에 맞춰 계산해야 합니다.</aside>
+</section>

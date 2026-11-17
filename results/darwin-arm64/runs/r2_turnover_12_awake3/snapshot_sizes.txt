@@ -1,0 +1,26 @@
+## node /var/lib/ate/snapshots/<actor-uid> (KB)
+328008	/var/lib/ate/snapshots/09263e24-c185-46d3-b7bc-1a5debacd50b
+314548	/var/lib/ate/snapshots/12e058d9-b67e-4363-b12d-d4e3ea0d58e6
+164780	/var/lib/ate/snapshots/150b4617-1338-45fc-b56f-494ad8971350
+328992	/var/lib/ate/snapshots/2b3c337d-2189-41b3-8815-fd1d5c660a81
+328976	/var/lib/ate/snapshots/40c3f9c0-f9b1-4ce8-923c-96a7d5b1a7f2
+329864	/var/lib/ate/snapshots/8a4a43e4-461a-4852-9e68-0861c75ed66b
+313720	/var/lib/ate/snapshots/a748286e-dff4-4749-86f7-44ee1c586abc
+164756	/var/lib/ate/snapshots/cddd9132-f840-4fe8-99a4-5b72869d5554
+313424	/var/lib/ate/snapshots/db9aba92-c2a0-4f4d-ab3c-ccbbfca1952d
+156368	/var/lib/ate/snapshots/dfe1baa1-11b6-4d0d-b172-a154b6c28168
+314404	/var/lib/ate/snapshots/f01dd0b7-4f18-4603-90a8-cda37d544221
+311872	/var/lib/ate/snapshots/faec3ab6-f972-4966-a8e3-77220046a2be
+## object store atespaces/benchmark/actors/<actor-uid> (KB)
+312044	/data/ate-snapshots/atespaces/benchmark/actors/09263e24-c185-46d3-b7bc-1a5debacd50b
+300152	/data/ate-snapshots/atespaces/benchmark/actors/12e058d9-b67e-4363-b12d-d4e3ea0d58e6
+154924	/data/ate-snapshots/atespaces/benchmark/actors/150b4617-1338-45fc-b56f-494ad8971350
+155668	/data/ate-snapshots/atespaces/benchmark/actors/2b3c337d-2189-41b3-8815-fd1d5c660a81
+314012	/data/ate-snapshots/atespaces/benchmark/actors/40c3f9c0-f9b1-4ce8-923c-96a7d5b1a7f2
+155384	/data/ate-snapshots/atespaces/benchmark/actors/8a4a43e4-461a-4852-9e68-0861c75ed66b
+145664	/data/ate-snapshots/atespaces/benchmark/actors/a748286e-dff4-4749-86f7-44ee1c586abc
+155332	/data/ate-snapshots/atespaces/benchmark/actors/cddd9132-f840-4fe8-99a4-5b72869d5554
+300976	/data/ate-snapshots/atespaces/benchmark/actors/db9aba92-c2a0-4f4d-ab3c-ccbbfca1952d
+150140	/data/ate-snapshots/atespaces/benchmark/actors/dfe1baa1-11b6-4d0d-b172-a154b6c28168
+151364	/data/ate-snapshots/atespaces/benchmark/actors/f01dd0b7-4f18-4603-90a8-cda37d544221
+149876	/data/ate-snapshots/atespaces/benchmark/actors/faec3ab6-f972-4966-a8e3-77220046a2be

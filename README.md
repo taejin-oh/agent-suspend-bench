@@ -19,6 +19,8 @@ Go 툴체인은 이 폴더 안(`toolchain/`)에 받으므로 따로 설치하지
 
 `/dev/kvm`은 필요 없습니다(gVisor 방식만 사용). 프록시가 TLS를 가로채는 망이면 이미지 pull과 빌드가 실패합니다. 이 경우는 이 저장소에서 다루지 않았습니다.
 
+발표 자료는 `docs/presentation/`에 있습니다 (HTML, PDF, PPTX, 슬라이드 원본).
+
 ## 실행 순서
 
 ```bash
@@ -64,6 +66,7 @@ scripts/06_run_load.sh turnover_12_awake3 12 300 lifecycle_mode=sync agentsessio
 | 그중 깨어 있는 수 / 초당 교체 수 | `agentsession_awake=N`, `target_rps=R` | |
 | 쉬는 시간 배율 | `agentsession_think_scale=0.5` | 1.0 |
 | suspend 방식 | `lifecycle_mode=sync`(업로드까지 대기) / `async`(백그라운드 업로드, substrate 기본) | |
+| 업로드 메모리 한도 (동시 업로드 수와 압축 병렬도를 함께 정함) | atelet DaemonSet의 objectstore-plugin 인자 `--upload-memory-budget` (아래 "원인 확인" 참고) | 512Mi |
 
 대본이나 worker 수, 메모리를 바꾸면 5번을 다시 실행해야 합니다(`SKIP_BUILD=1`을 주면 이미지 빌드를 건너뜀). `agentsession_awake`는 `WORKER_COUNT` 이하여야 합니다.
 
@@ -73,33 +76,62 @@ scripts/06_run_load.sh turnover_12_awake3 12 300 lifecycle_mode=sync agentsessio
 
 실행마다 `results/<HOST_LABEL>/runs/<이름>/`에 다음이 남습니다.
 
-- `summary.txt`: 아래 두 표의 요약. 먼저 볼 파일
+- `summary.txt`: 아래 내용의 요약. 먼저 볼 파일
+- `run.txt`: 실행 인자와 시작·종료 시각(UTC), objectstore-plugin 인자
 - `stats.json`, `stats.csv`, `failures.csv`: 부하 생성기(Locust)의 원본 통계
-- `proc_1s.txt`: 1초 간격 블록 장치 통계, 메모리, IO/메모리 pressure 원본
+- `boomer_worker.log`: 부하 생성기 로그 (turnover 교체 시작 시각이 여기 남는다)
+- `proc_1s.txt`: 1초 간격 블록 장치 통계, 메모리, IO/메모리 pressure, CPU 누적 시간 원본
 - `sizes_5s.txt`: 5초 간격 노드 로컬 snapshot 폴더와 객체 저장소 크기
+- `snapshot_sizes.txt`: 정지 직전의 actor별 snapshot 크기 (노드 로컬, 객체 저장소)
+- `summary.txt`의 `load window only` 블록: 부하가 실제로 걸린 구간만의 쓰기량·사용률·초당 suspend 수 (`scripts/window_stats.py`). turnover는 등록과 1분 대기를 뺀 교체 구간
+- `phases.txt`: suspend/resume 구간별 시간. substrate가 남기는 "timing breakdown" 로그를 substrate의 `benchmarking/analysis/phase_report.py`로 집계한 것
 
 `summary.txt`의 요청 표에서 볼 행:
 
 | 행 | 의미 |
 |---|---|
 | `SuspendActor` | 재우기(checkpoint) 한 번에 걸린 시간. `sync`면 객체 저장소 업로드까지 포함 |
-| `SuspendActor_Register` | turnover에서 처음 등록할 때의 재우기. 경합이 없을 때의 기준값으로 쓸 수 있음 |
+| `SuspendActor_Register` | turnover에서 처음 등록할 때의 재우기. 대본 1단계만 돈 상태라 snapshot이 작다 |
 | `ResumeActor`, `TimeToWake` | 깨우기에 걸린 시간 (재시도 포함) |
 | `Step_*` | 깨어난 뒤 대본의 각 단계가 걸린 시간 |
 | `fail` 열 | 실패 수. 오류 문구는 표 아래 `ERROR` 줄 |
 
-스토리지 부분에서 볼 값: 총 쓰기량(`written_MiB_by_device`), 1초 피크(`peak_1s`), 디스크 사용률(`disk_util_pct`, `seconds_over_90`), IO pressure(`psi_io_*`), 로컬/객체 저장소 점유량의 최대값.
+스토리지 부분에서 볼 값: 총 쓰기량(`written_MiB_by_device`), 1초 피크(`peak_1s`), 디스크 사용률(`disk_util_pct`, `seconds_over_90`), IO pressure(`psi_io_*`, 커널이 제공할 때만), CPU 사용률과 IO 대기(`cpu_pct_all_cores`), 로컬/객체 저장소 점유량의 최대값.
+
+구간별 시간에서 볼 행: `worker_checkpoint`(sandbox의 메모리·파일을 노드 로컬에 쓰는 구간)와 `persist`(zstd로 압축해 객체 저장소에 올리는 구간). 어느 쪽이 늘어나는지로 병목 위치를 좁힌다.
+
+주의: turnover의 `SuspendActor_Register`는 대본 1단계만 돈 작은 snapshot을 재우는 값이라 `SuspendActor`의 기준값으로 쓸 수 없다. 기준값은 같은 대본을 세션 1개로 돌린 실행(`06_run_load.sh s1_sync 1 120 lifecycle_mode=sync`)에서 얻는다.
 
 **문제가 생기는지 보는 방법:** 세션 수나 `target_rps`를 단계적으로 올리면서 `SuspendActor`·`TimeToWake`의 p95/p99가 기준값 대비 몇 배로 늘어나는지, `fail`이 생기기 시작하는 지점, 그때의 디스크 사용률과 IO pressure를 같이 봅니다.
 
-## Mac(Apple M4, OrbStack VM 8 GB)에서 확인한 것
+## Mac(Apple M4, OrbStack VM 10 vCPU / 8 GB)에서 확인한 것
 
 원본은 `results/darwin-arm64/`. 이 숫자는 "끝까지 돈다"는 증거이고, 서버의 성능을 예측하는 값이 아닙니다.
 
-- 설치, counter suspend/resume, 부하 두 모드 모두 실패 없이 완료
-- counter(메모리 수 MB): suspend 0.2~0.3초, 깨우는 첫 요청 0.1~0.3초. 노드 로컬 4.5 MB → 객체 저장소 2.4 MB(zstd)
-- `smoke-5step` 대본의 snapshot은 actor당 약 180 MB (메모리 페이지 약 160 MB + rootfs 약 25 MB)
-- turnover 12개/활성 3개/초당 1개 교체, 5분: 깨우기 185회, 재우기 175회, 디스크 쓰기 약 58 GB. 재우기 시간은 등록 시 중앙값 0.8초에서 교체 중 중앙값 5.7초, p95 16초로 늘어남
+- 설치, counter suspend/resume, 부하 실행 모두 실패 없이 완료 (부하 8회 합계 suspend 1,033회, resume 1,013회)
+- counter(메모리 수 MB): suspend 0.25~0.32초, 깨우는 첫 요청 0.10~0.24초
+- 같은 대본(`smoke-5step`, worker 4개, sync)으로 겹침 정도만 바꾼 결과 (`runs/r2_*`):
+
+| | 세션 1개 | 세션 4개 | turnover 12개/활성 3개/목표 초당 1개 |
+|---|---|---|---|
+| `SuspendActor` 중앙값 / p95 | 0.83초 / 1.2초 | 2.7초 / 3.7초 | 8.9초 / 16초 |
+| `TimeToWake` 중앙값 / p95 | 0.14초 / 0.58초 | 0.46초 / 1.3초 | 1.6초 / 3.2초 |
+| suspend 중 `persist` 비중 (중앙값) | 80% | 88% | 90% |
+| 부하 구간 디스크 쓰기 평균 | 104 MiB/s | 232 MiB/s | 231 MiB/s |
+| 부하 구간 디스크 사용률 / CPU | 15% / 12% | 33% / 28% | 63% / 39% |
+
+표의 속도와 사용률은 각 `summary.txt`의 `load window only` 블록(`scripts/window_stats.py`) 값입니다.
+
+- turnover의 실제 교체 속도는 초당 약 0.72회였습니다(목표 1회). suspend 1회당 디스크 쓰기는 약 320 MiB로, snapshot 크기(actor당 로컬 157 MiB, 객체 저장소 150 MiB)의 약 2배입니다.
+- 늘어난 suspend 시간의 대부분은 `persist`(압축·업로드) 구간이었고, 그때 디스크(평균 63%, 1초 최대 94%)와 CPU(평균 39%)는 평균으로는 포화되지 않았습니다.
+- **원인 확인 (`runs/r3_upload2g_*`)**: substrate의 objectstore-plugin은 업로드에 쓰는 메모리를 노드당 512Mi로 제한하고(`--upload-memory-budget`), 넘치면 업로드를 기다리게 합니다. 이 값만 2Gi로 올려 같은 부하를 다시 돌리자 turnover의 `SuspendActor` 중앙값이 8.9초 → 2.3초, p95가 16초 → 7.1초, `persist` 중앙값이 7.2초 → 0.84초가 됐습니다. 세션 4개 실행도 같은 방향입니다(`SuspendActor` 중앙값 2.7초 → 1.6초). 기본값으로 되돌려 다시 돌리자(`runs/r4_default_turnover_12_awake3`) 중앙값이 11초로 돌아갔습니다. 반면 `TimeToWake` 중앙값은 1.6초 → 2.2초로 늘었고, CPU 평균은 39% → 52%, 가용 메모리 최소값은 2.6 GiB → 1.8 GiB가 됐습니다. 교체 속도는 초당 0.72회 → 0.77회로 거의 그대로였습니다. 이 설정은 동시 업로드 수와 업로드 하나의 압축 병렬도를 함께 바꾸므로 둘의 효과는 나누어 보지 못했습니다. 한도를 올린 실행은 각 1회입니다. 패치를 적용하면 atelet pod가 다시 뜹니다. 실험 방법:
+
+  ```bash
+  kubectl -n ate-system patch ds atelet --type=json \
+    -p '[{"op":"add","path":"/spec/template/spec/initContainers/0/args/-","value":"--upload-memory-budget=2Gi"}]'
+  ```
+
+- 약 12시간 앞서 같은 조건으로 돌린 첫 실행(`runs/s4_sync`, `runs/turnover_12_awake3`)도 같은 경향입니다(turnover `SuspendActor` 중앙값 9.8초, p95 16초). 이 두 실행에는 CPU·구간별 시간·actor별 snapshot 크기가 없습니다.
 
 ## 알려진 한계
 
@@ -107,6 +139,9 @@ scripts/06_run_load.sh turnover_12_awake3 12 300 lifecycle_mode=sync agentsessio
 - kind는 노드가 컨테이너 하나라서, snapshot 로컬 쓰기와 객체 저장소(rustfs) 쓰기, 이미지 저장이 모두 Docker 데이터 디스크 하나에 섞입니다. 총 쓰기량은 이 셋의 합입니다. snapshot을 전용 디스크로 분리하려면 kind 설정에 `extraMounts`를 넣어야 하며(substrate `docs/guides/node-storage.md`), 이 저장소에는 아직 없습니다.
 - `async` 모드에서는 업로드가 기본 5분 뒤에 시작됩니다. 실행 시간을 그보다 길게 잡지 않으면 객체 저장소 쓰기가 측정 창 밖으로 빠집니다.
 - 지표 수집은 kind 노드 안의 `/proc/diskstats`를 읽습니다. 장치는 쓰기량이 가장 많은 것을 자동으로 고르며, `scripts/analyze_io.py <폴더> <장치>`로 지정할 수 있습니다.
+- 세션 1개 기준 실행은 한 번만 했습니다. "동시에 진행 중인 suspend 수"는 초당 suspend 수 × 중앙값으로 계산한 어림값입니다.
+- 실패 수는 부하 생성기 기준입니다. 깨우기는 생성기가 최대 1분까지 재시도합니다.
+- OrbStack VM은 IO pressure(PSI)를 제공하지 않아 Mac 결과에는 `psi_*` 줄이 없습니다.
 - macOS에서는 기본 bash(3.2)로 substrate의 벤치마크 스크립트가 돌지 않습니다. bash 4.4 이상을 `toolchain/bash5/bash`에 두면 스크립트가 그것을 먼저 씁니다.
 
 고정한 버전(substrate commit, Go)은 `scripts/env.sh`에 있습니다.

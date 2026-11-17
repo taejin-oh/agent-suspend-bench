@@ -1,0 +1,34 @@
+# Verification script: 5 short steps, small memory, varying think (idle) time.
+name: our-test
+min_actor_memory: 512Mi
+steps:
+  - name: 01_load_context
+    agent: loads context into RAM
+    think: 1s
+    ops:
+      - fill_ram: {key: ctx, size: 64Mi}
+      - ping: {}
+  - name: 02_download
+    agent: downloads a repo to disk
+    think: 2s
+    ops:
+      - ingest: {key: repo, size: 8Mi}
+      - burn_cpu: {millis: 300, parallel: 1}
+  - name: 03_build
+    agent: builds; writes artifacts
+    think: 3s
+    ops:
+      - churn_ram: {key: ctx, size: 16Mi}
+      - write_disk: {key: build, size: 16Mi}
+  - name: 04_test
+    agent: reads artifacts and runs tests
+    think: 2s
+    ops:
+      - read_disk_digest: {key: build}
+      - burn_cpu: {millis: 500, parallel: 2}
+  - name: 05_wrap_up
+    agent: walks RAM, writes summary
+    think: 1s
+    ops:
+      - walk_ram: {key: ctx}
+      - write_disk: {key: summary, size: 256Ki}

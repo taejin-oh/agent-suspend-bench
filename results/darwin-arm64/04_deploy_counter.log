@@ -1,0 +1,118 @@
+configuration: 7 set, 51 default
+  actorJWT.algorithm                          ES256                (from default)
+  actorJWT.issuer                             ""                   (from default)
+  ateapi.authz.bootstrapOwners                ""                   (from default)
+  ateapi.authz.egressGatewayExtraSPIFFEIDs    ""                   (from default)
+  ateapi.expectedJWTIssuer                    ""                   (from default)
+  ateapi.logLevel                             ""                   (from default)
+  ateapi.postgres.cloudsql.gsa                ""                   (from default)
+  ateapi.postgres.cloudsql.iamAuth            ""                   (from default)
+  ateapi.postgres.cloudsql.instance           ""                   (from default)
+  ateapi.postgres.cloudsql.ipType             ""                   (from default)
+  ateapi.postgres.owner.connectionString      ""                   (from default)
+  ateapi.postgres.owner.role                  substrate_owner      (from default)
+  ateapi.postgres.poolMaxConns                ""                   (from default)
+  ateapi.postgres.readWrite.connectionString  ""                   (from default)
+  ateapi.postgres.readWrite.role              substrate_readwrite  (from default)
+  ateapi.postgres.schema                      ""                   (from default)
+  ateapi.postgres.serverCAFile                ""                   (from default)
+  ateapi.postgres.storageClass                ""                   (from default)
+  atenet.dataplane                            envoy                (from default)
+  atenet.egress.additionalExtprocService      ""                   (from default)
+  atenet.egress.credentialProvider            ""                   (from default)
+  benchmark.actorMemory                       ""                   (from default)
+  benchmark.sandboxClass                      gvisor               (from default)
+  benchmark.workerCount                       1                    (from default)
+  clusterSize                                 size0                (from default)
+  context                                     kind-kind            (from the --kind profile)
+  cordonSystemInfraComponents                 false                (from default)
+  csi.setup                                   none                 (from default)
+  demo.anthropicAPIKey                        ""                   (from default)
+  demo.counter.storageClass                   standard             (from default)
+  demo.counter.withExternalVolume             false                (from default)
+  docker.buildFlags                           ""                   (from default)
+  e2e.envoyConcurrency                        0                    (from default)
+  e2e.tuning                                  false                (from default)
+  fakeDataPlane.enabled                       false                (from default)
+  gcp.clusterLocation                         ""                   (from default)
+  gcp.clusterName                             ""                   (from default)
+  gcp.projectID                               ""                   (from default)
+  images.repo                                 ""                   (from default)
+  images.tag                                  ""                   (from default)
+  ingressAllowedSPIFFEIDs                     ""                   (from default)
+  kindCluster.enabled                         true                 (from ATE_INSTALL_KIND)
+  kindCluster.name                            kind                 (from default)
+  ko.defaultPlatforms                         linux/arm64          (from the --kind profile)
+  ko.dockerRepo                               localhost:5001       (from the --kind profile)
+  kubeconfig                                  ""                   (from default)
+  namespace                                   ate-system           (from default)
+  otlpEndpoint                                ""                   (from default)
+  podcert.workersPerSigner                    0                    (from default)
+  preview                                     ""                   (from default)
+  publish.binariesDir                         bin/release          (from default)
+  publish.overwrite                           false                (from default)
+  record.dir                                  ""                   (from default)
+  rolloutTimeout                              600s                 (from --rollout-timeout)
+  sandboxClasses                              gvisor,microvm       (from default)
+  storage.bucketName                          ate-snapshots        (from the --kind profile)
+  storage.snapshotLocation                    gs://ate-snapshots/  (from the --kind profile)
+  storage.transferGSAName                     ""                   (from default)
+[1;36m[step]: demo-counter_deploy[0m
+[1;36m[step]: ensure_crds[0m
+[1;36m[step]: images: built from source with ko[0m
+2026/11/17 18:50:53 Using base gcr.io/distroless/static-debian13:nonroot@sha256:18f4cc26c9ffa7f20a359298be7deadac5c607c8e03a02b8119f1a5fc2f82c99 for go.ate.dev/substrate/cmd/ateworker-gvisor
+2026/11/17 18:50:55 Building go.ate.dev/substrate/cmd/ateworker-gvisor for linux/arm64/v8
+2026/11/17 18:50:58 Publishing localhost:5001/ateworker-gvisor:latest
+2026/11/17 18:50:58 pushed blob: sha256:ffb59389b2ed88b73526ef87c6b62cf7324ebe9339c6e828ef5c5c49650973e1
+2026/11/17 18:50:58 pushed blob: sha256:bd2acf10d1b1f2304688bd0f891444a61272b7b18c00df6ca91369dd92a2ca2d
+2026/11/17 18:50:58 localhost:5001/ateworker-gvisor:sha256-a7cfc29222610963b30c4c09137deb1c25f14ede355628fb2a55aa41950f886f.sbom: digest: sha256:ccf32cee9b9b8a49620243e835075778b32299c633fc2adad4acdb64e2f70da1 size: 374
+2026/11/17 18:50:58 Published SBOM localhost:5001/ateworker-gvisor:sha256-a7cfc29222610963b30c4c09137deb1c25f14ede355628fb2a55aa41950f886f.sbom
+2026/11/17 18:50:59 pushed blob: sha256:2780920e5dbfbe103d03a583ed75345306e572ec5a48cb10361f046767d9f29a
+2026/11/17 18:50:59 pushed blob: sha256:3214acf345c0cc6bbdb56b698a41ccdefc624a09d6beb0d38b5de0b2303ecaf4
+2026/11/17 18:51:00 pushed blob: sha256:7c12895b777bcaa8ccae0605b4de635b68fc32d60fa08f421dc3818bf55ee212
+2026/11/17 18:51:00 pushed blob: sha256:d6b1b89eccacc15c2420b2776d72c1dae334a00805ed9af54bf2f71e4d536f28
+2026/11/17 18:51:00 pushed blob: sha256:9bb4b566b9ef0df0f11dbd96ec825f1f6affab4aeaa3a94f69ca3bb6d36f9d1e
+2026/11/17 18:51:00 pushed blob: sha256:dd64bf2dd177757451a98fcdc999a339c35dee5d9872d8f4dc69c8f3c4dd0112
+2026/11/17 18:51:00 pushed blob: sha256:099b2accc78e83f216b082f3182c7b09c65d3af928664f9168fd932ca1c05e50
+2026/11/17 18:51:00 pushed blob: sha256:938a1fd8ae6d4c31a25adcfe24b9753913956433d5210f3cf372c7c4fc2cea83
+2026/11/17 18:51:00 pushed blob: sha256:52630fc75a18675c530ed9eba5f55eca09b03e91bd5bc15307918bbc1a7e7296
+2026/11/17 18:51:01 pushed blob: sha256:617b009a71d625ef77982b400cb9939dd5ed9809ebf50681a0520b7c08c0ca89
+2026/11/17 18:51:01 pushed blob: sha256:c172f21841dff4c8cf45cde46589c1c2616cefe7e819965e92e6d3475c428aa0
+2026/11/17 18:51:02 pushed blob: sha256:b839dfae01f66e15c6a8b63520557ed315bdfe036342fa7a0c537259f10d7a9a
+2026/11/17 18:51:02 pushed blob: sha256:a99dd1dd5eaf3e2099256f1a75c8e4c02a1d3a81b8e2bfd1735b1dd166b68a12
+2026/11/17 18:51:02 pushed blob: sha256:ebddc55facdc6b1f7e0f30816a5fc7cc62f38abdf76c0a8b0a0ce52085754795
+2026/11/17 18:51:02 pushed blob: sha256:401d177fd1e8a1e0d7a48139788d026e9a2e919ccb122bedd110ac7cf351f53e
+2026/11/17 18:51:03 pushed blob: sha256:5689407c3340e75a085703d3366e55b6105152a2574d971cb884f24228292c1d
+2026/11/17 18:51:03 localhost:5001/ateworker-gvisor:latest: digest: sha256:a7cfc29222610963b30c4c09137deb1c25f14ede355628fb2a55aa41950f886f size: 2938
+2026/11/17 18:51:03 Published localhost:5001/ateworker-gvisor@sha256:a7cfc29222610963b30c4c09137deb1c25f14ede355628fb2a55aa41950f886f
+  (ko resolve -f - took 12.247s)
+  (apply of 2 objects took 0.031s)
+  (rollout status deployment/counter took 2.013s)
+2026/11/17 18:51:08 Using base gcr.io/distroless/static-debian13:latest@sha256:15f8637509792e05b97d83451b0b6ccfa4abd548f997e406ac1e72c87fe1fa78 for go.ate.dev/substrate/demos/counter
+2026/11/17 18:51:09 Building go.ate.dev/substrate/demos/counter for linux/arm64/v8
+2026/11/17 18:51:10 Publishing localhost:5001/counter:latest
+2026/11/17 18:51:10 pushed blob: sha256:c4da530481dcf40de6243da7d61c8f1d177f06e99dcc3325d234d15fad4e8d5a
+2026/11/17 18:51:10 pushed blob: sha256:b3c5cd6b968e93f3bc64e84ee6be48799d5f39a524defc1336835ceb21d011b4
+2026/11/17 18:51:10 localhost:5001/counter:sha256-2a8c093ca16f7bcd26fe2fecdeaf77f4452f0ce89ea30d9ca1d9791e8891ca50.sbom: digest: sha256:1accca92486492d3acaef1682c2ec1496cee51751dafcf9792481f2be7aafbf4 size: 373
+2026/11/17 18:51:10 Published SBOM localhost:5001/counter:sha256-2a8c093ca16f7bcd26fe2fecdeaf77f4452f0ce89ea30d9ca1d9791e8891ca50.sbom
+2026/11/17 18:51:11 pushed blob: sha256:dd64bf2dd177757451a98fcdc999a339c35dee5d9872d8f4dc69c8f3c4dd0112
+2026/11/17 18:51:11 pushed blob: sha256:c172f21841dff4c8cf45cde46589c1c2616cefe7e819965e92e6d3475c428aa0
+2026/11/17 18:51:12 pushed blob: sha256:401d177fd1e8a1e0d7a48139788d026e9a2e919ccb122bedd110ac7cf351f53e
+2026/11/17 18:51:13 pushed blob: sha256:7c12895b777bcaa8ccae0605b4de635b68fc32d60fa08f421dc3818bf55ee212
+2026/11/17 18:51:13 pushed blob: sha256:617b009a71d625ef77982b400cb9939dd5ed9809ebf50681a0520b7c08c0ca89
+2026/11/17 18:51:13 pushed blob: sha256:4a2796d8ea5ef7ae1a64ba20ba56759987f49f2ea2091ddce6bade81c0ad1fa6
+2026/11/17 18:51:13 pushed blob: sha256:15f769a817c59673784dcd64ffb0e8cfd9ae8a1c229f756f1a2990751049201b
+2026/11/17 18:51:13 pushed blob: sha256:cbe5e830313a9b30ba647081bd3e4e285745adf670a8983b23ae57249c6c2c81
+2026/11/17 18:51:13 pushed blob: sha256:d6b1b89eccacc15c2420b2776d72c1dae334a00805ed9af54bf2f71e4d536f28
+2026/11/17 18:51:13 pushed blob: sha256:52630fc75a18675c530ed9eba5f55eca09b03e91bd5bc15307918bbc1a7e7296
+2026/11/17 18:51:13 pushed blob: sha256:2780920e5dbfbe103d03a583ed75345306e572ec5a48cb10361f046767d9f29a
+2026/11/17 18:51:13 pushed blob: sha256:3214acf345c0cc6bbdb56b698a41ccdefc624a09d6beb0d38b5de0b2303ecaf4
+2026/11/17 18:51:13 pushed blob: sha256:b839dfae01f66e15c6a8b63520557ed315bdfe036342fa7a0c537259f10d7a9a
+2026/11/17 18:51:14 pushed blob: sha256:ebddc55facdc6b1f7e0f30816a5fc7cc62f38abdf76c0a8b0a0ce52085754795
+2026/11/17 18:51:15 pushed blob: sha256:a99dd1dd5eaf3e2099256f1a75c8e4c02a1d3a81b8e2bfd1735b1dd166b68a12
+2026/11/17 18:51:15 pushed blob: sha256:5689407c3340e75a085703d3366e55b6105152a2574d971cb884f24228292c1d
+2026/11/17 18:51:15 localhost:5001/counter:latest: digest: sha256:2a8c093ca16f7bcd26fe2fecdeaf77f4452f0ce89ea30d9ca1d9791e8891ca50 size: 2937
+2026/11/17 18:51:15 Published localhost:5001/counter@sha256:2a8c093ca16f7bcd26fe2fecdeaf77f4452f0ce89ea30d9ca1d9791e8891ca50
+  (ko resolve -f - took 9.715s)
+[1;36m[step]: Waiting for the ate-demo-counter/counter golden snapshot...[0m
+ate-setup deploy demo counter --rollout-timeout=600s  6.56s user 3.52s system 25% cpu 39.799 total

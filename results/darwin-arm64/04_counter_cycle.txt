@@ -1,0 +1,153 @@
+# counter cycle 2026-11-17T09:52:02Z host_label=darwin-arm64
+counter-7b5df94c96-2989g   1/1   Running   0     59s
+counter-7b5df94c96-f2s8z   1/1   Running   0     59s
+counter-7b5df94c96-qd5m8   1/1   Running   0     59s
+ATESPACE           NAME      GOLDEN TAG                             ERROR   AGE
+ate-demo-counter   counter   157b28fe-b13e-4146-babc-e730a0fdcc9d           46s
+ATESPACE           NAME           TEMPLATE                   STATE                   WORKER POD   WORKER IPS   VERSION   AGE
+ate-demo-counter   my-counter-1   ate-demo-counter/counter   ACTOR_STATE_SUSPENDED   <none>                    1         0s
+cycle=1 wake_request_s=0.267 response=[preserved memory count: 1 | preserved file counter: 1 | preserved rootfs counter: 1 ]
+ate-demo-counter   my-counter-1   ate-demo-counter/counter   ACTOR_STATE_RUNNING   ate-demo-counter/counter-7b5df94c96-f2s8z   10.244.0.24   3         4s
+  node_kb_before_suspend: 8	/var/lib/ate/snapshots 4504	/var/lib/ate/snapshot-cache 0	/var/lib/ate/snapshot-scratch 156920	/var/lib/ate/actors 
+ATESPACE           NAME           TEMPLATE                   STATE                   WORKER POD   WORKER IPS   VERSION   AGE
+ate-demo-counter   my-counter-1   ate-demo-counter/counter   ACTOR_STATE_SUSPENDED   <none>                    5         4s
+cycle=1 suspend_sync_s=0.211 rc=0
+ate-demo-counter   my-counter-1   ate-demo-counter/counter   ACTOR_STATE_SUSPENDED   <none>                    5         4s
+  node_kb_after_suspend:  4496	/var/lib/ate/snapshots 4512	/var/lib/ate/snapshot-cache 0	/var/lib/ate/snapshot-scratch 155852	/var/lib/ate/actors 
+cycle=2 wake_request_s=0.114 response=[preserved memory count: 2 | preserved file counter: 2 | preserved rootfs counter: 2 ]
+ate-demo-counter   my-counter-1   ate-demo-counter/counter   ACTOR_STATE_RUNNING   ate-demo-counter/counter-7b5df94c96-f2s8z   10.244.0.24   7         5s
+  node_kb_before_suspend: 4496	/var/lib/ate/snapshots 4512	/var/lib/ate/snapshot-cache 0	/var/lib/ate/snapshot-scratch 156924	/var/lib/ate/actors 
+ATESPACE           NAME           TEMPLATE                   STATE                   WORKER POD   WORKER IPS   VERSION   AGE
+ate-demo-counter   my-counter-1   ate-demo-counter/counter   ACTOR_STATE_SUSPENDED   <none>                    9         5s
+cycle=2 suspend_sync_s=0.320 rc=0
+ate-demo-counter   my-counter-1   ate-demo-counter/counter   ACTOR_STATE_SUSPENDED   <none>                    9         5s
+  node_kb_after_suspend:  4576	/var/lib/ate/snapshots 4512	/var/lib/ate/snapshot-cache 0	/var/lib/ate/snapshot-scratch 155852	/var/lib/ate/actors 
+cycle=3 wake_request_s=0.114 response=[preserved memory count: 3 | preserved file counter: 3 | preserved rootfs counter: 3 ]
+ate-demo-counter   my-counter-1   ate-demo-counter/counter   ACTOR_STATE_RUNNING   ate-demo-counter/counter-7b5df94c96-2989g   10.244.0.25   11        5s
+  node_kb_before_suspend: 4576	/var/lib/ate/snapshots 4512	/var/lib/ate/snapshot-cache 0	/var/lib/ate/snapshot-scratch 156924	/var/lib/ate/actors 
+ATESPACE           NAME           TEMPLATE                   STATE                   WORKER POD   WORKER IPS   VERSION   AGE
+ate-demo-counter   my-counter-1   ate-demo-counter/counter   ACTOR_STATE_SUSPENDED   <none>                    13        6s
+cycle=3 suspend_sync_s=0.282 rc=0
+ate-demo-counter   my-counter-1   ate-demo-counter/counter   ACTOR_STATE_SUSPENDED   <none>                    13        6s
+  node_kb_after_suspend:  4576	/var/lib/ate/snapshots 4512	/var/lib/ate/snapshot-cache 0	/var/lib/ate/snapshot-scratch 155852	/var/lib/ate/actors 
+final wake_request_s=0.112 response=[preserved memory count: 4 | preserved file counter: 4 | preserved rootfs counter: 4 ]
+## actor status.snapshots
+  snapshots:
+  - actorTemplateUid: 157b28fe-b13e-4146-babc-e730a0fdcc9d
+    durableSnapshot:
+      object:
+        snapshotUri: gs://ate-snapshots/atespaces/ate-demo-counter/actors/0cc3af2e-e7e4-42ac-91a5-e11812d5df85/snapshots/cc373e02-3069-4fe4-babf-d440e6ff6cee
+      state: SNAPSHOT_STORAGE_STATE_COMPLETED
+    fidelity: SNAPSHOT_FIDELITY_MEMORY
+    generation: 4
+    locality: kind-control-plane
+    owner: SNAPSHOT_OWNER_ACTOR
+    sandboxRuntime:
+      sandboxClass: gvisor
+      version:
+        attributes:
+        - key: architecture
+          value: arm64
+        - key: cpu_features
+          value: b3ffff
+        - key: sandbox_bundle_hash
+          value: sha256:4c1a00064c5bc9885a27e352493f76913420073ba2294b2ac95f31a775164410
+        schemaVersion: v1
+    uuid: cc373e02-3069-4fe4-babf-d440e6ff6cee
+  state: ACTOR_STATE_RUNNING
+  workerAssignment:
+    nodeName: kind-control-plane
+    sandboxRuntime:
+      sandboxClass: gvisor
+      version:
+        attributes:
+        - key: architecture
+          value: arm64
+        - key: cpu_features
+          value: b3ffff
+        - key: sandbox_bundle_hash
+          value: sha256:4c1a00064c5bc9885a27e352493f76913420073ba2294b2ac95f31a775164410
+        schemaVersion: v1
+    worker:
+      name: a04b0104-b694-47a9-bd61-844e69fbf7ca
+    workerEpoch: "1"
+    workerNamespace: ate-demo-counter
+    workerPod: counter-7b5df94c96-2989g
+    workerPodIps:
+    - 10.244.0.25
+    workerPodUid: a04b0104-b694-47a9-bd61-844e69fbf7ca
+    workerPool: counter
+    workerSpiffeId: spiffe://cluster.local/ns/ate-demo-counter/sa/ateworker
+## 노드 로컬 파일 (/var/lib/ate)
+154M	/var/lib/ate/actors
+0	/var/lib/ate/atelet-otlp.sock
+4.0K	/var/lib/ate/cache-boot-id
+16M	/var/lib/ate/image-cache
+150M	/var/lib/ate/sandbox-asset-cache
+0	/var/lib/ate/sandbox-asset-scratch
+4.0K	/var/lib/ate/sandbox-runtime-index.json
+4.5M	/var/lib/ate/snapshot-cache
+0	/var/lib/ate/snapshot-scratch
+4.5M	/var/lib/ate/snapshots
+0	/var/lib/ate/worker-support.sock
+12K	/var/lib/ate/workers
+-rw------- 1 root root        991 Nov 17 09:52 /var/lib/ate/actors/0cc3af2e-e7e4-42ac-91a5-e11812d5df85/bundles/_sandbox/config.json
+-rw------- 1 root root       2675 Nov 17 09:52 /var/lib/ate/actors/0cc3af2e-e7e4-42ac-91a5-e11812d5df85/bundles/counter/config.json
+-rw------- 1 root root       1835 Nov 17 09:52 /var/lib/ate/actors/0cc3af2e-e7e4-42ac-91a5-e11812d5df85/bundles/counter/rootfs-overlay.json
+-rw-r--r-- 1 root root 1073741824 Nov 17 09:52 /var/lib/ate/actors/0cc3af2e-e7e4-42ac-91a5-e11812d5df85/bundles/counter/upper/.gvisor.filestore._sandbox
+-rw-r--r-- 1 root root        118 Nov 17 09:52 /var/lib/ate/actors/0cc3af2e-e7e4-42ac-91a5-e11812d5df85/bundles/counter/upper/etc/hosts
+-rw-r--r-- 1 root root        114 Nov 17 09:52 /var/lib/ate/actors/0cc3af2e-e7e4-42ac-91a5-e11812d5df85/bundles/counter/upper/etc/resolv.conf
+---------- 1 root root          0 Nov 17 09:52 /var/lib/ate/actors/0cc3af2e-e7e4-42ac-91a5-e11812d5df85/bundles/counter/work/work/incompat/volatile/dirty
+-rw-r--r-- 1 root root 1073741824 Nov 17 09:52 /var/lib/ate/actors/0cc3af2e-e7e4-42ac-91a5-e11812d5df85/durable-dir/data/.gvisor.filestore._sandbox
+-rw-r--r-- 1 root root          3 Nov 17 09:52 /var/lib/ate/actors/0cc3af2e-e7e4-42ac-91a5-e11812d5df85/pidfiles/_sandbox.pid
+-rw-r--r-- 1 root root          3 Nov 17 09:52 /var/lib/ate/actors/0cc3af2e-e7e4-42ac-91a5-e11812d5df85/pidfiles/counter.pid
+-rw------- 1 root root          0 Nov 17 09:52 /var/lib/ate/actors/0cc3af2e-e7e4-42ac-91a5-e11812d5df85/runsc-state/_sandbox_sandbox:_sandbox.lock
+-rw-r----- 1 root root       2578 Nov 17 09:52 /var/lib/ate/actors/0cc3af2e-e7e4-42ac-91a5-e11812d5df85/runsc-state/_sandbox_sandbox:_sandbox.state
+-rw------- 1 root root          0 Nov 17 09:52 /var/lib/ate/actors/0cc3af2e-e7e4-42ac-91a5-e11812d5df85/runsc-state/counter_sandbox:_sandbox.lock
+-rw-r----- 1 root root       4179 Nov 17 09:52 /var/lib/ate/actors/0cc3af2e-e7e4-42ac-91a5-e11812d5df85/runsc-state/counter_sandbox:_sandbox.state
+-r--r--r-- 1 root root          0 Nov 17 09:52 /var/lib/ate/actors/0cc3af2e-e7e4-42ac-91a5-e11812d5df85/runsc-state/null-netns
+-rw------- 1 root root        195 Nov 17 09:52 /var/lib/ate/actors/0cc3af2e-e7e4-42ac-91a5-e11812d5df85/sandbox-assets.json
+-r-xr-xr-x 5 root root   23115653 Nov 17 09:51 /var/lib/ate/actors/0cc3af2e-e7e4-42ac-91a5-e11812d5df85/sandbox-assets/gvisor/containerd-shim-runsc-v1
+-r-xr-xr-x 5 root root   46500322 Nov 17 09:51 /var/lib/ate/actors/0cc3af2e-e7e4-42ac-91a5-e11812d5df85/sandbox-assets/gvisor/gvisor-bin/checkpointgofer
+-r-xr-xr-x 5 root root       1024 Nov 17 09:51 /var/lib/ate/actors/0cc3af2e-e7e4-42ac-91a5-e11812d5df85/sandbox-assets/gvisor/gvisor-bin/gvisor-proc-umounter
+-r-xr-xr-x 5 root root       1512 Nov 17 09:51 /var/lib/ate/actors/0cc3af2e-e7e4-42ac-91a5-e11812d5df85/sandbox-assets/gvisor/gvisor-bin/gvisor-sentry-prewarmer
+-r-xr-xr-x 5 root root   51520121 Nov 17 09:51 /var/lib/ate/actors/0cc3af2e-e7e4-42ac-91a5-e11812d5df85/sandbox-assets/gvisor/gvisor-bin/gvisor_sentry
+-r-xr-xr-x 5 root root       1104 Nov 17 09:51 /var/lib/ate/actors/0cc3af2e-e7e4-42ac-91a5-e11812d5df85/sandbox-assets/gvisor/gvisor-bin/runsc-fd-parking
+-r-xr-xr-x 5 root root   20246744 Nov 17 09:51 /var/lib/ate/actors/0cc3af2e-e7e4-42ac-91a5-e11812d5df85/sandbox-assets/gvisor/gvisor-bin/runsc-metric-server
+-r-xr-xr-x 5 root root   18176288 Nov 17 09:51 /var/lib/ate/actors/0cc3af2e-e7e4-42ac-91a5-e11812d5df85/sandbox-assets/gvisor/runsc
+-rw------- 1 root root        870 Nov 17 09:52 /var/lib/ate/actors/0cc3af2e-e7e4-42ac-91a5-e11812d5df85/snapshot-state.json
+-r--r--r-- 1 root root      63093 Nov 17 09:52 /var/lib/ate/snapshot-cache/entries/1466593774edc53da0281d07027761d92af573cb06d2eb9b403e9ac0d77c3a77/data
+-rw-r--r-- 1 root root        161 Nov 17 09:52 /var/lib/ate/snapshot-cache/entries/1466593774edc53da0281d07027761d92af573cb06d2eb9b403e9ac0d77c3a77/meta.json
+-r--r--r-- 1 root root         70 Nov 17 09:52 /var/lib/ate/snapshot-cache/entries/16f78709e6b5a4dfc75115c57641a2fd8de7f0f84906c373ddbf3fb0a8b011af/data
+-rw-r--r-- 1 root root        169 Nov 17 09:52 /var/lib/ate/snapshot-cache/entries/16f78709e6b5a4dfc75115c57641a2fd8de7f0f84906c373ddbf3fb0a8b011af/meta.json
+-r--r--r-- 1 root root       1536 Nov 17 09:52 /var/lib/ate/snapshot-cache/entries/28a87f2548b61556cca90c630a420aa59d16d3b61eec80c329dfaca7c2f894f1/data
+-rw-r--r-- 1 root root        162 Nov 17 09:52 /var/lib/ate/snapshot-cache/entries/28a87f2548b61556cca90c630a420aa59d16d3b61eec80c329dfaca7c2f894f1/meta.json
+-r--r--r-- 1 root root         90 Nov 17 09:52 /var/lib/ate/snapshot-cache/entries/325b842be902d7fbf198de9cc63dd1c8e39e0c98220d667f1138143dc6e14fd5/data
+-rw-r--r-- 1 root root        168 Nov 17 09:52 /var/lib/ate/snapshot-cache/entries/325b842be902d7fbf198de9cc63dd1c8e39e0c98220d667f1138143dc6e14fd5/meta.json
+-r--r--r-- 1 root root         62 Nov 17 09:52 /var/lib/ate/snapshot-cache/entries/381fec3d1556d81c82eae4fd0130a081aea4a30a76aa837d240016b59ec6e4d0/data
+-rw-r--r-- 1 root root        164 Nov 17 09:52 /var/lib/ate/snapshot-cache/entries/381fec3d1556d81c82eae4fd0130a081aea4a30a76aa837d240016b59ec6e4d0/meta.json
+-r--r--r-- 1 root root       2560 Nov 17 09:52 /var/lib/ate/snapshot-cache/entries/43764dbb9f3af938e56d6bd641bc2f81cadb5ee0abf68aab6393aa33290bc653/data
+-rw-r--r-- 1 root root        166 Nov 17 09:52 /var/lib/ate/snapshot-cache/entries/43764dbb9f3af938e56d6bd641bc2f81cadb5ee0abf68aab6393aa33290bc653/meta.json
+-r--r--r-- 1 root root        743 Nov 17 09:52 /var/lib/ate/snapshot-cache/entries/8311af2fbd9443c3de7b5dc6860ee081c7caad48546384fa88160d43ce2c259d/data
+-rw-r--r-- 1 root root        160 Nov 17 09:52 /var/lib/ate/snapshot-cache/entries/8311af2fbd9443c3de7b5dc6860ee081c7caad48546384fa88160d43ce2c259d/meta.json
+-r--r--r-- 1 root root          0 Nov 17 09:52 /var/lib/ate/snapshot-cache/entries/89d2089255efea6011b7f877077974fb406e0b8d775d41cd52a1bc06024326fc/data
+-rw-r--r-- 1 root root        158 Nov 17 09:52 /var/lib/ate/snapshot-cache/entries/89d2089255efea6011b7f877077974fb406e0b8d775d41cd52a1bc06024326fc/meta.json
+-r--r--r-- 1 root root       2571 Nov 17 09:52 /var/lib/ate/snapshot-cache/entries/8fcfc091161299f3828d0d1a37f33ffc4b4c8c578482cb205225ca414adb76a0/data
+-rw-r--r-- 1 root root        161 Nov 17 09:52 /var/lib/ate/snapshot-cache/entries/8fcfc091161299f3828d0d1a37f33ffc4b4c8c578482cb205225ca414adb76a0/meta.json
+-r--r--r-- 1 root root    3424256 Nov 17 09:52 /var/lib/ate/snapshot-cache/entries/b1e85cf152d0b98be2058ec8b15fd4c1774aea20f3b5f5ee77f80b27eb5b46fe/data
+-rw-r--r-- 1 root root        155 Nov 17 09:52 /var/lib/ate/snapshot-cache/entries/b1e85cf152d0b98be2058ec8b15fd4c1774aea20f3b5f5ee77f80b27eb5b46fe/meta.json
+-r--r--r-- 1 root root    1048576 Nov 17 09:52 /var/lib/ate/snapshot-cache/entries/c6ab2f6d3080b40b87dc38b8c5d79b79e4c523b70f7669defd86a09e09f02cf1/data
+-rw-r--r-- 1 root root        163 Nov 17 09:52 /var/lib/ate/snapshot-cache/entries/c6ab2f6d3080b40b87dc38b8c5d79b79e4c523b70f7669defd86a09e09f02cf1/meta.json
+-r--r--r-- 1 root root         94 Nov 17 09:52 /var/lib/ate/snapshot-cache/entries/e9e960e613234cf2b8f1e7ce495124cd2039e879e11ce10ad460c42d134ccfca/data
+-rw-r--r-- 1 root root        162 Nov 17 09:52 /var/lib/ate/snapshot-cache/entries/e9e960e613234cf2b8f1e7ce495124cd2039e879e11ce10ad460c42d134ccfca/meta.json
+-rw-r--r-- 1 root root      63526 Nov 17 09:52 /var/lib/ate/snapshots/0cc3af2e-e7e4-42ac-91a5-e11812d5df85/local-checkpoint/cc373e02-3069-4fe4-babf-d440e6ff6cee/checkpoint.img
+-rw-r--r-- 1 root root         94 Nov 17 09:52 /var/lib/ate/snapshots/0cc3af2e-e7e4-42ac-91a5-e11812d5df85/local-checkpoint/cc373e02-3069-4fe4-babf-d440e6ff6cee/fs/fscheckpoint.pb
+-rw-r--r-- 1 root root       2560 Nov 17 09:52 /var/lib/ate/snapshots/0cc3af2e-e7e4-42ac-91a5-e11812d5df85/local-checkpoint/cc373e02-3069-4fe4-babf-d440e6ff6cee/fs/multitar.img
+-rw-r--r-- 1 root root       4096 Nov 17 09:52 /var/lib/ate/snapshots/0cc3af2e-e7e4-42ac-91a5-e11812d5df85/local-checkpoint/cc373e02-3069-4fe4-babf-d440e6ff6cee/fs/pages.img
+-rw-r--r-- 1 root root         88 Nov 17 09:52 /var/lib/ate/snapshots/0cc3af2e-e7e4-42ac-91a5-e11812d5df85/local-checkpoint/cc373e02-3069-4fe4-babf-d440e6ff6cee/fs/pages_meta.img
+-rw------- 1 root root        767 Nov 17 09:52 /var/lib/ate/snapshots/0cc3af2e-e7e4-42ac-91a5-e11812d5df85/local-checkpoint/cc373e02-3069-4fe4-babf-d440e6ff6cee/manifest.json
+-rw-r--r-- 1 root root    3530752 Nov 17 09:52 /var/lib/ate/snapshots/0cc3af2e-e7e4-42ac-91a5-e11812d5df85/local-checkpoint/cc373e02-3069-4fe4-babf-d440e6ff6cee/pages.img
+-rw-r--r-- 1 root root       2567 Nov 17 09:52 /var/lib/ate/snapshots/0cc3af2e-e7e4-42ac-91a5-e11812d5df85/local-checkpoint/cc373e02-3069-4fe4-babf-d440e6ff6cee/pages_meta.img
+-rw-r--r-- 1 root root         70 Nov 17 09:52 /var/lib/ate/snapshots/0cc3af2e-e7e4-42ac-91a5-e11812d5df85/local-checkpoint/cc373e02-3069-4fe4-babf-d440e6ff6cee/rootfs/fscheckpoint.pb
+-rw-r--r-- 1 root root       3584 Nov 17 09:52 /var/lib/ate/snapshots/0cc3af2e-e7e4-42ac-91a5-e11812d5df85/local-checkpoint/cc373e02-3069-4fe4-babf-d440e6ff6cee/rootfs/multitar.img
+-rw-r--r-- 1 root root    1052672 Nov 17 09:52 /var/lib/ate/snapshots/0cc3af2e-e7e4-42ac-91a5-e11812d5df85/local-checkpoint/cc373e02-3069-4fe4-babf-d440e6ff6cee/rootfs/pages.img

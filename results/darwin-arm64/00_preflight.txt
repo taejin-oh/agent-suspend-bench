@@ -1,0 +1,38 @@
+# preflight 2026-11-17T09:44:54Z  host_label=darwin-arm64
+## host
+Darwin 25.4.0 arm64
+Apple M4
+10
+17179869184
+/dev/disk3s1s1   460Gi    12Gi   166Gi     7%    458k  1.7G    0%   /
+## docker (kind 노드가 실제로 도는 곳)
+server=29.4.0 os=OrbStack kernel=7.0.14-orbstack-00380-ga7e0a2dc9535 arch=aarch64 cpus=10 mem_bytes=8393289728 cgroup=v2 driver=cgroupfs
+in_docker_self_cgroup=0::/   # 필요: 0::/ 형태 (cgroup v2)
+in_docker_kvm: ls: /dev/kvm: No such file or directory
+in_docker_ipv6_disabled=0
+MemTotal:        8196572 kB
+SwapTotal:       9245140 kB
+overlay                 212.3G     54.6G    157.7G  26% /
+## 외부 통신 (HTTP 코드가 나오면 도달함; 000 또는 인증서 오류면 막힘)
+https://ghcr.io 405
+https://registry-1.docker.io/v2/ 401
+https://storage.googleapis.com 400
+https://github.com 200
+https://go.dev 200
+https://proxy.golang.org 200
+proxy_env: 
+## 도구
+git: /opt/homebrew/bin/git
+docker: /usr/local/bin/docker
+kubectl: /usr/local/bin/kubectl
+curl: /usr/bin/curl
+python3: /opt/homebrew/bin/python3
+iostat: /usr/sbin/iostat
+pidstat: MISSING
+aws: MISSING
+Client Version: v1.33.9
+## 충돌 가능성
+existing container: kind-control-plane
+existing container: kind-registry
+port in use: OrbStack    656 taejin  130u  IPv4 0x2a23a10cbfb89291      0t0  TCP 127.0.0.1:5001 (LISTEN)
+port in use: OrbStack    656 taejin  131u  IPv6 0xf9afe83ebd154c37      0t0  TCP [::1]:5001 (LISTEN)

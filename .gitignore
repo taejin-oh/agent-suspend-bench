@@ -1,0 +1,10 @@
+# 내려받거나 빌드해서 생기는 것 (scripts/01_setup.sh 가 다시 만듦)
+/toolchain/
+/src/
+/bin/
+/gopath/
+/gocache/
+/kubeconfig.backup
+/env.sh
+/measure/
+.DS_Store

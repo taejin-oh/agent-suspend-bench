@@ -1,0 +1,28 @@
+## requests
+name                                 reqs  fail    p50ms    p95ms    p99ms    maxms
+CreateActor                             4     0       10       13       13       13
+CreateAtespace                          4     0        3        7        7        7
+ResumeActor                            84     0      350     1400     4200     4240
+Step_01_load_context                   20     0      170      240      240      244
+Step_02_download                       16     0      410     1200     1200     1156
+Step_03_build                          16     0      120      440      440      443
+Step_04_test                           16     0      580     1000     1000      995
+Step_05_wrap_up                        16     0       36      100      100      101
+SuspendActor                           84     0     2800     4900     7000     7045
+TimeToWake                             84     0      370     1400     4300     4279
+WakeFirstTouch                         84     0       18       91      730      732
+Aggregated                            428     0      320     4000     4900     7045
+## storage / memory
+duration_s=140 samples=140 device=vdb
+written_MiB_by_device: vdb=27394
+write_MiB_per_s: mean=195.3 p50=167.4 p95=584.1 p99=734.7 peak_1s=867.1
+write_MiB_per_s_busy_seconds_only(>1MiB/s): n=104 mean=260.9
+disk_util_pct: mean=33.2 p95=68.2 peak=100.0 seconds_over_90=1
+mem_available_MiB: start=3817 min=2477 end=3414 | dirty_pagecache_MiB_peak=280
+node_snapshots_dir_MiB: start=0 peak=1309 end=667
+object_store_atespaces_MiB: start=4 peak=1075 end=641
+## worker pods after
+benchmark-worker-6f8c8b9657-2v6kg   1/1   Running   0     3m49s
+benchmark-worker-6f8c8b9657-g95qm   1/1   Running   0     3m49s
+benchmark-worker-6f8c8b9657-mwc9c   1/1   Running   0     3m49s
+benchmark-worker-6f8c8b9657-zwjgw   1/1   Running   0     3m49s

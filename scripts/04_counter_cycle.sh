@@ -19,9 +19,10 @@ fi
 kubectl --context "$KCTX" get pods -n "$NS" --no-headers
 ate get actor-templates -a "$NS"
 ate get actor "$ACTOR" -a "$NS" >/dev/null 2>&1 || ate create actor "$ACTOR" -a "$NS" --template counter
-ate proxy actor "$ACTOR" -a "$NS" >"$RESULTS/04_proxy.log" 2>&1 & PROXY=$!
+kubectl ate --context "$KCTX" proxy actor "$ACTOR" "$PORT:80" -a "$NS" >"$RESULTS/04_proxy.log" 2>&1 & PROXY=$!   # 함수(ate)로 감싸면 $! 가 하위 셸이라 종료 시 프록시가 남는다
 trap 'kill $PROXY 2>/dev/null' EXIT
 sleep 4
+if ! kill -0 $PROXY 2>/dev/null; then echo "FAIL: proxy 가 뜨지 않음 (포트 $PORT 사용 중? PORT=다른값 으로 재시도): $(cat "$RESULTS/04_proxy.log")"; exit 1; fi
 for i in $(seq 1 "$N"); do
   s=$(now); r=$(curl -s -m 120 -X POST "http://localhost:$PORT/"); e=$(now)
   echo "cycle=$i wake_request_s=$(el $s $e) response=[$(echo "$r" | tr '\n' ' ')]"
@@ -34,9 +35,13 @@ for i in $(seq 1 "$N"); do
 done
 s=$(now); r=$(curl -s -m 120 -X POST "http://localhost:$PORT/"); e=$(now)
 echo "final wake_request_s=$(el $s $e) response=[$(echo "$r" | tr '\n' ' ')]"
+want=$((N+1))
+if echo "$r" | grep -q "memory count: $want " && echo "$r" | grep -q "file counter: $want " && echo "$r" | grep -q "rootfs counter: $want"; then echo "PASS: suspend/resume ${N}회 뒤 세 counter 모두 ${want} (상태 보존됨)"; else echo "FAIL: 기대값 ${want} 과 다름"; fi
+kill $PROXY 2>/dev/null   # bash 3.2 는 파이프 안 EXIT trap 을 돌리지 않으므로 직접 끈다
 echo "## actor status.snapshots"
 ate get actor "$ACTOR" -a "$NS" -o yaml | sed -n '/snapshots:/,$p' | head -60
 echo "## 노드 로컬 파일 (/var/lib/ate)"
 docker exec "${KIND_CLUSTER_NAME:-kind}-control-plane" sh -c 'du -sh /var/lib/ate/* 2>/dev/null; find /var/lib/ate/snapshots /var/lib/ate/snapshot-cache /var/lib/ate/actors -type f -exec ls -l {} + 2>/dev/null | head -60'
 } 2>&1 | tee "$out"
 echo "saved: $out"
+grep -q "^PASS" "$out"

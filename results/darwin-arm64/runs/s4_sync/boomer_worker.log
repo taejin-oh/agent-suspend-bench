@@ -1,0 +1,36 @@
+{"time":"2026-11-17T10:25:11.394447614Z","level":"INFO","msg":"dynconfig fetch enabled","url":"http://127.0.0.1:8089/boomer-config","poll_interval":10000000000}
+{"time":"2026-11-17T10:25:11.394665992Z","level":"INFO","msg":"registered boomer task","user_class":"AgentSessionUser","user_class_flag":"agentsession"}
+{"time":"2026-11-17T10:25:11.394690492Z","level":"INFO","msg":"new slave runner"}
+{"time":"2026-11-17T10:25:11.394692701Z","level":"INFO","msg":"Boomer is built with gomq support."}
+{"time":"2026-11-17T10:25:11.89924572Z","level":"INFO","msg":"Boomer is connected to master(tcp://127.0.0.1:5557) press Ctrl+c to quit."}
+{"time":"2026-11-17T10:25:17.590041754Z","level":"INFO","msg":"dynconfig applied","trigger":"spawn","trace_probability":0,"config":"{Lifecycle:{ResumeMode:explicit LifecycleMode:sync} Script:coding-session ScriptFile:/etc/agentsession/script.yaml ThinkScale:1 SnapshotSteps: PhaseIn:0s ResumeRetryBudget:1m0s Awake:0 TargetRPS:0}"}
+{"time":"2026-11-17T10:25:17.590105797Z","level":"INFO","msg":"The total number of clients required is  1"}
+{"time":"2026-11-17T10:25:17.590108547Z","level":"INFO","msg":"The current number of clients is 0, 1 clients will be added"}
+{"time":"2026-11-17T10:25:17.590478343Z","level":"INFO","msg":"agentsession: loaded script","script":"our-test","source":"/etc/agentsession/script.yaml","steps":5,"declared_ram":"64Mi","declared_disk":"24832Ki","min_actor_memory":"512Mi"}
+{"time":"2026-11-17T10:25:17.625264521Z","level":"INFO","msg":"Creating agent session","actor":"agent-aee5b748-5ab0-4dee-942c-e64a3b99cb65"}
+{"time":"2026-11-17T10:25:18.597045515Z","level":"INFO","msg":"The total number of clients required is  2"}
+{"time":"2026-11-17T10:25:18.597096224Z","level":"INFO","msg":"The current number of clients is 1, 1 clients will be added"}
+{"time":"2026-11-17T10:25:18.598169114Z","level":"INFO","msg":"Creating agent session","actor":"agent-8be9240d-bc52-4a4c-bf2a-7604e6349989"}
+{"time":"2026-11-17T10:25:19.595676788Z","level":"INFO","msg":"The total number of clients required is  3"}
+{"time":"2026-11-17T10:25:19.595743206Z","level":"INFO","msg":"The current number of clients is 2, 1 clients will be added"}
+{"time":"2026-11-17T10:25:19.595887083Z","level":"INFO","msg":"Creating agent session","actor":"agent-bdc1d3d7-ab8c-462d-9441-55989ed8873d"}
+{"time":"2026-11-17T10:25:20.598277282Z","level":"INFO","msg":"The total number of clients required is  4"}
+{"time":"2026-11-17T10:25:20.598308074Z","level":"INFO","msg":"The current number of clients is 3, 1 clients will be added"}
+{"time":"2026-11-17T10:25:20.598628828Z","level":"INFO","msg":"Creating agent session","actor":"agent-dcc549b6-64cb-4432-bd98-22ab77eacdf9"}
+{"time":"2026-11-17T10:25:38.064235655Z","level":"INFO","msg":"agent session completed the full script; starting over","actor":"agent-aee5b748-5ab0-4dee-942c-e64a3b99cb65"}
+{"time":"2026-11-17T10:25:38.372877238Z","level":"INFO","msg":"agent session completed the full script; starting over","actor":"agent-8be9240d-bc52-4a4c-bf2a-7604e6349989"}
+{"time":"2026-11-17T10:25:38.37401967Z","level":"INFO","msg":"agent session completed the full script; starting over","actor":"agent-bdc1d3d7-ab8c-462d-9441-55989ed8873d"}
+{"time":"2026-11-17T10:25:41.593906847Z","level":"INFO","msg":"agent session completed the full script; starting over","actor":"agent-dcc549b6-64cb-4432-bd98-22ab77eacdf9"}
+{"time":"2026-11-17T10:26:05.214641219Z","level":"INFO","msg":"agent session completed the full script; starting over","actor":"agent-aee5b748-5ab0-4dee-942c-e64a3b99cb65"}
+{"time":"2026-11-17T10:26:05.270712809Z","level":"INFO","msg":"agent session completed the full script; starting over","actor":"agent-8be9240d-bc52-4a4c-bf2a-7604e6349989"}
+{"time":"2026-11-17T10:26:05.278979837Z","level":"INFO","msg":"agent session completed the full script; starting over","actor":"agent-bdc1d3d7-ab8c-462d-9441-55989ed8873d"}
+{"time":"2026-11-17T10:26:05.28439291Z","level":"INFO","msg":"agent session completed the full script; starting over","actor":"agent-dcc549b6-64cb-4432-bd98-22ab77eacdf9"}
+{"time":"2026-11-17T10:26:39.203433192Z","level":"INFO","msg":"agent session completed the full script; starting over","actor":"agent-8be9240d-bc52-4a4c-bf2a-7604e6349989"}
+{"time":"2026-11-17T10:26:39.204636583Z","level":"INFO","msg":"agent session completed the full script; starting over","actor":"agent-aee5b748-5ab0-4dee-942c-e64a3b99cb65"}
+{"time":"2026-11-17T10:26:39.206199021Z","level":"INFO","msg":"agent session completed the full script; starting over","actor":"agent-bdc1d3d7-ab8c-462d-9441-55989ed8873d"}
+{"time":"2026-11-17T10:26:39.219032903Z","level":"INFO","msg":"agent session completed the full script; starting over","actor":"agent-dcc549b6-64cb-4432-bd98-22ab77eacdf9"}
+{"time":"2026-11-17T10:27:10.298312Z","level":"INFO","msg":"agent session completed the full script; starting over","actor":"agent-dcc549b6-64cb-4432-bd98-22ab77eacdf9"}
+{"time":"2026-11-17T10:27:10.298563254Z","level":"INFO","msg":"agent session completed the full script; starting over","actor":"agent-aee5b748-5ab0-4dee-942c-e64a3b99cb65"}
+{"time":"2026-11-17T10:27:10.298607379Z","level":"INFO","msg":"agent session completed the full script; starting over","actor":"agent-8be9240d-bc52-4a4c-bf2a-7604e6349989"}
+{"time":"2026-11-17T10:27:10.29888405Z","level":"INFO","msg":"agent session completed the full script; starting over","actor":"agent-bdc1d3d7-ab8c-462d-9441-55989ed8873d"}
+{"time":"2026-11-17T10:27:17.738367243Z","level":"INFO","msg":"Recv stop message from master, all the goroutines are stopped"}

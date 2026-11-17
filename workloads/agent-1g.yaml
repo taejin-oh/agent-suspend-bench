@@ -1,0 +1,38 @@
+# 서버용 대본: 메모리 이미지가 큰 Agent. 한 바퀴에 5번 깨어나고, 깨어날 때마다 메모리를 더럽힌다.
+# 선언: RAM 640Mi + 디스크 96Mi. --actor-memory 는 1536Mi 이상으로 배포할 것 (ACTOR_MEMORY=1536Mi).
+# think(쉬는 시간) 동안 actor 가 suspend 된다. 전체 배율은 agentsession_think_scale 로 조절.
+name: agent-1g
+min_actor_memory: 1536Mi
+steps:
+  - name: 01_load_context
+    agent: 컨텍스트와 모델 캐시를 메모리에 올림
+    think: 2s
+    ops:
+      - fill_ram: {key: heap, size: 512Mi}
+      - fill_ram: {key: ctx, size: 128Mi}
+      - ping: {}
+  - name: 02_fetch
+    agent: 저장소/문서를 내려받음
+    think: 5s
+    ops:
+      - ingest: {key: repo, size: 32Mi}
+      - burn_cpu: {millis: 500, parallel: 1}
+  - name: 03_work
+    agent: 작업하며 메모리 일부를 다시 씀
+    think: 10s
+    ops:
+      - churn_ram: {key: heap, size: 128Mi}
+      - write_disk: {key: out, size: 64Mi}
+      - burn_cpu: {millis: 1500, parallel: 2}
+  - name: 04_review
+    agent: 결과를 읽고 컨텍스트 갱신
+    think: 8s
+    ops:
+      - read_disk_digest: {key: out}
+      - churn_ram: {key: ctx, size: 64Mi}
+  - name: 05_wrap_up
+    agent: 깨어난 뒤 전체 메모리를 훑고 요약을 씀
+    think: 15s
+    ops:
+      - walk_ram: {key: heap}
+      - write_disk: {key: summary, size: 256Ki}

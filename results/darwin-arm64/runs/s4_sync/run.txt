@@ -1,0 +1,8 @@
+name=s4_sync users=4 duration_s=120 extra=lifecycle_mode=sync
+start=2026-11-17T10:25:17Z
+{
+  "host": null,
+  "message": "Swarming started",
+  "success": true
+}
+end=2026-11-17T10:27:18Z

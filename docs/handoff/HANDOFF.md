@@ -87,9 +87,11 @@ cat site.env
 |---|---|---|---|---|
 | 0 | `00_preflight.sh` | 서버 조건 점검. 아무것도 바꾸지 않음 | 마지막 줄 `PREFLIGHT=PASS` | 3초 |
 | 1 | `01_setup.sh` | Go를 이 폴더 안에 내려받고 substrate 소스를 고정 버전으로 받음 | `substrate d283af4e...` 줄 출력 | 1분 |
-| 2 | `02_cluster.sh` | kind 클러스터와 로컬 이미지 저장소(registry) 생성 | 노드가 `Ready` | 1.5분 |
+| 2 | `02_cluster.sh` | kind 클러스터와 로컬 이미지 저장소(registry) 생성. 노드가 Ready가 될 때까지 기다림 | 마지막 줄 `CLUSTER_READY` | 1.5분 |
 | 3 | `03_deploy_substrate.sh` | Agent Substrate 설치 (소스에서 빌드) | `ate-system`의 pod가 전부 `Running` | 8분 |
 | 4 | `04_counter_cycle.sh 3` | Actor 하나를 3번 재웠다 깨움 | `PASS:` 줄 | 1분 |
+
+준비 단계는 한 번 성공하면 다시 실행하지 않습니다. status의 "클러스터 상태" 줄에 Ready가 아닌 노드나 Running이 아닌 pod가 보여도 재설치하지 않고, 1분 뒤 status를 다시 봅니다.
 
 `WARN:` 줄은 진행을 막지 않습니다. 내용을 읽고 보고에 포함합니다. `FAIL:` 줄이 있으면 `PREFLIGHT=FAIL`이 되고 status가 STOP을 알립니다.
 
@@ -169,6 +171,8 @@ T나 A 단계에서 문제가 나면 STOP하는 이유: 이 두 단계는 Mac에
 | `permission denied ... docker.sock` | 현재 사용자가 docker를 쓸 권한이 없음 | STOP. 사용자에게 전달 (docker 그룹 추가는 관리자 권한이 필요) | 미확인 |
 | `toomanyrequests` 또는 `429` (이미지 받기) | Docker Hub의 익명 내려받기 횟수 제한 | 30분 뒤 같은 단계를 한 번 다시. 또 나면 STOP하고 보고 | 미확인 |
 | `too many open files`, pod가 `CrashLoopBackOff` | Linux의 inotify 한도가 낮음 (kind에서 알려진 문제) | STOP. 관리자 권한으로 sysctl을 바꿔야 하므로 사용자에게 전달 | 미확인 |
+| 2단계가 `kubectl wait` 에서 시간 초과 | 노드가 5분 안에 Ready가 되지 않음 | STOP. `kubectl --kubeconfig kubeconfig describe node`의 출력을 저장해 보고 | 미확인 |
+| 서버가 재시작된 뒤 status가 2단계를 다시 하라고 하고, 2단계는 `STOP: 컨테이너 ... 가 이미 있다` | kind 노드 컨테이너가 꺼져 있음 | STOP하고 보고. 컨테이너를 다시 켤지(`docker start`) 새로 만들지는 사용자가 정한다 | 미확인 |
 | 3단계가 `rollout` 대기 중 시간 초과 | 이미지 내려받기가 느리거나 pod가 뜨지 못함 | `kubectl --kubeconfig kubeconfig get pods -A`의 출력을 저장하고 3단계를 한 번 다시 실행(다시 실행해도 안전함. Mac에서 4분). 또 실패하면 STOP | 재실행은 확인 |
 | worker pod가 `Running`이 되지 않음 | 호스트가 cgroup v1 | 0단계가 FAIL로 잡는다. STOP | 미확인 |
 | `ImagePullBackOff` (locust 또는 worker) | 로컬 registry에 이미지가 없음 (클러스터를 다시 만든 뒤 배포 기록이 남은 경우 등) | `rm results/<HOST_LABEL>/deployed.txt` 후 단계를 다시 시작 (이미지를 다시 빌드한다) | 미확인 |
@@ -191,6 +195,8 @@ T나 A 단계에서 문제가 나면 STOP하는 이유: 이 두 단계는 Mac에
 ```
 
 원인을 추측해서 단정하지 않습니다. 추측이면 "추측"이라고 적습니다.
+
+사용자가 "계속 진행하라"고 답했으면 그것이 resume의 승인입니다. 다시 묻지 않습니다.
 
 사용자가 원인을 해결했다고 하면: 준비 단계의 문제였으면 `scripts/stage.sh resume` 뒤 status의 NEXT를 따릅니다. 특정 실행의 문제였으면 `scripts/stage.sh resume <실행이름>`으로 그 실행의 결과를 옆으로 치우고 다시 돌립니다.
 

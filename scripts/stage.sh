@@ -132,14 +132,19 @@ status() {
   echo "== 준비 단계"
   if grep -q '^PREFLIGHT=PASS' "$RESULTS/00_preflight.txt" 2>/dev/null; then p0=done; elif grep -q '^PREFLIGHT=FAIL' "$RESULTS/00_preflight.txt" 2>/dev/null; then p0=FAIL; else p0=todo; fi
   { [ -x "$ROOT/toolchain/go/bin/go" ] && [ -d "$SUBSTRATE_DIR/.git" ] && [ -f "$RESULTS/01_substrate_commit.txt" ]; } && p1=done || p1=todo
-  kubectl --context "$KCTX" get nodes --no-headers 2>/dev/null | grep -qw Ready && p2=done || p2=todo
-  { [ "$p2" = done ] && [ -f "$RESULTS/03_pods.txt" ] && kubectl --context "$KCTX" -n ate-system get ds atelet >/dev/null 2>&1 && [ "$(bad_pods ate-system)" = 0 ]; } && p3=done || p3=todo
+  # 2, 3 은 "만들어졌는가"만 본다. 잠깐 Ready/Running 이 아닌 것은 아래 '클러스터 상태' 줄에 따로 표시한다 (다시 설치할 이유가 아니다).
+  { grep -q '^CLUSTER_READY' "$RESULTS/02_kind_create.log" 2>/dev/null && kubectl --context "$KCTX" get nodes --no-headers >/dev/null 2>&1; } && p2=done || p2=todo
+  { [ "$p2" = done ] && [ -f "$RESULTS/03_pods.txt" ] && kubectl --context "$KCTX" -n ate-system get ds atelet >/dev/null 2>&1; } && p3=done || p3=todo
   grep -q '^PASS' "$RESULTS/04_counter_cycle.txt" 2>/dev/null && p4=done || p4=todo
   echo "[$p0] 0 사전 점검"
   echo "[$p1] 1 도구 준비 (Go, substrate 소스)"
   echo "[$p2] 2 kind 클러스터"
   echo "[$p3] 3 Substrate 설치"
   echo "[$p4] 4 재우기/깨우기 확인 (counter)"
+  if [ "$p2" = done ]; then
+    local nr; nr="$(kubectl --context "$KCTX" get nodes --no-headers 2>/dev/null | grep -cvw Ready)"
+    echo "== 클러스터 상태: Ready 가 아닌 노드 ${nr}개, Running 이 아닌 pod ate-system $(bad_pods ate-system)개 / benchmark-workloads $(bad_pods benchmark-workloads)개  (0 이 아니면 1분 뒤 status 를 다시 본다. 부하 단계는 시작할 때 최대 5분을 스스로 기다린다)"
+  fi
   if [ "$p0" = todo ]; then next="scripts/00_preflight.sh"
   elif [ "$p0" = FAIL ]; then next="STOP: 사전 점검이 FAIL 이다. $RESULTS/00_preflight.txt 맨 아래의 FAIL 줄을 사용자에게 그대로 전달한다. (고친 뒤에는 scripts/00_preflight.sh 를 다시 실행)"
   elif [ "$p1" = todo ]; then next="scripts/bg.sh start step1 scripts/01_setup.sh"

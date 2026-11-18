@@ -1,0 +1,25 @@
+<section id="why3" data-transition="fade" style="gap:24px">
+<p class="eyebrow">결과 4 · 원인 분석 (3) 그 뒤에 생긴 일</p>
+<h2>2분 뒤 줄이 다시 생겼다. 이번에는 기계가 못 따라갔다</h2>
+<table>
+<tr class="head"><th style="width:28%">한도 2 GiB, 교체 시작 후</th><th class="r" style="width:18%">동시에 도는 업로드</th><th class="r" style="width:22%">큰 파일 하나 처리 시간</th><th class="r" style="width:14%">CPU 사용률</th><th class="r" style="width:18%">기다린 시간</th></tr>
+<tr class="band"><td>처음 30초</td><td class="r">1개</td><td class="r">0.4초</td><td class="r">35%</td><td class="r">거의 0</td></tr>
+<tr class="band"><td>1분 ~ 1분 30초</td><td class="r">2개</td><td class="r">1.1초</td><td class="r">56%</td><td class="r">0.1초</td></tr>
+<tr class="band"><td>2분 ~ 2분 30초</td><td class="r">3개</td><td class="r">2.7초</td><td class="r">72%</td><td class="r">3.3초</td></tr>
+<tr class="hot"><td>2분 30초 ~ 3분</td><td class="r">3개</td><td class="r">3.4초</td><td class="r">72%</td><td class="r">7.8초</td></tr>
+</table>
+<div class="chain">
+<div class="node sm"><p class="ntxt">창구가 늘어 초당 1개를 다 받는다</p></div>
+<x-connector style="width:60px; align-self:center; color:#5A6870; border-width:3px"></x-connector>
+<div class="node sm"><p class="ntxt">업로드 여러 개가 CPU와 RAM을 나눠 쓴다 (가용 메모리 2.3 → 1.5&nbsp;GiB)</p></div>
+<x-connector style="width:60px; align-self:center; color:#5A6870; border-width:3px"></x-connector>
+<div class="node sm"><p class="ntxt">업로드 하나가 0.4초에서 3초대로 느려진다</p></div>
+<x-connector style="width:60px; align-self:center; color:#AD430C; border-width:3px"></x-connector>
+<div class="node sm disk"><p class="ntxt">3개 이상이 동시에 예약을 잡아 2 GiB도 다시 찬다</p></div>
+</div>
+<div class="banner">
+<b>증상은 같지만 원인이 다르다.</b> 512&nbsp;MiB에서는 설정이 창구를 하나로 묶었고, 2&nbsp;GiB에서는 CPU와 메모리가 모자랐다. 어느 쪽에서도 디스크가 한계였다는 증거는 없다.
+</div>
+<p class="foot">출처: 자체 측정 (2026년 11월). 2 GiB 실행 두 번 중 한 번의 기록이고, 다른 한 번은 끝까지 빨랐다(중앙값 2.3초)</p>
+<aside>세 번째 장은 그 뒤에 생긴 일입니다. 한도를 2 GiB로 올린 실행을 시간 순서로 본 표입니다. 처음 30초는 동시에 도는 업로드가 하나이고, 큰 파일 하나를 처리하는 데 0.4초, 기다린 시간은 거의 없습니다. 그런데 창구가 늘어나자 기계가 초당 한 개씩 들어오는 요청을 다 받아서 처리하기 시작합니다. 전에는 줄 때문에 초당 0.7개만 하고 있었습니다. 일이 한꺼번에 몰리면서 업로드 여러 개가 같은 CPU 10개와 RAM 8 GB를 나눠 쓰게 됩니다. 그러자 업로드 하나하나가 느려집니다. 큰 파일 하나의 처리 시간이 0.4초에서 1.1초, 2.7초, 3.4초로 늘어납니다. CPU 사용률은 35퍼센트에서 72퍼센트로 올랐고, 가용 메모리는 2.3 GiB에서 1.5 GiB로 줄었습니다. 업로드 하나가 3초씩 걸리는데 요청이 1초에 하나씩 오면, 동시에 세 개 이상이 돌게 됩니다. 세 개가 각자 예약을 잡고 있으니 2 GiB 한도도 다시 꽉 찹니다. 그래서 2분쯤부터 줄이 다시 생기고, 기다리는 시간이 8초 가까이로 돌아갑니다. 증상은 기본 한도 때와 같지만 원인이 다릅니다. 기본 한도에서는 설정이 창구를 하나로 묶어서 줄이 생겼고, 2 GiB에서는 기계의 CPU와 메모리가 못 따라가서 줄이 생겼습니다. 어느 쪽에서도 디스크가 한계였다는 증거는 없습니다. 두 가지는 분명히 해 두겠습니다. 이 현상은 2 GiB 실행 두 번 중 한 번에서 본 것이고, 다른 한 번은 끝까지 빨랐습니다. 그리고 느려진 원인이 CPU인지 메모리인지는 가려내지 못했습니다. 둘이 함께 변했습니다.</aside>
+</section>

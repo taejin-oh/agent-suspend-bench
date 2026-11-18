@@ -155,3 +155,12 @@ td.r, th.r { text-align: right; }
 .gname.sm { font-size: 24px; font-weight: 400; color: #44535C; }
 tr.sum { background: #E4E1D6; font-weight: 700; }
 tr.sum td { font-weight: 700; }
+
+.dlabel { font-size: 26px; line-height: 1.4; color: #16242E; }
+.budget { display: flex; height: 80px; border: 2px solid #9AA7AD; border-radius: 10px; overflow: hidden; }
+.bfill { width: 94%; background: #AD430C; }
+.bfree { flex: 1; background: #FCFCFA; }
+.qbox { width: 80px; height: 80px; border-radius: 10px; background: #D5D2C6; }
+.qbox.on { background: #AD430C; }
+.node.sm { padding: 16px 20px; }
+.node.sm .ntxt { font-size: 24px; color: #16242E; }

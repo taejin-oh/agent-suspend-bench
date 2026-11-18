@@ -4,6 +4,8 @@
 
 실제 Agent(LLM)는 돌리지 않습니다. [Agent Substrate](https://github.com/agent-substrate/substrate)의 agent-session 부하 도구가 대본(YAML)대로 CPU·메모리·디스크를 소모하는 가상 Agent를 만듭니다. checkpoint 자체는 gVisor가 실제 메모리를 디스크에 쓰고 객체 저장소(클러스터 안 rustfs)로 올리므로, 스토리지 부담은 실제 값입니다. 외부 클라우드 자원은 쓰지 않습니다.
 
+이 저장소의 스크립트는 substrate가 제공하는 설치·부하 도구를 순서대로 부르고, 그 위에 지표 수집·판정·보고를 더한 것입니다. 어느 것이 substrate 기본 제공이고 어느 것이 추가한 것인지는 `docs/origin.md`에 정리했습니다.
+
 회사 서버에서 에이전트에게 맡겨 진행할 때는 `AGENTS.md`와 `docs/handoff/HANDOFF.md`(작업 지시서)를 따릅니다.
 
 ## 서버에 있어야 하는 것

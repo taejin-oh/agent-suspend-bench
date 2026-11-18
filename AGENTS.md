@@ -29,3 +29,4 @@ scripts/stage.sh status                             # 진행 상태와 다음에
 | `docs/handoff/HANDOFF.md` | 서버 검증 작업 지시서 (진행, 판정, 문제 대응, 보고 형식) |
 | `README.md` | 절차 설명, 결과 파일 읽는 법, Mac 결과 |
 | `docs/workload-patterns.md` | 부하 조절값의 뜻, 결과를 어디까지 믿을 수 있는가 |
+| `docs/origin.md` | Agent Substrate가 기본 제공하는 것과 이 저장소가 추가한 것의 구분 |

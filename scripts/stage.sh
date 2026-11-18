@@ -135,11 +135,11 @@ status() {
   kubectl --context "$KCTX" get nodes --no-headers 2>/dev/null | grep -qw Ready && p2=done || p2=todo
   { [ "$p2" = done ] && [ -f "$RESULTS/03_pods.txt" ] && kubectl --context "$KCTX" -n ate-system get ds atelet >/dev/null 2>&1 && [ "$(bad_pods ate-system)" = 0 ]; } && p3=done || p3=todo
   grep -q '^PASS' "$RESULTS/04_counter_cycle.txt" 2>/dev/null && p4=done || p4=todo
-  echo "[$p0] 0 사전 점검      scripts/00_preflight.sh"
-  echo "[$p1] 1 도구 준비      scripts/01_setup.sh"
-  echo "[$p2] 2 클러스터       scripts/02_cluster.sh"
-  echo "[$p3] 3 Substrate 설치 scripts/03_deploy_substrate.sh"
-  echo "[$p4] 4 재우기 확인    scripts/04_counter_cycle.sh 3"
+  echo "[$p0] 0 사전 점검"
+  echo "[$p1] 1 도구 준비 (Go, substrate 소스)"
+  echo "[$p2] 2 kind 클러스터"
+  echo "[$p3] 3 Substrate 설치"
+  echo "[$p4] 4 재우기/깨우기 확인 (counter)"
   if [ "$p0" = todo ]; then next="scripts/00_preflight.sh"
   elif [ "$p0" = FAIL ]; then next="STOP: 사전 점검이 FAIL 이다. $RESULTS/00_preflight.txt 맨 아래의 FAIL 줄을 사용자에게 그대로 전달한다. (고친 뒤에는 scripts/00_preflight.sh 를 다시 실행)"
   elif [ "$p1" = todo ]; then next="scripts/bg.sh start step1 scripts/01_setup.sh"
@@ -174,7 +174,8 @@ EOF
          if [ "$(cat "$RESULTS/bg/$n.count" 2>/dev/null || echo 0)" -ge 2 ]; then next="STOP: 백그라운드 작업 $n 이 2번 실패했다. $RESULTS/bg/$n.log 의 마지막 30줄을 사용자에게 전달한다."
          else echo "   직전 작업 $n 이 실패했다. 로그($RESULTS/bg/$n.log)의 오류를 docs/handoff/HANDOFF.md 의 '자주 나는 문제' 표에서 찾아 조치한 뒤 아래 NEXT 를 실행한다. 표에 없으면 멈추고 보고한다."; fi;; esac;;
   esac
-  echo "NEXT: $next"; }
+  echo "NEXT: $next"
+  echo "(NEXT 줄의 명령을 글자 그대로 실행한다. 위 목록은 상태 표시일 뿐이다.)"; }
 
 case "${1:-status}" in
   status) status;;

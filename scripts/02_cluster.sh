@@ -6,7 +6,9 @@ set -euo pipefail
 source "$(dirname "$0")/env.sh"
 node="${KIND_CLUSTER_NAME:-kind}-control-plane"
 if { docker inspect "$node" >/dev/null 2>&1 || docker inspect kind-registry >/dev/null 2>&1; } && [ "${ASB_RECREATE:-0}" != 1 ]; then
-  echo "STOP: 컨테이너 '$node' 또는 'kind-registry' 가 이미 있다. 이 스크립트는 같은 이름의 클러스터를 지우고 다시 만들며, registry 컨테이너를 같이 쓴다."
+  found="$(for c in "$node" kind-registry; do docker inspect "$c" >/dev/null 2>&1 && printf "'%s' " "$c"; done)"
+  echo "STOP: 컨테이너 ${found}가 이미 있다. 이 스크립트는 이름이 같은 kind 클러스터('$node')가 있으면 지우고 다시 만들고, 'kind-registry' 가 있으면 그것을 그대로 같이 쓴다."
+  echo "  ('kind-registry' 라는 이름은 substrate 스크립트에 고정돼 있어, KIND_CLUSTER_NAME 을 바꿔도 달라지지 않는다.)"
   echo "  이 작업이 만든 것이 맞고 다시 만들어도 되면: ASB_RECREATE=1 scripts/02_cluster.sh"
   echo "  다른 사람의 것이거나 모르겠으면: 멈추고 사용자에게 묻는다 (클러스터 이름은 site.env 의 KIND_CLUSTER_NAME 으로 바꿀 수 있다)"
   exit 3

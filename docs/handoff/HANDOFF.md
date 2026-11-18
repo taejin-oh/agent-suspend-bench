@@ -52,7 +52,7 @@ cat site.env
 ```
 1) scripts/stage.sh status 를 실행한다
 2) 맨 아래 NEXT 줄을 읽는다
-   - 명령이면            → 그 명령을 그대로 실행한다
+   - 명령이면            → 그 명령을 글자 그대로 실행한다 (짧아 보여도 bg.sh 를 빼고 직접 실행하지 않는다)
    - "scripts/bg.sh wait" → 실행하고, 끝날 때까지 반복한다
    - "STOP: ..."         → 8절로 간다
    - "모든 단계가 끝났다" → 9절로 간다
@@ -147,7 +147,7 @@ T나 A 단계에서 문제가 나면 STOP하는 이유: 이 두 단계는 Mac에
 
 ### 6.4 일부 단계만 하라고 했을 때
 
-`site.env`의 `ASB_STAGES`를 줄입니다. 예: `export ASB_STAGES="T A C"`.
+`site.env`에 `ASB_STAGES` 줄을 넣습니다(주석으로 된 예시 줄을 고치거나 파일 끝에 추가). 예: `export ASB_STAGES="T A C"`.
 
 ### 6.5 서버 자원이 Mac보다 훨씬 클 때
 
@@ -161,7 +161,7 @@ T나 A 단계에서 문제가 나면 STOP하는 이유: 이 두 단계는 Mac에
 
 | 증상 (로그나 출력의 문구) | 원인 | 조치 | 근거 |
 |---|---|---|---|
-| `STOP: 컨테이너 ... 가 이미 있다` (2단계) | 같은 이름의 kind 클러스터나 `kind-registry` 컨테이너가 이미 있음 | 이 작업의 이전 시도가 만든 것이 분명하면(`results/<HOST_LABEL>/02_kind_create.log`가 있음) `scripts/bg.sh start step2 env ASB_RECREATE=1 scripts/02_cluster.sh`. 아니면 STOP하고 사용자에게 묻는다 | 확인 |
+| `STOP: 컨테이너 ... 가 이미 있다` (2단계) | 같은 이름의 kind 클러스터나 `kind-registry` 컨테이너가 이미 있음 | 이 작업의 이전 시도가 만든 것이 분명하거나(`results/<HOST_LABEL>/02_kind_create.log`가 있음) 사용자가 써도 된다고 하면 `scripts/bg.sh start step2 env ASB_RECREATE=1 scripts/02_cluster.sh`. 아니면 STOP하고 사용자에게 묻는다. `kind-registry`는 이름이 고정이라 `KIND_CLUSTER_NAME`을 바꿔도 피할 수 없다. 다른 사람의 것이면 사용자가 결정해야 한다 | 확인 |
 | `STOP: kubectl 현재 context 가 ...` | 전용 kubeconfig를 쓰지 않고 있음 | `site.env`에 `KUBECONFIG` 줄이 있는지 확인. 없으면 `site.env.example`에서 복사 | 확인 |
 | `FAIL: proxy 가 뜨지 않음 (포트 ... 사용 중?)` (4단계) | 로컬 포트 8000이 사용 중 | `site.env`에 `export PORT=18000` 추가 후 4단계 다시 | 확인 |
 | 부하 실행에서 `curl` 연결 실패, `stats.json`이 비어 있음 → `BROKEN` | 로컬 포트 8089가 사용 중 | `site.env`에 `export LOCUST_PORT=18089` 추가 | 미확인 |
@@ -239,6 +239,7 @@ T나 A 단계에서 문제가 나면 STOP하는 이유: 이 두 단계는 Mac에
 - 숫자의 뜻과 한계는 `docs/workload-patterns.md` 7절에 있습니다. 묻는 내용이 거기 있으면 그 문서를 근거로 답하고, 없으면 모른다고 답합니다.
 - 가상 사용자는 앞 요청이 끝나야 다음 요청을 보냅니다. 시스템이 느려지면 부하도 같이 줄어듭니다. 그래서 "실패 0"만 보면 안 되고 실제 속도가 목표를 따라갔는지(`LIMIT` 여부)를 같이 봐야 합니다.
 - 같은 조건을 다시 돌려도 값이 움직입니다. 실행 한 번의 값을 결론으로 쓰지 않습니다. 그래서 A 단계가 같은 조건을 3번 돕니다.
+- 판정 기준(목표의 80%, 가용 메모리 1 GiB 등)과 단계 계획은 이 저장소가 정한 것입니다. Agent Substrate의 공식 합격 기준이 아닙니다. 어떤 것이 substrate 기본 제공이고 어떤 것이 추가한 것인지는 `docs/origin.md`에 있습니다. 보고할 때 둘을 섞어 쓰지 않습니다.
 - Mac에서 찾은 지연의 원인은 디스크가 아니라 업로드에 쓰는 메모리 한도(`--upload-memory-budget`, 기본 512Mi)였습니다. 서버에서도 그런지는 F 단계가 확인합니다. 서버 결과를 보기 전에는 "서버도 그렇다"고 쓰지 않습니다.
 
 ## 10. 사용자가 알려 줄 정보
@@ -285,4 +286,4 @@ T나 A 단계에서 문제가 나면 STOP하는 이유: 이 두 단계는 Mac에
 | 백그라운드 작업 로그 | `results/<HOST_LABEL>/bg/<이름>.log` |
 | 멈춤 사유 | `results/<HOST_LABEL>/STOP.txt` |
 | Mac 결과 (비교용) | `results/darwin-arm64/REPORT.md`, `README.md` |
-| 배경 지식 | `README.md` (절차와 결과 읽는 법), `docs/workload-patterns.md` (조절값의 뜻, 결과의 한계) |
+| 배경 지식 | `README.md` (절차와 결과 읽는 법), `docs/workload-patterns.md` (조절값의 뜻, 결과의 한계), `docs/origin.md` (substrate가 기본 제공하는 것과 이 저장소가 추가한 것의 구분) |

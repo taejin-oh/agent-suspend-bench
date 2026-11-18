@@ -37,6 +37,7 @@ for r in runs:
              f"{f(r['write_mib_s'], '{:.0f}')} | {pair(r['disk_mean'], r['disk_peak'], '{:.0f}')} | {f(r['cpu_mean'], '{:.0f}')} | {f(r['mem_min_mib'], '{:.0f}')} | {f(r['persist_p50_s'])} | {f(r['snapshot_mib'], '{:.0f}')} | {r['verdict']} | {', '.join(r['flags'] + r['reasons']) or '-'} |")
 L += ["", "기준값(세션 1개, sync, 판정 OK 인 실행들의 재우기 중앙값): " + (", ".join(f"{k or '배포 기록 없음'} → {v:.2f}초" for k, v in base.items()) or "없음"), "",
       "열 설명: 재우기 = `SuspendActor`(sync) 또는 `SuspendActorAsync`(async) 행. 깨우기 = `TimeToWake` 행. 초당 재우기부터 CPU 까지는 부하가 걸린 구간만의 값(`load window only`).",
+      "snapshot MiB = 정지 직전 객체 저장소에 있던 Actor 하나의 snapshot 크기(중앙값).",
       "`.bad1` 로 끝나는 실행은 멈춤 판정을 받아 한 번 다시 돌린 것의 1차 시도다."]
 if skipped: L += ["", "## 건너뛴 실행", ""] + [f"- {n}: {w}" for n, w in skipped]
 if os.path.exists(f"{res}/STOP.txt"): L += ["", "## 멈춤 상태", "", read(f"{res}/STOP.txt").strip()]

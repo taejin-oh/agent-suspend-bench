@@ -64,7 +64,8 @@ def load(d):
     r["psi_io_peak"] = num(r"psi_io_some_avg10: .*peak=([\d.]+)", summ)
     r["persist_p50_s"] = (num(r"atelet +checkpoint .* persist +\d+ +([\d.]+)", summ) or 0) / 1000 or None
     r["dump_p50_s"] = (num(r"atelet +checkpoint .* worker_checkpoint +\d+ +([\d.]+)", summ) or 0) / 1000 or None
-    r["snapshot_mib"] = num(r"^node: actors=\d+ median=(\d+)", summ)
+    # 객체 저장소 쪽 값을 쓴다 (벤치마크 atespace 만 센다). 노드 쪽 폴더에는 counter 데모 같은 다른 Actor 도 섞인다.
+    r["snapshot_mib"] = num(r"^object: actors=\d+ median=(\d+)", summ) or num(r"^node: actors=\d+ median=(\d+)", summ)
     restarts = lambda t: sum(int(p[3]) for p in (l.split() for l in t.splitlines()) if len(p) > 3 and p[3].isdigit())
     r["worker_restarts"] = restarts(read(f"{d}/workers_after.txt")) - restarts(read(f"{d}/workers_before.txt"))
 

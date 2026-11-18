@@ -1,0 +1,4 @@
+benchmark-worker-6f8c8b9657-2v6kg   1/1   Running   0     14h
+benchmark-worker-6f8c8b9657-g95qm   1/1   Running   0     14h
+benchmark-worker-6f8c8b9657-mwc9c   1/1   Running   0     14h
+benchmark-worker-6f8c8b9657-zwjgw   1/1   Running   0     14h

@@ -80,6 +80,7 @@ scripts/06_run_load.sh turnover_12_awake3 12 300 lifecycle_mode=sync agentsessio
 - `run.txt`: 실행 인자와 시작·종료 시각(UTC), objectstore-plugin 인자
 - `stats.json`, `stats.csv`, `failures.csv`: 부하 생성기(Locust)의 원본 통계
 - `boomer_worker.log`: 부하 생성기 로그 (turnover 교체 시작 시각이 여기 남는다)
+- `phases_raw.jsonl`, `uploads_raw.jsonl`: atelet의 suspend별 구간 기록과 objectstore-plugin의 파일별 업로드 기록 원본 (`scripts/analyze_uploads.py` 입력)
 - `proc_1s.txt`: 1초 간격 블록 장치 통계, 메모리, IO/메모리 pressure, CPU 누적 시간 원본
 - `sizes_5s.txt`: 5초 간격 노드 로컬 snapshot 폴더와 객체 저장소 크기
 - `snapshot_sizes.txt`: 정지 직전의 actor별 snapshot 크기 (노드 로컬, 객체 저장소)
@@ -108,7 +109,7 @@ scripts/06_run_load.sh turnover_12_awake3 12 300 lifecycle_mode=sync agentsessio
 
 원본은 `results/darwin-arm64/`. 이 숫자는 "끝까지 돈다"는 증거이고, 서버의 성능을 예측하는 값이 아닙니다.
 
-- 설치, counter suspend/resume, 부하 실행 모두 실패 없이 완료 (부하 8회 합계 suspend 1,033회, resume 1,013회)
+- 설치, counter suspend/resume, 부하 실행 모두 실패 없이 완료 (부하 9회 합계 suspend 1,197회, resume 1,175회)
 - counter(메모리 수 MB): suspend 0.25~0.32초, 깨우는 첫 요청 0.10~0.24초
 - 같은 대본(`smoke-5step`, worker 4개, sync)으로 겹침 정도만 바꾼 결과 (`runs/r2_*`):
 
@@ -124,13 +125,18 @@ scripts/06_run_load.sh turnover_12_awake3 12 300 lifecycle_mode=sync agentsessio
 
 - turnover의 실제 교체 속도는 초당 약 0.72회였습니다(목표 1회). suspend 1회당 디스크 쓰기는 약 320 MiB로, snapshot 크기(actor당 로컬 157 MiB, 객체 저장소 150 MiB)의 약 2배입니다.
 - 늘어난 suspend 시간의 대부분은 `persist`(압축·업로드) 구간이었고, 그때 디스크(평균 63%, 1초 최대 94%)와 CPU(평균 39%)는 평균으로는 포화되지 않았습니다.
-- **원인 확인 (`runs/r3_upload2g_*`)**: substrate의 objectstore-plugin은 업로드에 쓰는 메모리를 노드당 512Mi로 제한하고(`--upload-memory-budget`), 넘치면 업로드를 기다리게 합니다. 이 값만 2Gi로 올려 같은 부하를 다시 돌리자 turnover의 `SuspendActor` 중앙값이 8.9초 → 2.3초, p95가 16초 → 7.1초, `persist` 중앙값이 7.2초 → 0.84초가 됐습니다. 세션 4개 실행도 같은 방향입니다(`SuspendActor` 중앙값 2.7초 → 1.6초). 기본값으로 되돌려 다시 돌리자(`runs/r4_default_turnover_12_awake3`) 중앙값이 11초로 돌아갔습니다. 반면 `TimeToWake` 중앙값은 1.6초 → 2.2초로 늘었고, CPU 평균은 39% → 52%, 가용 메모리 최소값은 2.6 GiB → 1.8 GiB가 됐습니다. 교체 속도는 초당 0.72회 → 0.77회로 거의 그대로였습니다. 이 설정은 동시 업로드 수와 업로드 하나의 압축 병렬도를 함께 바꾸므로 둘의 효과는 나누어 보지 못했습니다. 한도를 올린 실행은 각 1회입니다. 패치를 적용하면 atelet pod가 다시 뜹니다. 실험 방법:
+- **원인 확인 (`runs/r3_upload2g_*`)**: substrate의 objectstore-plugin은 업로드에 쓰는 메모리를 노드당 512Mi로 제한하고(`--upload-memory-budget`), 넘치면 업로드를 기다리게 합니다. 이 값만 2Gi로 올려 같은 부하를 다시 돌리자 turnover의 `SuspendActor` 중앙값이 8.9초 → 2.3초, p95가 16초 → 7.1초, `persist` 중앙값이 7.2초 → 0.84초가 됐습니다. 세션 4개 실행도 같은 방향입니다(`SuspendActor` 중앙값 2.7초 → 1.6초). 기본값으로 되돌려 다시 돌리자(`runs/r4_default_turnover_12_awake3`) 중앙값이 11초로 돌아갔습니다. 반면 `TimeToWake` 중앙값은 1.6초 → 2.2초로 늘었고, CPU 평균은 39% → 52%, 가용 메모리 최소값은 2.6 GiB → 1.8 GiB가 됐습니다. 교체 속도는 초당 0.72회 → 0.77회로 거의 그대로였습니다. 이 설정은 동시 업로드 수와 업로드 하나의 압축 병렬도를 함께 바꾸므로 둘의 효과는 나누어 보지 못했습니다. turnover에서 한도를 올린 실행은 2회이고 결과가 서로 달랐습니다(아래). 패치를 적용하면 atelet pod가 다시 뜹니다. 실험 방법:
 
   ```bash
   kubectl -n ate-system patch ds atelet --type=json \
     -p '[{"op":"add","path":"/spec/template/spec/initContainers/0/args/-","value":"--upload-memory-budget=2Gi"}]'
   ```
 
+- **왜 줄어드는가 (`scripts/analyze_uploads.py`, `runs/r4_default_*`와 `runs/r5_upload2g_*`)**: objectstore-plugin은 파일마다 "예산을 얻은 뒤부터의 시간"을 로그로 남기므로, `persist`를 대기와 실제 작업으로 나눌 수 있습니다.
+  - snapshot 하나는 파일 7개이고 파일마다 따로 예약합니다(전송 버퍼 160 MiB + 압축 worker 수 × 최대 64 MiB). 예약 합계는 한도 512Mi에서 1,736 MiB(한도의 3.4배), 2Gi에서 2,056 MiB입니다.
+  - 512Mi: 동시에 작업 중인 파일 평균 1.0개, 한도가 꽉 찬 시간 92%. `persist` 중앙값 9.5초 중 자기 파일의 실제 작업은 0.8초(파일을 하나씩 처리해도 1.3초)이고 84~90%가 대기였습니다.
+  - 2Gi: 첫 1분은 대기가 거의 없고 `persist` 0.4~0.6초, 초당 1회 처리. 그 뒤 동시 업로드가 늘면서 큰 파일의 처리 시간이 0.4초 → 3초대, CPU 35% → 72%, 가용 메모리 2.3 → 1.5 GiB가 됐고, 2분쯤부터 한도가 다시 차서 `persist`가 10초대로 돌아갔습니다. 이 실행의 `SuspendActor` 중앙값은 3.8초, p95는 18초입니다(첫 2Gi 실행은 2.3초 / 7.1초).
+  - 사용법: `python3 scripts/analyze_uploads.py results/<HOST_LABEL>/runs/<이름> <예산 MiB>`
 - 약 12시간 앞서 같은 조건으로 돌린 첫 실행(`runs/s4_sync`, `runs/turnover_12_awake3`)도 같은 경향입니다(turnover `SuspendActor` 중앙값 9.8초, p95 16초). 이 두 실행에는 CPU·구간별 시간·actor별 snapshot 크기가 없습니다.
 
 ## 알려진 한계

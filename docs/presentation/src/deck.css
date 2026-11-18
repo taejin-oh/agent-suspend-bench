@@ -148,3 +148,10 @@ td.r, th.r { text-align: right; }
 .lgtxt { font-size: 26px; color: #16242E; }
 .banner { background: #10202B; color: #EEF2F0; border-radius: 16px; padding: 26px 36px; font-size: 28px; line-height: 1.5; }
 .banner.light { background: #E4E1D6; color: #16242E; }
+
+.bars.short { height: 370px; gap: 4px; }
+.bar.sm { width: 52px; }
+.barval.sm { width: 52px; font-size: 24px; }
+.gname.sm { font-size: 24px; font-weight: 400; color: #44535C; }
+tr.sum { background: #E4E1D6; font-weight: 700; }
+tr.sum td { font-weight: 700; }

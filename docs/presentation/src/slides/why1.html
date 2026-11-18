@@ -1,0 +1,29 @@
+<section id="why1" data-transition="fade">
+<p class="eyebrow">결과 4 · 원인 분석 (1)</p>
+<h2>snapshot 하나가 한도의 3배를 예약해, 업로드가 한 줄로 선다</h2>
+<div class="row" style="gap:48px">
+<div class="col" style="flex:1.25; gap:12px">
+<table>
+<tr class="head"><th style="width:36%">snapshot의 파일</th><th class="r" style="width:20%">크기</th><th class="r" style="width:22%">예약: 한도 512&nbsp;MiB</th><th class="r" style="width:22%">예약: 한도 2&nbsp;GiB</th></tr>
+<tr class="band"><td>메모리 내용 (pages.img)</td><td class="r">119 MiB</td><td class="r">480 MiB</td><td class="r">800 MiB</td></tr>
+<tr class="band"><td>파일시스템 내용 (rootfs/pages.img)</td><td class="r">24 MiB</td><td class="r">416 MiB</td><td class="r">416 MiB</td></tr>
+<tr class="band"><td>작은 파일 5개</td><td class="r">각 0.1 MiB 이하</td><td class="r">각 168 MiB</td><td class="r">각 168 MiB</td></tr>
+<tr class="sum"><td>snapshot 1개의 합계</td><td class="r">약 144 MiB</td><td class="r">1,736 MiB</td><td class="r">2,056 MiB</td></tr>
+<tr class="hot"><td>한도 대비</td><td class="r"></td><td class="r">3.4배</td><td class="r">1.0배</td></tr>
+</table>
+<p class="small">예약 = 전송 버퍼 160&nbsp;MiB + 압축 작업 수 × 최대 64&nbsp;MiB. 파일마다 따로 예약하고, 한도가 크면 압축 작업 수도 늘어난다(5개 → 10개).</p>
+</div>
+<div class="col" style="flex:1; gap:20px">
+<div class="card alert">
+<p class="label">한도 512 MiB에서 잰 값</p>
+<p class="ctxt">큰 파일 하나가 한도의 94%를 차지한다. 동시에 작업 중인 파일은 평균 1.0개였고, 전체 시간의 92% 동안 한도가 꽉 차 있었다.</p>
+</div>
+<div class="card key">
+<p class="label">한도 2 GiB에서는</p>
+<p class="ctxt">snapshot 하나의 파일 7개가 거의 한꺼번에 올라갈 수 있다. 다른 snapshot을 기다릴 일이 크게 줄어든다.</p>
+</div>
+</div>
+</div>
+<p class="foot">출처: Substrate 소스 pkg/objectstorage/upload.go의 예약 계산식, 업로드 플러그인의 파일별 기록 (2026년 11월 측정)</p>
+<aside>한도를 올리면 왜 그렇게 크게 줄어드는지를 두 장에 걸쳐 설명드리겠습니다. 먼저 구조입니다. snapshot 하나는 파일 일곱 개로 이루어져 있고, 업로드할 때 파일마다 따로 메모리를 예약합니다. 예약하는 양은 전송 버퍼 160 MiB에, 압축 작업 수에 최대 64 MiB를 곱한 값을 더한 것입니다. 그래서 0.1 MiB도 안 되는 작은 파일도 168 MiB를 예약하고, 메모리 내용이 담긴 가장 큰 파일은 480 MiB, 한도의 94퍼센트를 예약합니다. snapshot 하나의 예약을 모두 더하면 1,736 MiB로, 한도 512 MiB의 3.4배입니다. 즉 snapshot 하나조차 자기 파일들을 동시에 올리지 못하고, 다른 snapshot은 그 뒤에서 기다려야 합니다. 실제로 재 보니 동시에 작업 중인 파일은 평균 한 개였고, 전체 시간의 92퍼센트 동안 한도가 꽉 차 있었습니다. 업로드가 사실상 한 줄로 서 있었던 것입니다. 한도를 2 GiB로 올리면 snapshot 하나의 예약 합계가 한도와 거의 같아져서, 파일 일곱 개가 거의 한꺼번에 올라갈 수 있습니다. 예약 계산식은 Substrate 소스에서 읽은 것이고, 동시 작업 수와 한도 점유 시간은 업로드 플러그인이 남긴 기록에서 계산한 값입니다.</aside>
+</section>

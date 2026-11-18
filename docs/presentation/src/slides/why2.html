@@ -1,0 +1,77 @@
+<section id="why2" data-transition="fade">
+<p class="eyebrow">결과 4 · 원인 분석 (2)</p>
+<h2>대기가 사라져 빨라졌지만, 2분 뒤 다른 한계에 닿았다</h2>
+<div class="row" style="gap:48px">
+<div class="col" style="gap:16px">
+<div class="legend"><p class="lgtxt"><b>업로드 구간의 중앙값(초), 교체 시작 후 30초 단위</b></p><div class="lg"><div class="lgbox up"></div><p class="lgtxt">512&nbsp;MiB</p></div><div class="lg"><div class="lgbox ok"></div><p class="lgtxt">2&nbsp;GiB</p></div></div>
+<div class="row" style="gap:16px; align-items:flex-end">
+<div class="group">
+<div class="bars short">
+<div class="col" style="gap:6px"><p class="barval sm hotval">0.5</p><div class="bar sm hot" style="height:12px"></div></div>
+<div class="col" style="gap:6px"><p class="barval sm">0.4</p><div class="bar sm" style="height:9px"></div></div>
+</div>
+<p class="gname sm">0~30초</p>
+</div>
+<div class="group">
+<div class="bars short">
+<div class="col" style="gap:6px"><p class="barval sm hotval">8.9</p><div class="bar sm hot" style="height:203px"></div></div>
+<div class="col" style="gap:6px"><p class="barval sm">0.6</p><div class="bar sm" style="height:14px"></div></div>
+</div>
+<p class="gname sm">~1분</p>
+</div>
+<div class="group">
+<div class="bars short">
+<div class="col" style="gap:6px"><p class="barval sm hotval">11.2</p><div class="bar sm hot" style="height:256px"></div></div>
+<div class="col" style="gap:6px"><p class="barval sm">1.5</p><div class="bar sm" style="height:35px"></div></div>
+</div>
+<p class="gname sm">~1분 30초</p>
+</div>
+<div class="group">
+<div class="bars short">
+<div class="col" style="gap:6px"><p class="barval sm hotval">8.6</p><div class="bar sm hot" style="height:196px"></div></div>
+<div class="col" style="gap:6px"><p class="barval sm">2.2</p><div class="bar sm" style="height:51px"></div></div>
+</div>
+<p class="gname sm">~2분</p>
+</div>
+<div class="group">
+<div class="bars short">
+<div class="col" style="gap:6px"><p class="barval sm hotval">8.6</p><div class="bar sm hot" style="height:197px"></div></div>
+<div class="col" style="gap:6px"><p class="barval sm">5.2</p><div class="bar sm" style="height:118px"></div></div>
+</div>
+<p class="gname sm">~2분 30초</p>
+</div>
+<div class="group">
+<div class="bars short">
+<div class="col" style="gap:6px"><p class="barval sm hotval">10.4</p><div class="bar sm hot" style="height:238px"></div></div>
+<div class="col" style="gap:6px"><p class="barval sm">11.1</p><div class="bar sm" style="height:255px"></div></div>
+</div>
+<p class="gname sm">~3분</p>
+</div>
+<div class="group">
+<div class="bars short">
+<div class="col" style="gap:6px"><p class="barval sm hotval">12.5</p><div class="bar sm hot" style="height:285px"></div></div>
+<div class="col" style="gap:6px"><p class="barval sm">9.6</p><div class="bar sm" style="height:220px"></div></div>
+</div>
+<p class="gname sm">~3분 30초</p>
+</div>
+<div class="group">
+<div class="bars short">
+<div class="col" style="gap:6px"><p class="barval sm hotval">10.1</p><div class="bar sm hot" style="height:230px"></div></div>
+<div class="col" style="gap:6px"><p class="barval sm">13.7</p><div class="bar sm" style="height:314px"></div></div>
+</div>
+<p class="gname sm">~4분</p>
+</div>
+</div>
+</div>
+<div class="col" style="flex:1; gap:16px">
+<p class="body"><b>512&nbsp;MiB.</b> 30초 만에 줄이 차서 끝까지 그대로다. 업로드 구간 9.5초 중 실제 작업은 0.8초이고 84~90%가 대기였다.</p>
+<p class="body"><b>2&nbsp;GiB, 첫 1분.</b> 대기가 거의 없다. 업로드 구간이 0.4~0.6초였고, 목표인 초당 1회를 처리했다.</p>
+<p class="body warn"><b>2&nbsp;GiB, 그 뒤.</b> 동시에 도는 업로드가 1개에서 3개로 늘자 큰 파일 하나의 처리 시간이 0.4초에서 3초대로 늘었다. CPU는 35%에서 72%로, 가용 메모리는 2.3에서 1.5&nbsp;GiB로 변했다.</p>
+</div>
+</div>
+<div class="banner">
+<b>한도를 올리면 대기는 사라지지만, 그만큼 CPU와 메모리를 더 쓴다.</b> 두 번의 실행 중 한 번은 끝까지 빨랐고(중앙값 2.3초), 한 번은 위와 같이 2분 뒤 다시 느려졌다(3.8초).
+</div>
+<p class="foot">출처: 자체 측정 (2026년 11월). 막대는 기본 한도 재실행과 2 GiB 두 번째 실행의 값</p>
+<aside>두 번째 장은 시간에 따른 변화입니다. 막대는 교체를 시작한 뒤 30초 단위로 본 업로드 구간의 중앙값입니다. 주황색이 기본 한도 512 MiB, 초록색이 2 GiB입니다. 기본 한도에서는 30초 만에 줄이 차서 9초에서 12초 수준으로 끝까지 유지됩니다. 이때 업로드 구간 9.5초 가운데 그 snapshot 자신의 파일을 처리하는 시간은 0.8초이고, 84에서 90퍼센트가 앞선 업로드를 기다리는 시간이었습니다. 업로드 플러그인은 한도를 얻은 뒤부터의 시간을 따로 기록하기 때문에 이렇게 나눠 볼 수 있습니다. 한 줄로 처리할 때 snapshot 하나에 약 1.3초가 걸리므로 처리 능력은 초당 0.78개쯤이고, 이것이 앞에서 본 초당 0.7회라는 처리량과 맞습니다. 2 GiB로 올리면 첫 1분은 대기가 거의 없습니다. 업로드 구간이 0.4에서 0.6초이고, 목표였던 초당 1회를 처리했습니다. 한도를 올렸을 때 지연이 크게 줄어드는 이유는 이것입니다. 일이 빨라진 것이 아니라 기다림이 없어진 것입니다. 그런데 그 뒤가 중요합니다. 초당 1회를 다 받아들이자 동시에 도는 업로드가 한 개에서 세 개로 늘었고, 큰 파일 하나를 처리하는 시간이 0.4초에서 3초대로 늘었습니다. CPU 사용률은 35에서 72퍼센트로 오르고 가용 메모리는 2.3에서 1.5 GiB로 줄었습니다. 2분쯤 지나자 2 GiB 한도도 다시 꽉 차서 대기가 돌아왔습니다. 한도를 올린 실행은 두 번 했는데, 한 번은 끝까지 빨랐고 한 번은 이렇게 다시 느려졌습니다. 정리하면, 이 한도는 업로드를 줄 세우는 동시에 노드에 걸리는 부하를 눌러 두는 역할도 하고 있었습니다. 한도를 올리는 것이 답이 되려면 노드에 그만큼의 CPU와 메모리 여유가 있어야 합니다.</aside>
+</section>

@@ -44,6 +44,9 @@ kubectl --context "$KCTX" logs -n ate-system ds/atelet --since-time="$start_ts" 
 for p in $(kubectl --context "$KCTX" get pods -n benchmark-workloads -o name); do
   kubectl --context "$KCTX" logs -n benchmark-workloads "$p" --since-time="$start_ts" 2>/dev/null | grep "timing breakdown" > "$tmp/$(basename "$p").log"; done
 python3 "$SUBSTRATE_DIR/benchmarking/analysis/phase_report.py" "$tmp"/*.log > "$out/phases.txt" 2>&1 || true
+# 원본 기록도 남긴다: atelet 의 구간별 시간, objectstore-plugin 의 파일별 업로드 시간(예산 대기를 뺀 실제 압축·전송 시간)
+cp "$tmp/atelet.log" "$out/phases_raw.jsonl"
+kubectl --context "$KCTX" logs -n ate-system ds/atelet -c objectstore-plugin --since-time="$start_ts" 2>/dev/null | grep '"Compressed zstd upload"' > "$out/uploads_raw.jsonl" || true
 rm -rf "$tmp"
 { echo "## requests"; python3 - "$out/stats.json" <<'PY'
 import json,sys

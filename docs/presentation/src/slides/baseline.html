@@ -1,0 +1,18 @@
+<section id="baseline" data-transition="fade">
+<p class="eyebrow">기본 제공 시나리오</p>
+<h2>Substrate가 제공하는 기준 시나리오도 실패 없이 돌았다</h2>
+<table>
+<tr class="head"><th style="width:46%">시나리오 (값은 Substrate가 정한 그대로)</th><th class="r" style="width:20%">재우기 중앙값 / p95</th><th class="r" style="width:20%">깨우기 중앙값 / p95</th><th class="r" style="width:14%">실패</th></tr>
+<tr class="band"><td>기준 부하, 사용자 1명 (업로드까지 대기)</td><td class="r">0.16초 / 0.22초</td><td class="r">0.07초 / 0.08초</td><td class="r">0건</td></tr>
+<tr class="band"><td>기준 부하, 사용자 5명</td><td class="r">0.26초 / 0.41초</td><td class="r">0.07초 / 0.12초</td><td class="r">0건</td></tr>
+<tr class="band"><td>기준 부하, 사용자 10명</td><td class="r">0.38초 / 0.63초</td><td class="r">0.09초 / 0.21초</td><td class="r">0건</td></tr>
+<tr class="hot"><td>메모리 1&nbsp;GiB를 채운 Actor 1개 (업로드까지 대기)</td><td class="r">5.1초 / 5.5초</td><td class="r">0.91초 / 1.0초</td><td class="r">0건</td></tr>
+<tr class="band"><td>메모리 1&nbsp;GiB, 업로드는 나중에 (async)</td><td class="r">1.3초 / 1.7초</td><td class="r">0.17초 / 1.1초</td><td class="r">0건</td></tr>
+<tr class="band"><td>사용자 15명을 worker 10개에 초과 배정 (async)</td><td class="r">0.05초 / 0.10초</td><td class="r">0.07초 / 0.13초</td><td class="r">0건</td></tr>
+<tr class="band"><td>기본 시나리오(코딩 작업 20단계), Actor 1개 (async)</td><td class="r">0.43초 / 0.59초</td><td class="r">0.22초 / 0.83초</td><td class="r">0건</td></tr>
+<tr class="band"><td>기본 시나리오(코딩 작업 20단계), Actor 4개 (async)</td><td class="r">0.58초 / 1.0초</td><td class="r">0.51초 / 1.6초</td><td class="r">0건</td></tr>
+</table>
+<p class="small">기준 부하는 깨우기 → 응답 확인 → 재우기를 반복하는 Substrate의 기본 부하(glutton)다. 사용자 수, worker 수, 메모리, 실행 시간(1~2분)은 Substrate 야간 시험 목록의 값이다. 기본 시나리오의 Actor 수와 실행 시간(5분)만 자체로 정했다. 메모리 2&nbsp;GiB 항목은 이 장비의 메모리가 모자라 실행하지 못했다.</p>
+<p class="foot">출처: 자체 측정 (2026년 11월), 항목마다 1회. 시나리오 정의는 Substrate 저장소의 야간 시험 목록과 공식 문서의 기본 실행 명령</p>
+<aside>앞의 확인은 제가 쓴 시나리오로 한 것이어서, Substrate가 직접 제공하는 기준 시나리오도 값을 바꾸지 않고 돌렸습니다. Substrate 저장소에는 매일 밤 자동으로 도는 시험 목록이 있고, 거기서 기준으로 쓰는 부하는 깨우기와 재우기만 반복하는 단순한 부하입니다. 사용자 1명, 5명, 10명에서 재우기 중앙값은 0.16초, 0.26초, 0.38초였습니다. 메모리 1 GiB를 채운 Actor는 업로드까지 기다리면 5.1초, 업로드를 나중으로 미루면 1.3초였습니다. 사용자 15명을 worker 10개에 올린 초과 배정 시험과, 문서의 기본 시나리오인 코딩 작업 20단계도 실패가 없었습니다. 측정 방법과 디스크, CPU 수집은 제 도구로 했고, 항목마다 한 번씩만 돌렸습니다. 메모리 2 GiB 항목은 이 장비의 메모리가 모자라 서버에서 확인할 대상입니다.</aside>
+</section>

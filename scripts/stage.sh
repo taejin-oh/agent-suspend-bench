@@ -140,8 +140,9 @@ run_stage() {
         PARTIAL) mv "$out" "$out.partial-$(date +%s)";;
         *) v="$(verdict_of "$out")"
            if [ ! -d "$out.bad1" ]; then echo "## $name 판정 $v → 한 번 다시 실행한다"; mv "$out" "$out.bad1"; sleep 30
-           elif [ "$v" = BROKEN ] || [ "$st" = T ] || [ "$st" = A ]; then
+           elif [ "$v" = BROKEN ] || [ "$st" = T ] || [ "$st" = A ] || [ "$name" = S_glutton_baseline_1_user ]; then
              stop_all "실행 $name 이 두 번 연속 $v ($(sed -n 's/^reason=//p' "$out/verdict.txt"))."
+           elif [ "$st" = S ]; then echo "## $name 이 두 번 연속 $v. S 단계의 항목은 서로 독립이므로 다음 항목으로 넘어간다"; break
            else ended="앞 실행 $name 이 두 번 연속 $v 여서 $st 단계를 여기서 끝냄"; echo "## $ended"; break; fi;;
       esac
     done

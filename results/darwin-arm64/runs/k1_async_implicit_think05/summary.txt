@@ -1,0 +1,46 @@
+## requests
+name                                 reqs  fail    p50ms    p95ms    p99ms    maxms
+CreateActor                             2     0       10       10       10       10
+CreateAtespace                          2     0        3        3        3        3
+Step_01_load_context                   24     0      130      180      230      227
+Step_02_download                       22     0      360      390      400      401
+Step_03_build                          22     0       99      110      120      122
+Step_04_test                           22     0      540      590      630      632
+Step_05_wrap_up                        22     0       17       23       32       32
+SuspendActorAsync                     114     0      180      550      820      856
+TimeToWake                            114     0      120      280      670      739
+WakeFirstTouch                        114     0      120      280      670      739
+Aggregated                            458     0      130      540      670      856
+## storage / memory / cpu
+duration_s=111 samples=111 device=vdb
+written_MiB_by_device: vdb=22173
+write_MiB_per_s: mean=200.3 p50=192.8 p95=501.9 p99=558.8 peak_1s=581.7
+write_MiB_per_s_busy_seconds_only(>1MiB/s): n=86 mean=256.2
+disk_util_pct: mean=18.3 p95=44.9 peak=75.7 seconds_over_90=0
+cpu_pct_all_cores: busy_mean=12.9 busy_p95=23.6 busy_peak=27.8 | iowait_mean=0.9 iowait_p95=3.6 iowait_peak=4.9
+mem_available_MiB: start=3834 min=3269 end=3727 | dirty_pagecache_MiB_peak=254
+node_snapshots_dir_MiB: start=0 peak=631 end=341
+object_store_atespaces_MiB: start=4 peak=4 end=4
+## suspend(checkpoint) / resume(restore) phases, ms (atelet)
+layer   op          class    kind    scope           phase                n      p50      p90      p95      max
+atelet  checkpoint  gvisor   local   -               worker_checkpoint   120    120.0    205.6    234.6    424.4
+atelet  checkpoint  gvisor   local   -               persist            120      0.7      1.5      1.9     13.3
+atelet  checkpoint  gvisor   local   -               total              120    121.8    209.2    236.6    427.7
+atelet  restore     gvisor   latest  -               download             2      0.6      0.7      0.7      0.7
+atelet  restore     gvisor   latest  -               worker_restore       2    194.7    309.0    323.3    337.6
+atelet  restore     gvisor   latest  -               total                2    201.3    319.8    334.6    349.4
+atelet  restore     gvisor   local   -               worker_restore     118     91.6    181.8    205.6    612.0
+atelet  restore     gvisor   local   -               total              118     93.4    184.3    209.3    616.1
+## snapshot size per actor, MiB
+node: actors=2 median=170 min=170 max=171 total=341
+## load window only (부하가 걸린 구간: turnover 는 교체 구간)
+window=start..end duration_s=90 device=vdb
+written_MiB=21425 write_MiB_per_s_mean=239
+disk_util_pct: mean=21 p95=46 peak_1s=76
+cpu_pct_all_cores: busy_mean=15 iowait_mean=1.0
+suspends=114 suspends_per_s=1.27 written_MiB_per_suspend=188 suspend_p50_s=0.18 suspends_in_flight_mean(rate*p50)=0.2
+## worker pods after
+benchmark-worker-6f8c8b9657-2v6kg   1/1   Running   0     15h
+benchmark-worker-6f8c8b9657-g95qm   1/1   Running   0     15h
+benchmark-worker-6f8c8b9657-mwc9c   1/1   Running   0     15h
+benchmark-worker-6f8c8b9657-zwjgw   1/1   Running   0     15h

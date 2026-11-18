@@ -1,0 +1,11 @@
+## node /var/lib/ate/snapshots/<actor-uid> (KB)
+4	/var/lib/ate/snapshots/1d60befc-109a-4eda-a6fc-e8c1f6336fd5
+0	/var/lib/ate/snapshots/2027e7ee-d9b5-4aec-89fb-c2c4282be416
+0	/var/lib/ate/snapshots/6dd0ec71-c8c9-4340-ba76-ed4917ee533b
+0	/var/lib/ate/snapshots/8026b8c4-cd23-46c6-8855-bdd06b38f28c
+0	/var/lib/ate/snapshots/85ba27b5-d6f7-4873-a327-80c287693018
+0	/var/lib/ate/snapshots/f1f3fdd4-27b2-4bb1-bf3f-b47c77c9e061
+0	/var/lib/ate/snapshots/f83b5596-fb33-412d-a9f2-c02e4d26966b
+0	/var/lib/ate/snapshots/faaa1b70-debd-4a65-9826-dd05a0823213
+## object store atespaces/benchmark/actors/<actor-uid> (KB)
+command terminated with exit code 1

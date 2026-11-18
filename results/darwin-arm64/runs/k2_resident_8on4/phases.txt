@@ -1,0 +1,78 @@
+parsed 16 timing breakdown records out of 16 JSON log entries
+
+== Phase percentiles (ms) ==
+layer   op          class    kind    scope           phase                n      p50      p90      p95      max
+atelet  restore     gvisor   latest  -               volume_mount         8      0.0      0.0      0.0      0.0
+atelet  restore     gvisor   latest  -               manifest_fetch       8      0.2      7.2     15.3     23.3
+atelet  restore     gvisor   latest  -               sandbox_assets       8      0.3      1.0      1.1      1.3
+atelet  restore     gvisor   latest  -               download             8      0.5      1.1      1.5      1.8
+atelet  restore     gvisor   latest  -               oci_unpack           8      0.7      2.3      3.7      5.1
+atelet  restore     gvisor   latest  -               worker_restore       8     62.1    129.1    194.8    260.6
+atelet  restore     gvisor   latest  -               total                8     63.8    141.5    219.8    298.0
+ateworker restore     gvisor   latest  -               prep                 8      0.3      0.5      0.6      0.7
+ateworker restore     gvisor   latest  -               egress_prepare       8      3.8      6.7      9.8     12.8
+ateworker restore     gvisor   latest  -               net_setup            8      2.2      3.4      3.5      3.5
+ateworker restore     gvisor   latest  -               sandbox_create       8      5.6     17.0     28.6     40.2
+ateworker restore     gvisor   latest  -               sandbox_restore      8     13.4     43.5     74.0    104.5
+ateworker restore     gvisor   latest  -               app_rootfs           8      0.8      2.0      3.3      4.6
+ateworker restore     gvisor   latest  -               app_create           8      4.2      7.0      7.3      7.6
+ateworker restore     gvisor   latest  -               app_restore          8     24.7     30.9     31.8     32.6
+ateworker restore     gvisor   latest  -               wakeup_probe         8      2.7     17.9     32.0     46.2
+ateworker restore     gvisor   latest  -               activate             8      0.0      0.1      0.2      0.2
+ateworker restore     gvisor   latest  -               total                8     60.6    123.3    186.9    250.5
+
+== Slowest 3 operations (waterfall, ms) ==
+restore actor=f83b5596-fb33-412d-a9f2-c02e4d26966b template=glutton class=gvisor scope=- kind=latest total=298.0
+  atelet volume_mount         0.0
+  atelet manifest_fetch      23.3
+  atelet sandbox_assets       1.3
+  atelet download             1.8
+  atelet oci_unpack           5.1
+  atelet worker_restore     260.6
+    ateworker  prep               0.7
+    ateworker  egress_prepare     12.8
+    ateworker  net_setup          2.7
+    ateworker  sandbox_create     40.2
+    ateworker  sandbox_restore    104.5
+    ateworker  app_rootfs         4.6
+    ateworker  app_create         7.6
+    ateworker  app_restore       30.2
+    ateworker  wakeup_probe      46.2
+    ateworker  activate           0.1
+    (gap)  rpc/queueing      10.2
+restore actor=faaa1b70-debd-4a65-9826-dd05a0823213 template=glutton class=gvisor scope=- kind=latest total=74.5
+  atelet volume_mount         0.0
+  atelet manifest_fetch       0.2
+  atelet sandbox_assets       0.6
+  atelet download             0.4
+  atelet oci_unpack           0.5
+  atelet worker_restore      72.7
+    ateworker  prep               0.3
+    ateworker  egress_prepare      3.7
+    ateworker  net_setup          3.4
+    ateworker  sandbox_create      7.1
+    ateworker  sandbox_restore     13.4
+    ateworker  app_rootfs         0.9
+    ateworker  app_create         3.7
+    ateworker  app_restore       32.6
+    ateworker  wakeup_probe       2.9
+    ateworker  activate           0.0
+    (gap)  rpc/queueing       3.9
+restore actor=2027e7ee-d9b5-4aec-89fb-c2c4282be416 template=glutton class=gvisor scope=- kind=latest total=65.6
+  atelet volume_mount         0.0
+  atelet manifest_fetch       0.2
+  atelet sandbox_assets       0.2
+  atelet download             0.3
+  atelet oci_unpack           0.9
+  atelet worker_restore      64.0
+    ateworker  prep               0.3
+    ateworker  egress_prepare      4.1
+    ateworker  net_setup          2.1
+    ateworker  sandbox_create      5.5
+    ateworker  sandbox_restore     11.5
+    ateworker  app_rootfs         0.8
+    ateworker  app_create         6.5
+    ateworker  app_restore       29.2
+    ateworker  wakeup_probe       2.2
+    ateworker  activate           0.0
+    (gap)  rpc/queueing       1.5

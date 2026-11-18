@@ -59,7 +59,7 @@ scripts/06_run_load.sh turnover_12_awake3 12 300 lifecycle_mode=sync agentsessio
 
 | 무엇 | 어디서 | 기본 |
 |---|---|---|
-| 동시에 깨어 있을 수 있는 Agent 수 (worker pod 수) | `WORKER_COUNT=N scripts/05_deploy_benchmark.sh` | 4 |
+| worker pod 수. worker 하나가 여러 Agent를 받으므로 동시 활성 수의 상한은 아님 (`docs/workload-patterns.md`) | `WORKER_COUNT=N scripts/05_deploy_benchmark.sh` | 4 |
 | Agent 1개의 메모리 한도 | `ACTOR_MEMORY=1536Mi scripts/05_deploy_benchmark.sh` | 512Mi |
 | Agent가 하는 일(메모리·디스크·CPU·쉬는 시간) | 대본 YAML. `scripts/05_deploy_benchmark.sh workloads/agent-1g.yaml` | `workloads/smoke-5step.yaml` |
 | 전체 Agent 수 | `06_run_load.sh`의 `<세션수>` | |
@@ -68,7 +68,7 @@ scripts/06_run_load.sh turnover_12_awake3 12 300 lifecycle_mode=sync agentsessio
 | suspend 방식 | `lifecycle_mode=sync`(업로드까지 대기) / `async`(백그라운드 업로드, substrate 기본) | |
 | 업로드 메모리 한도 (동시 업로드 수와 압축 병렬도를 함께 정함) | atelet DaemonSet의 objectstore-plugin 인자 `--upload-memory-budget` (아래 "원인 확인" 참고) | 512Mi |
 
-대본이나 worker 수, 메모리를 바꾸면 5번을 다시 실행해야 합니다(`SKIP_BUILD=1`을 주면 이미지 빌드를 건너뜀). `agentsession_awake`는 `WORKER_COUNT` 이하여야 합니다.
+대본이나 worker 수, 메모리를 바꾸면 5번을 다시 실행해야 합니다(`SKIP_BUILD=1`을 주면 이미지 빌드를 건너뜀). 패턴을 조절하는 방법과 패턴별 특징은 `docs/workload-patterns.md`에 정리했습니다.
 
 대본 작성 규칙은 substrate 문서 `docs/guides/benchmarking.md`의 "Writing an agent-session script" 절에 있습니다. `workloads/agent-1g.yaml`은 RAM 640Mi를 쓰는 서버용 대본으로, 검증기만 통과했고 실행해 보지는 않았습니다.
 

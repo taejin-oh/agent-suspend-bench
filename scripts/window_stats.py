@@ -39,7 +39,7 @@ if "cpu" in X[0] and "cpu" in X[-1]:
     print(f"cpu_pct_all_cores: busy_mean={100*(t-dv[3]-dv[4])/t:.0f} iowait_mean={100*dv[4]/t:.1f}")
 try:
     rows = {r["name"]: r for r in json.load(open(f"{d}/stats.json"))["stats"]}
-    s = rows.get("SuspendActor")
+    s = rows.get("SuspendActor") or rows.get("SuspendActorAsync")  # sync / async 재우기 행
     if s and s["num_requests"]:
         n = s["num_requests"]; med = s["median_response_time"] / 1000
         print(f"suspends={n} suspends_per_s={n/dur:.2f} written_MiB_per_suspend={mib/n:.0f} suspend_p50_s={med:.2f} suspends_in_flight_mean(rate*p50)={n/dur*med:.1f}")

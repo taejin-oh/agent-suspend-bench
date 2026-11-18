@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # 가상 Agent(glutton) 템플릿 + worker pool + Locust(부하 생성기)를 배포한다.
 # 사용: scripts/05_deploy_benchmark.sh [대본.yaml]      (기본: workloads/smoke-5step.yaml)
-# 환경변수: WORKER_COUNT(기본 4) = 동시에 깨어 있을 수 있는 Agent 수의 상한(worker pod 1개 = 깨어 있는 actor 1개),
+# 환경변수: WORKER_COUNT(기본 4) = worker pod 수 (worker 하나가 여러 actor 를 받는다. 동시 활성 수의 상한은 아님),
 #           ACTOR_MEMORY(기본 512Mi) = Agent 1개의 메모리 한도. 대본의 min_actor_memory 이상이어야 한다.
 set -euo pipefail
 source "$(dirname "$0")/env.sh"

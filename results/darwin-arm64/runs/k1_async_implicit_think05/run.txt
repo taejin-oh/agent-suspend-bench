@@ -1,0 +1,9 @@
+name=k1_async_implicit_think05 users=2 duration_s=90 extra=lifecycle_mode=async resume_mode=implicit agentsession_think_scale=0.5
+objectstore_plugin_args=["node","--socket=/run/objectstore-plugin/node.sock","--root=/var/lib/ate","--asset-staging-dir=/var/lib/objectstore-plugin/asset-staging","--asset-staging-capacity=8Gi","--preview="]
+start=2026-11-18T01:45:29Z
+{
+  "host": null,
+  "message": "Swarming started",
+  "success": true
+}
+end=2026-11-18T01:47:00Z

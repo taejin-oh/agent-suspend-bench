@@ -1,0 +1,5 @@
+# lifecycle_mode=none 으로 세션 8개를 worker 4개에 올렸을 때, RUNNING 인 actor 수 (kubectl ate get actors -a benchmark 를 worker pod 별로 센 것)
+2 benchmark-worker-6f8c8b9657-2v6kg
+2 benchmark-worker-6f8c8b9657-g95qm
+2 benchmark-worker-6f8c8b9657-mwc9c
+2 benchmark-worker-6f8c8b9657-zwjgw

@@ -1,0 +1,37 @@
+## requests
+name                                 reqs  fail    p50ms    p95ms    p99ms    maxms
+CreateActor                             8     0        8       33       33       33
+CreateAtespace                          8     0        2        4        4        4
+Step_01_load_context                   32     0      130      160      190      193
+Step_02_download                       31     0      370      440      590      593
+Step_03_build                          27     0       84      110      140      139
+Step_04_test                           25     0      550      610      610      614
+Step_05_wrap_up                        24     0       28       72       89       89
+Aggregated                            155     0      120      570      610      614
+## storage / memory / cpu
+duration_s=60 samples=61 device=vdb
+written_MiB_by_device: vdb=679
+write_MiB_per_s: mean=11.3 p50=0.5 p95=48.3 p99=71.9 peak_1s=71.9
+write_MiB_per_s_busy_seconds_only(>1MiB/s): n=26 mean=25.7
+disk_util_pct: mean=5.9 p95=22.6 peak=32.6 seconds_over_90=0
+cpu_pct_all_cores: busy_mean=11.6 busy_p95=22.7 busy_peak=24.1 | iowait_mean=0.1 iowait_p95=0.4 iowait_peak=0.9
+mem_available_MiB: start=3813 min=2465 end=2525 | dirty_pagecache_MiB_peak=186
+node_snapshots_dir_MiB: start=0 peak=0 end=0
+object_store_atespaces_MiB: start=4 peak=4 end=4
+## suspend(checkpoint) / resume(restore) phases, ms (atelet)
+layer   op          class    kind    scope           phase                n      p50      p90      p95      max
+atelet  restore     gvisor   latest  -               download             8      0.5      1.1      1.5      1.8
+atelet  restore     gvisor   latest  -               worker_restore       8     62.1    129.1    194.8    260.6
+atelet  restore     gvisor   latest  -               total                8     63.8    141.5    219.8    298.0
+## snapshot size per actor, MiB
+node: actors=8 median=0 min=0 max=0 total=0
+## load window only (부하가 걸린 구간: turnover 는 교체 구간)
+window=start..end duration_s=40 device=vdb
+written_MiB=645 write_MiB_per_s_mean=16
+disk_util_pct: mean=6 p95=31 peak_1s=33
+cpu_pct_all_cores: busy_mean=14 iowait_mean=0.1
+## worker pods after
+benchmark-worker-6f8c8b9657-2v6kg   1/1   Running   0     15h
+benchmark-worker-6f8c8b9657-g95qm   1/1   Running   0     15h
+benchmark-worker-6f8c8b9657-mwc9c   1/1   Running   0     15h
+benchmark-worker-6f8c8b9657-zwjgw   1/1   Running   0     15h

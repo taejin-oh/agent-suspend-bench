@@ -1,0 +1,9 @@
+name=k2_resident_8on4 users=8 duration_s=40 extra=lifecycle_mode=none
+objectstore_plugin_args=["node","--socket=/run/objectstore-plugin/node.sock","--root=/var/lib/ate","--asset-staging-dir=/var/lib/objectstore-plugin/asset-staging","--asset-staging-capacity=8Gi","--preview="]
+start=2026-11-18T01:58:51Z
+{
+  "host": null,
+  "message": "Swarming started",
+  "success": true
+}
+end=2026-11-18T01:59:33Z

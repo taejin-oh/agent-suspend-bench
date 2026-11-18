@@ -38,7 +38,15 @@
 
 ## 3. 시작
 
-저장소는 사용자가 서버에 받아 둔 상태에서 시작합니다(비공개 저장소라 인증이 필요합니다. 폴더가 없으면 사용자에게 요청합니다). 저장소 폴더에서 한 번만 합니다.
+저장소 주소는 `https://github.com/taejin-oh/agent-suspend-bench.git`입니다. 지금 있는 폴더에 `scripts/stage.sh`가 있으면 그 폴더가 저장소이고, 경로를 따로 물을 필요가 없습니다. 없으면 아래 명령으로 받습니다.
+
+```bash
+git clone https://github.com/taejin-oh/agent-suspend-bench.git && cd agent-suspend-bench
+```
+
+비공개 저장소라 인증이 필요합니다. 인증을 요구하며 실패하면 멈추고 사용자에게 받아 달라고 요청합니다. 토큰이나 비밀번호를 직접 입력하지 않습니다.
+
+저장소 폴더에서 한 번만 합니다.
 
 ```bash
 [ -f site.env ] || cp site.env.example site.env

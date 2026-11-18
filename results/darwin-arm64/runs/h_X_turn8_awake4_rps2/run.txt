@@ -1,0 +1,10 @@
+name=X_turn8 users=8 duration_s=200 extra=lifecycle_mode=sync agentsession_awake=4 target_rps=2
+deployed=script=smoke-5step.yaml actor_memory=512Mi worker_count=4
+objectstore_plugin_args=["node","--socket=/run/objectstore-plugin/node.sock","--root=/var/lib/ate","--asset-staging-dir=/var/lib/objectstore-plugin/asset-staging","--asset-staging-capacity=8Gi","--preview="]
+start=2026-11-18T04:01:18Z
+{
+  "host": null,
+  "message": "Swarming started",
+  "success": true
+}
+end=2026-11-18T04:04:40Z

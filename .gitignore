@@ -8,3 +8,6 @@
 /env.sh
 /measure/
 .DS_Store
+/site.env
+/kubeconfig
+__pycache__/

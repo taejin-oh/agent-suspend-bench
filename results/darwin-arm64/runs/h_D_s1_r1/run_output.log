@@ -1,0 +1,56 @@
+name=D_s1_r1 users=1 duration_s=240 extra=lifecycle_mode=sync
+deployed=script=agent-1g.yaml actor_memory=1536Mi worker_count=4
+objectstore_plugin_args=["node","--socket=/run/objectstore-plugin/node.sock","--root=/var/lib/ate","--asset-staging-dir=/var/lib/objectstore-plugin/asset-staging","--asset-staging-capacity=8Gi","--preview="]
+start=2026-11-18T03:49:58Z
+{
+  "host": null,
+  "message": "Swarming started",
+  "success": true
+}
+
+end=2026-11-18T03:54:00Z
+## requests
+name                                 reqs  fail    p50ms    p95ms    p99ms    maxms
+CreateActor                             1     0       17       17       17       17
+CreateAtespace                          1     0        3        3        3        3
+ResumeActor                            14     0     1800     2900     2900     2937
+Step_01_load_context                    3     0     3400     4700     4700     4740
+Step_02_fetch                           3     0     2700     2900     2900     2868
+Step_03_work                            3     0     5100     5400     5400     5389
+Step_04_review                          3     0     4200     4400     4400     4376
+Step_05_wrap_up                         2     0     2800     2800     2800     2830
+SuspendActor                           15     0     4500     5300     5300     5304
+TimeToWake                             14     0     2100     3200     3200     3173
+WakeFirstTouch                         14     0      170      460      460      460
+Aggregated                             73     0     2100     5000     5400     5389
+## storage / memory / cpu
+duration_s=262 samples=261 device=vdb
+written_MiB_by_device: vdb=28638
+write_MiB_per_s: mean=109.3 p50=0.6 p95=617.5 p99=773.0 peak_1s=852.9
+write_MiB_per_s_busy_seconds_only(>1MiB/s): n=111 mean=255.5
+disk_util_pct: mean=24.0 p95=58.7 peak=73.9 seconds_over_90=0
+cpu_pct_all_cores: busy_mean=14.0 busy_p95=43.5 busy_peak=53.6 | iowait_mean=0.6 iowait_p95=3.0 iowait_peak=5.8
+mem_available_MiB: start=3265 min=1890 end=3014 | dirty_pagecache_MiB_peak=225
+node_snapshots_dir_MiB: start=0 peak=2070 end=2070
+object_store_atespaces_MiB: start=4 peak=1767 end=1029
+## suspend(checkpoint) / resume(restore) phases, ms (atelet)
+layer   op          class    kind    scope           phase                n      p50      p90      p95      max
+atelet  checkpoint  gvisor   latest  -               worker_checkpoint    15   1358.3   1692.9   1716.0   1727.4
+atelet  checkpoint  gvisor   latest  -               persist             15   2778.4   3267.9   3350.3   3457.7
+atelet  checkpoint  gvisor   latest  -               total               15   4280.8   4739.0   4829.0   4972.7
+atelet  restore     gvisor   local   -               worker_restore      15   1748.0   2700.6   2756.9   2840.8
+atelet  restore     gvisor   local   -               total               15   1755.3   2731.6   2794.2   2857.9
+## snapshot size per actor, MiB
+node: actors=1 median=1035 min=1035 max=1035 total=1035
+object: actors=1 median=1025 min=1025 max=1025 total=1025
+## load window only (부하가 걸린 구간: turnover 는 교체 구간)
+window=start..end duration_s=241 device=vdb
+written_MiB=26803 write_MiB_per_s_mean=111
+disk_util_pct: mean=24 p95=59 peak_1s=74
+cpu_pct_all_cores: busy_mean=14 iowait_mean=0.7
+suspends=15 suspends_per_s=0.06 written_MiB_per_suspend=1787 suspend_p50_s=4.50 suspends_in_flight_mean(rate*p50)=0.3
+## worker pods after
+benchmark-worker-6f8c8b9657-2v6kg   1/1   Running   0     17h
+benchmark-worker-6f8c8b9657-g95qm   1/1   Running   0     17h
+benchmark-worker-6f8c8b9657-mwc9c   1/1   Running   0     17h
+benchmark-worker-6f8c8b9657-zwjgw   1/1   Running   0     17h

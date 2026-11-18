@@ -1,0 +1,10 @@
+name=D_s1_r2 users=1 duration_s=240 extra=lifecycle_mode=sync
+deployed=script=agent-1g.yaml actor_memory=1536Mi worker_count=4
+objectstore_plugin_args=["node","--socket=/run/objectstore-plugin/node.sock","--root=/var/lib/ate","--asset-staging-dir=/var/lib/objectstore-plugin/asset-staging","--asset-staging-capacity=8Gi","--preview="]
+start=2026-11-18T03:54:32Z
+{
+  "host": null,
+  "message": "Swarming started",
+  "success": true
+}
+end=2026-11-18T03:58:33Z

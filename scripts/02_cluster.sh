@@ -4,6 +4,14 @@
 #       ~/.kube/config 에 kind-kind context 가 추가된다.
 set -euo pipefail
 source "$(dirname "$0")/env.sh"
+node="${KIND_CLUSTER_NAME:-kind}-control-plane"
+if { docker inspect "$node" >/dev/null 2>&1 || docker inspect kind-registry >/dev/null 2>&1; } && [ "${ASB_RECREATE:-0}" != 1 ]; then
+  echo "STOP: 컨테이너 '$node' 또는 'kind-registry' 가 이미 있다. 이 스크립트는 같은 이름의 클러스터를 지우고 다시 만들며, registry 컨테이너를 같이 쓴다."
+  echo "  이 작업이 만든 것이 맞고 다시 만들어도 되면: ASB_RECREATE=1 scripts/02_cluster.sh"
+  echo "  다른 사람의 것이거나 모르겠으면: 멈추고 사용자에게 묻는다 (클러스터 이름은 site.env 의 KIND_CLUSTER_NAME 으로 바꿀 수 있다)"
+  exit 3
+fi
+rm -f "$RESULTS/deployed.txt"      # 새 클러스터에는 벤치마크가 배포돼 있지 않다
 cd "$SUBSTRATE_DIR"
 { time hack/create-kind-cluster.sh; } 2>&1 | tee "$RESULTS/02_kind_create.log"
 kubectl --context "$KCTX" get nodes -o wide | tee -a "$RESULTS/02_kind_create.log"

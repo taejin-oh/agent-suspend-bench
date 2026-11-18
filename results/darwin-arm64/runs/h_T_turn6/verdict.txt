@@ -1,0 +1,6 @@
+VERDICT=LIMIT
+run=h_T_turn6
+reason=실제 교체 초당 0.78회 < 목표 1회의 80%
+flags=-
+suspend_p50_s=2.80 suspend_p95_s=4.70 wake_p50_s=1.10 wake_p95_s=3.00
+failures=0 suspends_per_s=0.78 target_rps=1 mem_min_MiB=2691 worker_restarts=0

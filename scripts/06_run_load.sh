@@ -18,6 +18,7 @@ for i in $(seq 1 30); do curl -s -o /dev/null "$L/" && break; sleep 1; done
 args=(-d "user_count=$users" -d "spawn_rate=${SPAWN_RATE:-1}")
 for kv in "$@"; do args+=(-d "$kv"); done
 { echo "name=$name users=$users duration_s=$dur extra=$*"
+  echo "deployed=$(cat "$RESULTS/deployed.txt" 2>/dev/null)"
   echo "objectstore_plugin_args=$(kubectl --context "$KCTX" -n ate-system get ds atelet -o jsonpath='{.spec.template.spec.initContainers[0].args}' 2>/dev/null)"
   date -u +start=%FT%TZ; } | tee "$out/run.txt"
 kubectl --context "$KCTX" get pods -n benchmark-workloads --no-headers > "$out/workers_before.txt" 2>&1

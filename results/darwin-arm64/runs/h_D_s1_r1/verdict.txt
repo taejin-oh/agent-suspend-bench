@@ -1,0 +1,6 @@
+VERDICT=OK
+run=h_D_s1_r1
+reason=-
+flags=-
+suspend_p50_s=4.50 suspend_p95_s=5.30 wake_p50_s=2.10 wake_p95_s=3.20
+failures=0 suspends_per_s=0.06 target_rps=0 mem_min_MiB=1890 worker_restarts=0

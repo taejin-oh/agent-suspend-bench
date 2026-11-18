@@ -6,6 +6,12 @@
 set -euo pipefail
 source "$(dirname "$0")/env.sh"
 script="$(cd "$(dirname "${1:-$ROOT/workloads/smoke-5step.yaml}")" && pwd)/$(basename "${1:-smoke-5step.yaml}")"
+# substrate 의 배포 스크립트는 kubectl 의 "현재 context" 에 배포한다. 다른 클러스터에 배포되지 않게 확인한다.
+cur="$(kubectl config current-context 2>/dev/null)"
+if [ "$cur" != "$KCTX" ]; then
+  echo "STOP: kubectl 현재 context 가 '$cur' 이다. 이 작업의 클러스터는 '$KCTX' 이다. 다른 클러스터에 배포하지 않도록 멈춘다."
+  echo "  site.env 에 KUBECONFIG 가 설정돼 있는지 확인한다 (site.env.example 참고)."; exit 3
+fi
 cd "$SUBSTRATE_DIR"
 [ -x "$ROOT/bin/boomer-worker" ] || go build -o "$ROOT/bin/boomer-worker" ./cmd/benchmarking/boomer-worker
 boomer-worker --check-agentsession-script "$script"
@@ -14,4 +20,5 @@ boomer-worker --check-agentsession-script "$script"
   time ./benchmarking/locust/deploy.sh --deploy --user-class agentsession --agentsession-script "$script"
 } 2>&1 | tee "$RESULTS/05_deploy_benchmark.log"
 kubectl --context "$KCTX" get pods -n benchmark-workloads -n benchmarking -o wide || true
+echo "script=$(basename "$script") actor_memory=${ACTOR_MEMORY:-512Mi} worker_count=${WORKER_COUNT:-4}" > "$RESULTS/deployed.txt"
 kubectl --context "$KCTX" get pods -n benchmarking; kubectl --context "$KCTX" get pods -n benchmark-workloads

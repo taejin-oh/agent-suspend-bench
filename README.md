@@ -4,6 +4,8 @@
 
 실제 Agent(LLM)는 돌리지 않습니다. [Agent Substrate](https://github.com/agent-substrate/substrate)의 agent-session 부하 도구가 대본(YAML)대로 CPU·메모리·디스크를 소모하는 가상 Agent를 만듭니다. checkpoint 자체는 gVisor가 실제 메모리를 디스크에 쓰고 객체 저장소(클러스터 안 rustfs)로 올리므로, 스토리지 부담은 실제 값입니다. 외부 클라우드 자원은 쓰지 않습니다.
 
+회사 서버에서 에이전트에게 맡겨 진행할 때는 `AGENTS.md`와 `docs/handoff/HANDOFF.md`(작업 지시서)를 따릅니다.
+
 ## 서버에 있어야 하는 것
 
 | 항목 | 조건 |
@@ -25,8 +27,10 @@ Go 툴체인은 이 폴더 안(`toolchain/`)에 받으므로 따로 설치하지
 
 ```bash
 git clone https://github.com/taejin-oh/agent-suspend-bench.git && cd agent-suspend-bench
-export HOST_LABEL=company-server      # 결과 폴더 이름. 생략하면 <os>-<arch>
+cp site.env.example site.env          # 서버별 설정: 결과 폴더 이름(HOST_LABEL), 전용 클러스터 이름, 전용 kubeconfig
 ```
+
+`site.env`가 없으면 기본값(결과 폴더 `<os>-<arch>`, 클러스터 이름 `kind`, `~/.kube/config`)으로 동작합니다.
 
 | # | 명령 | 하는 일 | 확인되는 것 | Mac 기준 소요 |
 |---|---|---|---|---|
@@ -38,11 +42,23 @@ export HOST_LABEL=company-server      # 결과 폴더 이름. 생략하면 <os>-
 | 5 | `scripts/05_deploy_benchmark.sh [대본]` | 가상 Agent 템플릿, worker pool, 부하 생성기 배포 | worker pod Running | 5분 |
 | 6 | `scripts/06_run_load.sh <이름> <세션수> <초> [옵션]` | 부하 실행 + 지표 수집 + 요약 | 아래 "결과 읽기" | 실행 시간 + 1분 |
 
-주의: 2번은 이름이 `kind`인 기존 kind 클러스터가 있으면 **지우고** 다시 만듭니다. 있으면 `KIND_CLUSTER_NAME=asb`처럼 다른 이름을 주십시오. `~/.kube/config`에 context가 하나 추가됩니다.
+주의: 2번은 같은 이름의 kind 클러스터를 **지우고** 다시 만드는 스크립트입니다. 그래서 같은 이름의 클러스터나 `kind-registry` 컨테이너가 이미 있으면 멈추고, `ASB_RECREATE=1`을 줘야 진행합니다. 클러스터 이름은 `site.env`의 `KIND_CLUSTER_NAME`으로 정합니다. `site.env`에 `KUBECONFIG`를 주지 않으면 `~/.kube/config`에 context가 하나 추가됩니다. 5번은 kubectl의 현재 context가 이 클러스터가 아니면 멈춥니다.
 
 정리: 실행 사이에는 `scripts/cleanup_actors.sh`, 전부 끝나면 `scripts/99_teardown.sh`.
 
-## 부하 실행
+## 부하 실행: 정해 둔 묶음으로 (권장)
+
+```bash
+scripts/stage.sh status                              # 진행 상태와 다음에 할 일(NEXT)
+scripts/stage.sh plan                                # 단계(T, A~F)별 실행 목록
+scripts/bg.sh start stage_A scripts/stage.sh A       # A 단계를 백그라운드로 실행
+scripts/bg.sh wait                                   # 끝나거나 240초가 지날 때까지 대기
+python3 scripts/report.py                            # 모든 실행을 표로: results/<HOST_LABEL>/REPORT.md
+```
+
+`scripts/stage.sh <단계>`는 실행마다 재배포(필요할 때), 가상 Agent 정리, 부하 실행, 판정(`scripts/check_run.py` → `verdict.txt`)을 차례로 합니다. 끝난 실행은 건너뛰므로 중간에 끊겨도 다시 실행하면 이어집니다. 자원이 모자란 실행은 스스로 건너뛰고, 멈춤 판정은 한 번 다시 돌린 뒤 정해진 규칙대로 그 단계를 끝내거나 전체를 멈춥니다. 단계의 뜻과 판정 규칙은 `docs/handoff/HANDOFF.md` 4~5절에 있습니다. 업로드 메모리 한도는 `scripts/upload_budget.sh 2Gi|default|show`로 바꿉니다.
+
+## 부하 실행: 하나씩 직접
 
 ```bash
 # (A) 일반 모드: 세션 N개가 각자 대본을 돌며 단계 사이마다 suspend
@@ -70,7 +86,7 @@ scripts/06_run_load.sh turnover_12_awake3 12 300 lifecycle_mode=sync agentsessio
 
 대본이나 worker 수, 메모리를 바꾸면 5번을 다시 실행해야 합니다(`SKIP_BUILD=1`을 주면 이미지 빌드를 건너뜀). 패턴을 조절하는 방법과 패턴별 특징은 `docs/workload-patterns.md`에 정리했습니다.
 
-대본 작성 규칙은 substrate 문서 `docs/guides/benchmarking.md`의 "Writing an agent-session script" 절에 있습니다. `workloads/agent-1g.yaml`은 RAM 640Mi를 쓰는 서버용 대본으로, 검증기만 통과했고 실행해 보지는 않았습니다.
+대본 작성 규칙은 substrate 문서 `docs/guides/benchmarking.md`의 "Writing an agent-session script" 절에 있습니다. `workloads/agent-1g.yaml`은 RAM 640Mi를 쓰는 서버용 대본입니다. Mac에서는 세션 1개로만 2회 돌려 봤습니다(`runs/h_D_s1_*`, 240초): 실패 없음, Actor 하나의 snapshot 약 1 GiB, `SuspendActor` 중앙값 4.4~4.5초. 세션 여러 개와 turnover는 Mac의 메모리가 모자라 돌리지 못했습니다.
 
 ## 결과 읽기
 

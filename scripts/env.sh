@@ -1,5 +1,8 @@
-# 모든 스크립트가 source 하는 공통 설정. bash 전용.
+# 모든 스크립트가 source 하는 공통 설정. bash 전용. 셸에서 직접 source 하지 말고 scripts/ 의 스크립트를 실행할 것.
+if [ -z "${BASH_VERSION:-}" ]; then echo "scripts/env.sh 는 bash 전용이다. 직접 source 하지 말고 scripts/*.sh 를 실행한다." >&2; return 1 2>/dev/null || exit 1; fi
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# 서버별 설정(결과 폴더 이름, 클러스터 이름, 포트 등). site.env.example 을 site.env 로 복사해 쓴다. 없으면 기본값.
+if [ -f "$ROOT/site.env" ]; then source "$ROOT/site.env"; fi
 
 # 재현을 위해 고정한 버전. 바꾸면 results/ 의 숫자와 비교할 수 없게 됨.
 SUBSTRATE_REPO="https://github.com/agent-substrate/substrate.git"

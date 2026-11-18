@@ -1,0 +1,60 @@
+name=T_turn6 users=6 duration_s=180 extra=lifecycle_mode=sync agentsession_awake=2 target_rps=1
+deployed=script=smoke-5step.yaml actor_memory=512Mi worker_count=4
+objectstore_plugin_args=["node","--socket=/run/objectstore-plugin/node.sock","--root=/var/lib/ate","--asset-staging-dir=/var/lib/objectstore-plugin/asset-staging","--asset-staging-capacity=8Gi","--preview="]
+start=2026-11-18T03:44:44Z
+{
+  "host": null,
+  "message": "Swarming started",
+  "success": true
+}
+
+end=2026-11-18T03:47:46Z
+## requests
+name                                 reqs  fail    p50ms    p95ms    p99ms    maxms
+CreateActor                             6     0        7       12       12       12
+CreateAtespace                          6     0        2       12       12       12
+ResumeActor                            92     0     1100     3000     3200     3217
+Step_01_load_context                   22     0      200      360      420      418
+Step_02_download                       20     0      430      570      570      570
+Step_03_build                          19     0      130      250      250      251
+Step_04_test                           19     0      590      690      690      685
+Step_05_wrap_up                        18     0       57      170      170      169
+SuspendActor                           89     0     2800     4700     5300     5328
+SuspendActor_Register                   6     0      430      550      550      547
+TimeToWake                             92     0     1100     3000     3200     3233
+WakeFirstTouch                         92     0       28      120      400      401
+Aggregated                            481     0      550     3500     4700     5328
+## storage / memory / cpu
+duration_s=201 samples=200 device=vdb
+written_MiB_by_device: vdb=29379
+write_MiB_per_s: mean=145.9 p50=140.4 p95=409.9 p99=492.7 peak_1s=518.3
+write_MiB_per_s_busy_seconds_only(>1MiB/s): n=127 mean=227.8
+disk_util_pct: mean=31.9 p95=74.2 peak=88.9 seconds_over_90=0
+cpu_pct_all_cores: busy_mean=26.4 busy_p95=57.7 busy_peak=77.3 | iowait_mean=1.4 iowait_p95=4.0 iowait_peak=7.0
+mem_available_MiB: start=2859 min=2691 end=2994 | dirty_pagecache_MiB_peak=257
+node_snapshots_dir_MiB: start=0 peak=1432 end=945
+object_store_atespaces_MiB: start=4 peak=1293 end=901
+## suspend(checkpoint) / resume(restore) phases, ms (atelet)
+layer   op          class    kind    scope           phase                n      p50      p90      p95      max
+atelet  checkpoint  gvisor   latest  -               worker_checkpoint    99    566.9   1057.1   1138.5   1580.9
+atelet  checkpoint  gvisor   latest  -               persist             99   1574.4   3335.8   3855.8   4883.7
+atelet  checkpoint  gvisor   latest  -               total               99   2379.5   3904.4   4611.8   5728.0
+atelet  restore     gvisor   latest  -               download             6      0.8      1.1      1.1      1.2
+atelet  restore     gvisor   latest  -               worker_restore       6     90.8    118.9    118.9    118.9
+atelet  restore     gvisor   latest  -               total                6     93.1    122.6    123.3    124.1
+atelet  restore     gvisor   local   -               worker_restore      95    979.5   2536.2   2930.4   3657.6
+atelet  restore     gvisor   local   -               total               95    982.7   2553.6   2936.5   3708.5
+## snapshot size per actor, MiB
+node: actors=6 median=235 min=153 max=321 total=1421
+object: actors=6 median=152 min=145 max=293 total=1174
+## load window only (부하가 걸린 구간: turnover 는 교체 구간)
+window=turnover fill done..end duration_s=114 device=vdb
+written_MiB=28087 write_MiB_per_s_mean=247
+disk_util_pct: mean=51 p95=80 peak_1s=89
+cpu_pct_all_cores: busy_mean=41 iowait_mean=2.3
+suspends=89 suspends_per_s=0.78 written_MiB_per_suspend=316 suspend_p50_s=2.80 suspends_in_flight_mean(rate*p50)=2.2
+## worker pods after
+benchmark-worker-6f8c8b9657-2v6kg   1/1   Running   0     17h
+benchmark-worker-6f8c8b9657-g95qm   1/1   Running   0     17h
+benchmark-worker-6f8c8b9657-mwc9c   1/1   Running   0     17h
+benchmark-worker-6f8c8b9657-zwjgw   1/1   Running   0     17h

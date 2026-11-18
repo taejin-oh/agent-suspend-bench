@@ -7,13 +7,33 @@
 #       scripts/stage.sh resume [실행이름]  STOP 상태를 푼다. 사용자가 원인을 해결했다고 확인한 뒤에만 쓴다
 source "$(dirname "$0")/env.sh"
 NODE="${KIND_CLUSTER_NAME:-kind}-control-plane"; RUNS="$RESULTS/runs"; STOPF="$RESULTS/STOP.txt"
-STAGES="${ASB_STAGES:-T A B C D E F}"
+STAGES="${ASB_STAGES:-S T A B C D E F}"
 SYNC="lifecycle_mode=sync"; TURN() { echo "agentsession_awake=$1 target_rps=$2"; }
 
 # 단계|실행이름|배포|업로드 한도|세션 수|실행 시간(초)|추가 인자
+#   S substrate 가 기본 제공하는 시나리오. 값을 바꾸지 않는다:
+#       S_glutton_*  substrate 야간 시험 목록(benchmarking/automation/tests.yaml)의 gVisor glutton 항목. 이름, 사용자 수, worker 수,
+#                    Actor 메모리, 실행 시간, 옵션이 그 파일과 같다 (microVM 항목은 뺐다)
+#       S_coding_*   문서(docs/guides/benchmarking.md "Agent-Session Benchmark")의 기본 실행: 내장 대본 coding-session,
+#                    Actor 메모리 1Gi, 옵션 없음. 세션 수와 실행 시간은 문서에 없어 이 저장소가 정했다
+#   T 이하는 이 저장소가 정한 조건 (자체 대본 smoke-5step / agent-1g)
 #   T 배관 점검 (짧게)            A Mac 과 같은 조건 + 반복      B 일반 모드에서 겹침 늘리기
 #   C turnover 규모 늘리기        D 메모리가 큰 Agent 대본       E async 모드      F 업로드 메모리 한도 비교
+GL="min_wait_time=1.0 max_wait_time=1.0"; GM="mem_churn=64Mi mem_read=all $GL"
 PLAN="
+S|S_glutton_baseline_1_user|g1|default|1|60|$SYNC $GL
+S|S_glutton_baseline_1_user_pause|g1|default|1|60|lifecycle_mode=async $GL
+S|S_glutton_baseline_5_users|g5|default|5|60|$SYNC $GL
+S|S_glutton_baseline_5_users_pause|g5|default|5|60|lifecycle_mode=async $GL
+S|S_glutton_baseline_10_users|g10|default|10|60|$SYNC $GL
+S|S_glutton_baseline_10_users_pause|g10|default|10|60|lifecycle_mode=async $GL
+S|S_glutton_oversubscribe_15_users|g10|default|15|120|min_wait_time=0.5 max_wait_time=1.0
+S|S_glutton_mem_1gi_gvisor|gm1|default|1|60|$SYNC mem_target=1Gi $GM
+S|S_glutton_mem_1gi_gvisor_pause|gm1|default|1|60|lifecycle_mode=async mem_target=1Gi $GM
+S|S_glutton_mem_2gi_gvisor|gm2|default|1|60|$SYNC mem_target=2Gi $GM
+S|S_glutton_mem_2gi_gvisor_pause|gm2|default|1|60|lifecycle_mode=async mem_target=2Gi $GM
+S|S_coding_1|cs|default|1|300|
+S|S_coding_4|cs|default|4|300|
 T|T_s1|smoke|default|1|90|$SYNC
 T|T_turn6|smoke|default|6|180|$SYNC $(TURN 2 1)
 A|A_s1_r1|smoke|default|1|180|$SYNC
@@ -42,10 +62,17 @@ F|F_def_turn12|smoke|default|12|300|$SYNC $(TURN 3 1)
 ${ASB_EXTRA_PLAN:-}"
 PLAN="$(printf '%s\n' "$PLAN" | grep '|')"
 
-# 배포 종류별 값: 대본, Actor 메모리 한도, 깨어 있는 Actor 1개가 쓰는 메모리 어림(MiB), Actor 1개의 snapshot 이 차지하는 디스크 어림(MiB)
-spec() { case "$1" in
-  smoke) echo "workloads/smoke-5step.yaml 512Mi 200 700";;
-  big)   echo "workloads/agent-1g.yaml 1536Mi 1500 4500";;
+# 배포 종류별 값: 부하 종류, 대본(builtin = substrate 내장), Actor 메모리 한도, worker 수,
+#   깨어 있는 Actor 1개가 쓰는 메모리 어림(MiB), Actor 1개의 snapshot 이 차지하는 디스크 어림(MiB)
+spec() { local w="${WORKER_COUNT:-4}"; case "$1" in
+  smoke) echo "agentsession workloads/smoke-5step.yaml 512Mi $w 200 700";;
+  big)   echo "agentsession workloads/agent-1g.yaml 1536Mi $w 1500 4500";;
+  g1)    echo "glutton builtin 256Mi 1 150 300";;        # 아래 넷은 substrate 야간 시험 목록의 값 (Actor 메모리 256Mi 는 substrate 기본값)
+  g5)    echo "glutton builtin 256Mi 5 150 300";;
+  g10)   echo "glutton builtin 256Mi 10 150 300";;
+  gm1)   echo "glutton builtin 1536Mi 1 1400 4500";;
+  gm2)   echo "glutton builtin 2560Mi 1 2500 9000";;
+  cs)    echo "agentsession builtin 1Gi 1 450 1200";;    # 문서의 기본 실행: --actor-memory 1Gi, worker 수는 substrate 기본값 1
   *)     echo "";; esac; }
 verdict_of() { sed -n 's/^VERDICT=//p' "$1/verdict.txt" 2>/dev/null | head -1; }
 stopping() { case "$1" in BROKEN|RESOURCE|FAILURES) return 0;; *) return 1;; esac; }
@@ -62,17 +89,18 @@ healthy() {
 wait_healthy() { local i; for i in $(seq 1 30); do healthy && return 0; sleep 10; done; return 1; }
 
 ensure_deploy() {   # $1 = 배포 종류
-  set -- $(spec "$1"); local want="script=$(basename "$1") actor_memory=$2 worker_count=${WORKER_COUNT:-4}"
+  set -- $(spec "$1"); local want="user_class=$1 script=$(basename "$2") actor_memory=$3 worker_count=$4"
   [ "$(cat "$RESULTS/deployed.txt" 2>/dev/null)" = "$want" ] && return 0
   echo "## 벤치마크 배포를 바꾼다: $want"
   [ -f "$RESULTS/deployed.txt" ] && "$ROOT/scripts/cleanup_actors.sh" >/dev/null 2>&1
   if [ -f "$RESULTS/deployed.txt" ]; then export SKIP_BUILD=1; else unset SKIP_BUILD; fi
-  ACTOR_MEMORY="$2" "$ROOT/scripts/05_deploy_benchmark.sh" "$ROOT/$1" > "$RESULTS/05_deploy_last.log" 2>&1 \
+  local arg="$ROOT/$2"; [ "$2" = builtin ] && arg=builtin
+  USER_CLASS="$1" ACTOR_MEMORY="$3" WORKER_COUNT="$4" "$ROOT/scripts/05_deploy_benchmark.sh" "$arg" > "$RESULTS/05_deploy_last.log" 2>&1 \
     || { tail -n 20 "$RESULTS/05_deploy_last.log"; return 1; }
   [ "$(cat "$RESULTS/deployed.txt" 2>/dev/null)" = "$want" ]; }
 
 guard() {   # 자원이 모자라면 이유를 출력하고 1 을 돌려준다. $1=배포 $2=한도 $3=세션 수 $4=추가 인자
-  set -- $(spec "$1") "$2" "$3" "$4"; local ram="$3" disk="$4" budget="$5" users="$6" extra="$7"
+  set -- $(spec "$1") "$2" "$3" "$4"; local ram="$5" disk="$6" budget="$7" users="$8" extra="$9"
   local awake; awake="$(printf '%s' "$extra" | sed -n 's/.*agentsession_awake=\([0-9]*\).*/\1/p')"; [ -n "$awake" ] || awake="$users"
   local mem_av disk_free need_mem need_disk
   mem_av="$(docker exec "$NODE" awk '/MemAvailable/{print int($2/1024)}' /proc/meminfo)"
@@ -85,7 +113,7 @@ guard() {   # 자원이 모자라면 이유를 출력하고 1 을 돌려준다. 
 
 do_run() {   # 반환: 0 실행함, 10 자원 부족으로 건너뜀
   local name="$1" sp="$2" budget="$3" users="$4" dur="$5" extra="$6" out="$RUNS/$1" why
-  [ -n "$(spec "$sp")" ] || stop_all "계획표의 배포 종류 '$sp' 를 모른다 (실행 $name). smoke 또는 big 이어야 한다."
+  [ -n "$(spec "$sp")" ] || stop_all "계획표의 배포 종류 '$sp' 를 모른다 (실행 $name). scripts/stage.sh 의 spec 에 있는 이름이어야 한다."
   wait_healthy || stop_all "클러스터 상태 이상: 5분을 기다려도 ate-system / benchmark-workloads 의 pod 가 모두 Running 이 아니다 (실행 $name 직전)."
   ensure_deploy "$sp" || stop_all "벤치마크 배포 실패 (실행 $name 직전). 로그: $RESULTS/05_deploy_last.log"
   "$ROOT/scripts/upload_budget.sh" "$budget" || stop_all "업로드 한도 변경 실패 (실행 $name 직전)."
@@ -123,8 +151,8 @@ EOF
   python3 "$ROOT/scripts/report.py" "$RESULTS" >/dev/null && echo "보고서: $RESULTS/REPORT.md"
   echo "STAGE_DONE=$st"; }
 
-show_plan() { printf '%-3s %-18s %-6s %-8s %5s %5s  %s\n' 단계 실행 배포 한도 세션 초 "추가 인자"
-  printf '%s\n' "$PLAN" | while IFS='|' read -r s n sp b u d e; do printf '%-3s %-18s %-6s %-8s %5s %5s  %s\n' "$s" "$n" "$sp" "$b" "$u" "$d" "$e"; done; }
+show_plan() { printf '%-3s %-34s %-6s %-8s %5s %5s  %s\n' 단계 실행 배포 한도 세션 초 "추가 인자"
+  printf '%s\n' "$PLAN" | while IFS='|' read -r s n sp b u d e; do printf '%-3s %-34s %-6s %-8s %5s %5s  %s\n' "$s" "$n" "$sp" "$b" "$u" "$d" "$e"; done; }
 
 status() {
   local next="" p0 p1 p2 p3 p4
@@ -152,7 +180,7 @@ status() {
   elif [ "$p3" = todo ]; then next="scripts/bg.sh start step3 scripts/03_deploy_substrate.sh"
   elif [ "$p4" = todo ]; then next="scripts/bg.sh start step4 scripts/04_counter_cycle.sh 3"; fi
   echo "== 부하 단계 (판정: OK 정상 / LIMIT 처리 한계 / FAILURES 요청 실패 / RESOURCE 자원 위험 / BROKEN 실행 불량)"
-  local st name sp b u d e state pending
+  local st name sp b u d e state pending bgline; bgline="$("$ROOT/scripts/bg.sh" status | head -1)"
   for st in $STAGES; do
     pending=""
     while IFS='|' read -r s name sp b u d e; do
@@ -160,10 +188,11 @@ status() {
       state="$(row_state "$name")"; row_final "$name" || pending=1
       case "$state" in
         SKIPPED) state="건너뜀: $(head -1 "$RUNS/$name/SKIPPED.txt")";;
-        PENDING) state="(아직 안 함)";; PARTIAL) state="(중단된 실행. 다시 돌리면 새로 한다)";;
+        PENDING) state="(아직 안 함)";;
+        PARTIAL) case "$bgline" in BG=RUNNING*) state="(실행 중)";; *) state="(중단된 실행. 단계를 다시 시작하면 새로 돌린다)";; esac;;
       esac
       [ -d "$RUNS/$name.bad1" ] && state="$state  [1차 시도: $(verdict_of "$RUNS/$name.bad1")]"
-      printf '  %-2s %-18s %s\n' "$st" "$name" "$state"
+      printf '  %-2s %-34s %s\n' "$st" "$name" "$state"
     done <<EOF
 $PLAN
 EOF

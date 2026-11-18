@@ -1,0 +1,10 @@
+name=S_coding_1 users=1 duration_s=300 extra=
+deployed=user_class=agentsession script=builtin actor_memory=1Gi worker_count=1
+objectstore_plugin_args=["node","--socket=/run/objectstore-plugin/node.sock","--root=/var/lib/ate","--asset-staging-dir=/var/lib/objectstore-plugin/asset-staging","--asset-staging-capacity=8Gi","--preview="]
+start=2026-11-18T05:00:57Z
+{
+  "host": null,
+  "message": "Swarming started",
+  "success": true
+}
+end=2026-11-18T05:05:59Z

@@ -52,13 +52,13 @@ cp site.env.example site.env          # 서버별 설정: 결과 폴더 이름(H
 
 ```bash
 scripts/stage.sh status                              # 진행 상태와 다음에 할 일(NEXT)
-scripts/stage.sh plan                                # 단계(T, A~F)별 실행 목록
+scripts/stage.sh plan                                # 단계(S, T, A~F)별 실행 목록
 scripts/bg.sh start stage_A scripts/stage.sh A       # A 단계를 백그라운드로 실행
 scripts/bg.sh wait                                   # 끝나거나 240초가 지날 때까지 대기
 python3 scripts/report.py                            # 모든 실행을 표로: results/<HOST_LABEL>/REPORT.md
 ```
 
-`scripts/stage.sh <단계>`는 실행마다 재배포(필요할 때), 가상 Agent 정리, 부하 실행, 판정(`scripts/check_run.py` → `verdict.txt`)을 차례로 합니다. 끝난 실행은 건너뛰므로 중간에 끊겨도 다시 실행하면 이어집니다. 자원이 모자란 실행은 스스로 건너뛰고, 멈춤 판정은 한 번 다시 돌린 뒤 정해진 규칙대로 그 단계를 끝내거나 전체를 멈춥니다. 단계의 뜻과 판정 규칙은 `docs/handoff/HANDOFF.md` 4~5절에 있습니다. 업로드 메모리 한도는 `scripts/upload_budget.sh 2Gi|default|show`로 바꿉니다.
+`scripts/stage.sh <단계>`는 실행마다 재배포(필요할 때), 가상 Agent 정리, 부하 실행, 판정(`scripts/check_run.py` → `verdict.txt`)을 차례로 합니다. 끝난 실행은 건너뛰므로 중간에 끊겨도 다시 실행하면 이어집니다. 자원이 모자란 실행은 스스로 건너뛰고, 멈춤 판정은 한 번 다시 돌린 뒤 정해진 규칙대로 그 단계를 끝내거나 전체를 멈춥니다. S 단계는 substrate가 기본 제공하는 시나리오(야간 시험 목록의 glutton 항목, 내장 대본 `coding-session`)를 값 그대로 돌리고, T 이하는 이 저장소가 정한 조건입니다. 단계의 뜻과 판정 규칙은 `docs/handoff/HANDOFF.md` 4~5절에 있습니다. 업로드 메모리 한도는 `scripts/upload_budget.sh 2Gi|default|show`로 바꿉니다.
 
 ## 부하 실행: 하나씩 직접
 
@@ -155,6 +155,7 @@ scripts/06_run_load.sh turnover_12_awake3 12 300 lifecycle_mode=sync agentsessio
   - 512Mi: 동시에 작업 중인 파일 평균 1.0개, 한도가 꽉 찬 시간 92%. `persist` 중앙값 9.5초 중 자기 파일의 실제 작업은 0.8초(파일을 하나씩 처리해도 1.3초)이고 84~90%가 대기였습니다.
   - 2Gi: 첫 1분은 대기가 거의 없고 `persist` 0.4~0.6초, 초당 1회 처리. 그 뒤 동시 업로드가 늘면서 큰 파일의 처리 시간이 0.4초 → 3초대, CPU 35% → 72%, 가용 메모리 2.3 → 1.5 GiB가 됐고, 2분쯤부터 한도가 다시 차서 `persist`가 10초대로 돌아갔습니다. 이 실행의 `SuspendActor` 중앙값은 3.8초, p95는 18초입니다(첫 2Gi 실행은 2.3초 / 7.1초).
   - 사용법: `python3 scripts/analyze_uploads.py results/<HOST_LABEL>/runs/<이름> <예산 MiB>`
+- **substrate 기본 제공 시나리오 (`runs/S_*`, `scripts/stage.sh S`)**: substrate 야간 시험 목록의 gVisor glutton 항목 11개 중 9개와 내장 대본 `coding-session`(세션 1개, 4개)을 값 그대로 돌렸고 모두 실패가 없었습니다. glutton의 sync `SuspendActor` 중앙값은 사용자 1명 0.16초, 5명 0.26초, 10명 0.38초, 메모리 1Gi를 채웠을 때 5.1초(snapshot 약 1 GiB)였습니다. `coding-session`(async)은 `SuspendActorAsync` 중앙값 0.43초(세션 1개), 0.58초(4개), snapshot 약 350 MiB였습니다. 메모리 2Gi 항목 2개는 Mac의 메모리가 모자라 건너뛰었습니다. 각 1회 실행이고, 전체 표는 `results/darwin-arm64/REPORT.md`에 있습니다.
 - 약 12시간 앞서 같은 조건으로 돌린 첫 실행(`runs/s4_sync`, `runs/turnover_12_awake3`)도 같은 경향입니다(turnover `SuspendActor` 중앙값 9.8초, p95 16초). 이 두 실행에는 CPU·구간별 시간·actor별 snapshot 크기가 없습니다.
 
 ## 알려진 한계

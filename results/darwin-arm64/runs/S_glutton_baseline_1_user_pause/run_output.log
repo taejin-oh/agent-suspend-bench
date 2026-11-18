@@ -1,0 +1,50 @@
+name=S_glutton_baseline_1_user_pause users=1 duration_s=60 extra=lifecycle_mode=async min_wait_time=1.0 max_wait_time=1.0
+deployed=user_class=glutton script=builtin actor_memory=256Mi worker_count=1
+objectstore_plugin_args=["node","--socket=/run/objectstore-plugin/node.sock","--root=/var/lib/ate","--asset-staging-dir=/var/lib/objectstore-plugin/asset-staging","--asset-staging-capacity=8Gi","--preview="]
+start=2026-11-18T04:43:51Z
+{
+  "host": null,
+  "message": "Swarming started",
+  "success": true
+}
+
+end=2026-11-18T04:44:52Z
+## requests
+name                                 reqs  fail    p50ms    p95ms    p99ms    maxms
+CreateActor                             1     0       10       10       10       10
+CreateAtespace                          1     0       12       12       12       12
+GluttonPing                            51     0        6       25       40       40
+ResumeActor                            50     0       72       90      220      218
+ResumeActorFirstResume                  1     0      101      100      100      101
+SuspendActorAsync                      51     0       43       66       71       71
+Aggregated                            155     0       43       84      100      218
+## storage / memory / cpu
+duration_s=81 samples=81 device=vdb
+written_MiB_by_device: vdb=316
+write_MiB_per_s: mean=3.9 p50=4.8 p95=6.9 p99=12.5 peak_1s=12.5
+write_MiB_per_s_busy_seconds_only(>1MiB/s): n=57 mean=5.4
+disk_util_pct: mean=5.9 p95=16.4 peak=48.3 seconds_over_90=0
+cpu_pct_all_cores: busy_mean=5.1 busy_p95=7.4 busy_peak=15.6 | iowait_mean=0.2 iowait_p95=0.4 iowait_peak=0.6
+mem_available_MiB: start=4266 min=4156 end=4159 | dirty_pagecache_MiB_peak=12
+node_snapshots_dir_MiB: start=4 peak=6 end=6
+object_store_atespaces_MiB: start=4 peak=4 end=4
+## suspend(checkpoint) / resume(restore) phases, ms (atelet)
+layer   op          class    kind    scope           phase                n      p50      p90      p95      max
+atelet  checkpoint  gvisor   local   -               worker_checkpoint    54     30.5     38.3     43.1     53.9
+atelet  checkpoint  gvisor   local   -               persist             54      0.4      0.7      0.9      3.1
+atelet  checkpoint  gvisor   local   -               total               54     31.6     39.4     45.2     55.7
+atelet  restore     gvisor   latest  -               download             1      1.5      1.5      1.5      1.5
+atelet  restore     gvisor   latest  -               worker_restore       1     78.2     78.2     78.2     78.2
+atelet  restore     gvisor   latest  -               total                1     83.2     83.2     83.2     83.2
+atelet  restore     gvisor   local   -               worker_restore      53     49.7     60.7     63.4     97.9
+atelet  restore     gvisor   local   -               total               53     52.3     63.9     66.0    105.4
+## snapshot size per actor, MiB
+node: actors=1 median=6 min=6 max=6 total=6
+## load window only (부하가 걸린 구간: turnover 는 교체 구간)
+window=start..end duration_s=59 device=vdb
+written_MiB=302 write_MiB_per_s_mean=5
+disk_util_pct: mean=6 p95=13 peak_1s=48
+cpu_pct_all_cores: busy_mean=5 iowait_mean=0.2
+suspends=51 suspends_per_s=0.86 written_MiB_per_suspend=6 suspend_p50_s=0.04 suspends_in_flight_mean(rate*p50)=0.0
+## worker pods after
+benchmark-worker-6f8c8b9657-g95qm   1/1   Running   1 (15m ago)   18h

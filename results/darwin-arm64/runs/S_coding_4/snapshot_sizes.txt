@@ -1,0 +1,7 @@
+## node /var/lib/ate/snapshots/<actor-uid> (KB)
+351200	/var/lib/ate/snapshots/33759bd3-a628-4eb8-bfda-c72d573d9f5a
+367048	/var/lib/ate/snapshots/4f28fe04-f364-42f3-9d80-dcf05196ad71
+597960	/var/lib/ate/snapshots/9608fad6-27e3-4c89-a458-f4ac20c9b8da
+315736	/var/lib/ate/snapshots/cc1627bd-b4cc-49a1-ba28-64bcd203c95a
+## object store atespaces/benchmark/actors/<actor-uid> (KB)
+command terminated with exit code 1

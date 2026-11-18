@@ -1,0 +1,10 @@
+name=S_glutton_baseline_5_users users=5 duration_s=60 extra=lifecycle_mode=sync min_wait_time=1.0 max_wait_time=1.0
+deployed=user_class=glutton script=builtin actor_memory=256Mi worker_count=5
+objectstore_plugin_args=["node","--socket=/run/objectstore-plugin/node.sock","--root=/var/lib/ate","--asset-staging-dir=/var/lib/objectstore-plugin/asset-staging","--asset-staging-capacity=8Gi","--preview="]
+start=2026-11-18T04:46:16Z
+{
+  "host": null,
+  "message": "Swarming started",
+  "success": true
+}
+end=2026-11-18T04:47:18Z

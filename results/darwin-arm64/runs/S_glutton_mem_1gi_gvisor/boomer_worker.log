@@ -1,0 +1,9 @@
+{"time":"2026-11-18T04:56:31.273164462Z","level":"INFO","msg":"dynconfig fetch enabled","url":"http://127.0.0.1:8089/boomer-config","poll_interval":10000000000}
+{"time":"2026-11-18T04:56:31.273277044Z","level":"INFO","msg":"registered boomer task","user_class":"GluttonUser","user_class_flag":"glutton"}
+{"time":"2026-11-18T04:56:31.273325377Z","level":"INFO","msg":"new slave runner"}
+{"time":"2026-11-18T04:56:31.273336793Z","level":"INFO","msg":"Boomer is built with gomq support."}
+{"time":"2026-11-18T04:56:31.776037533Z","level":"INFO","msg":"Boomer is connected to master(tcp://127.0.0.1:5557) press Ctrl+c to quit."}
+{"time":"2026-11-18T04:56:37.434221173Z","level":"INFO","msg":"dynconfig applied","trigger":"spawn","trace_probability":0,"config":"{WaitTime:{MinWait:1s MaxWait:1s} Lifecycle:{ResumeMode:explicit LifecycleMode:sync} MinLive:0s MaxLive:0s MemTarget:1Gi MemChurn:64Mi MemRead:all CPUCores:0 CPUDutyCycle:0 MaxPingsPerWake:1}"}
+{"time":"2026-11-18T04:56:37.434338463Z","level":"INFO","msg":"The total number of clients required is  1"}
+{"time":"2026-11-18T04:56:37.434365046Z","level":"INFO","msg":"The current number of clients is 0, 1 clients will be added"}
+{"time":"2026-11-18T04:57:37.684749614Z","level":"INFO","msg":"Recv stop message from master, all the goroutines are stopped"}

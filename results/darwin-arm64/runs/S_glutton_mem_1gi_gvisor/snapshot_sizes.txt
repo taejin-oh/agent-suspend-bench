@@ -1,0 +1,4 @@
+## node /var/lib/ate/snapshots/<actor-uid> (KB)
+1054852	/var/lib/ate/snapshots/b833ccd9-ed76-4bb4-8d80-9d9010216701
+## object store atespaces/benchmark/actors/<actor-uid> (KB)
+1049544	/data/ate-snapshots/atespaces/benchmark/actors/b833ccd9-ed76-4bb4-8d80-9d9010216701

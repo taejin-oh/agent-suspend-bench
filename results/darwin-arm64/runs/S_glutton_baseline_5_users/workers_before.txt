@@ -1,0 +1,5 @@
+benchmark-worker-6f8c8b9657-bqskw   1/1   Running   0             50s
+benchmark-worker-6f8c8b9657-g95qm   1/1   Running   1 (16m ago)   18h
+benchmark-worker-6f8c8b9657-gz7ct   1/1   Running   0             50s
+benchmark-worker-6f8c8b9657-q8ztr   1/1   Running   0             50s
+benchmark-worker-6f8c8b9657-xc9f5   1/1   Running   0             50s

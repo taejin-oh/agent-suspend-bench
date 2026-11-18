@@ -20,10 +20,11 @@
 | counter 데모, `kubectl ate` CLI (`suspend actor --mode=sync`, `proxy actor` 등) | `ate-setup deploy demo counter`, `cmd/kubectl-ate` | `04_counter_cycle.sh`, `cleanup_actors.sh` | 소스 |
 | 벤치마크 배포 (가상 Agent 템플릿, worker pool, Locust) | `benchmarking/deploy_locust.sh`, `benchmarking/locust/deploy.sh` | `05_deploy_benchmark.sh` | Deploy benchmarks |
 | 부하 생성기: Locust(제어) + boomer(Go로 만든 실행기), 가상 Agent 프로그램(glutton) | `benchmarking/locust/`, `cmd/benchmarking/boomer-worker`, `internal/benchmarking/` | 전체 | Running Tests |
-| 부하 종류: `agentsession`(일반, turnover), `glutton`, `sweperf`, `resumepaused`, `spawn`, `durdir`, `ate_env` | 위와 같음 | `agentsession`만 사용 | 각 Benchmark 절 |
+| 부하 종류: `agentsession`(일반, turnover), `glutton`, `sweperf`, `resumepaused`, `spawn`, `durdir`, `ate_env` | 위와 같음 | `glutton`(S 단계), `agentsession`(S의 일부와 T 이하) | 각 Benchmark 절 |
+| 야간 시험 목록: 어떤 부하를 어떤 값으로 돌리는지 정해 둔 표 | `benchmarking/automation/tests.yaml` | S 단계의 `S_glutton_*`가 gVisor glutton 항목을 값 그대로 옮김 | 소스 |
 | 실행 옵션: `lifecycle_mode`, `resume_mode`, `agentsession_awake`, `target_rps`, `agentsession_think_scale` 등 | Locust 옵션 | `06_run_load.sh`의 `key=value` | Agent-Session Configuration Knobs |
 | 대본(YAML) 형식, 동작 10종, 검사기 | `boomer-worker --check-agentsession-script` | `05_deploy_benchmark.sh`가 배포 전에 검사 | Writing an agent-session script |
-| 내장 대본 3종 (`coding-session` 20단계가 기본, `personal-assistant`, `personal-assistant-light`) | `internal/benchmarking/boomer/agentsession/scripts/` | **쓰지 않음** (3절) | Built-in script variants |
+| 내장 대본 3종 (`coding-session` 20단계가 기본, `personal-assistant`, `personal-assistant-light`) | `internal/benchmarking/boomer/agentsession/scripts/` | `coding-session`만 S 단계에서 사용. T 이하 단계는 자체 대본 | Built-in script variants |
 | 결과 표의 행 이름: `SuspendActor`, `SuspendActor_Register`, `ResumeActor`, `TimeToWake`, `WakeFirstTouch`, `Step_*` | boomer가 Locust에 보고 | `summary.txt`의 요청 표 | Agent-Session Reported Metrics |
 | turnover에서 등록 구간과 교체 구간을 가르는 로그 `turnover fill done` | boomer 로그 | `window_stats.py`, `analyze_uploads.py`가 이 줄로 구간을 자름 | Analyzing a Turnover Run |
 | 재우기·깨우기의 구간별 시간 (`worker_checkpoint`, `persist`, `download`, `worker_restore`) | atelet·worker의 "timing breakdown" 로그, `benchmarking/analysis/phase_report.py` | `06_run_load.sh`가 로그를 모아 이 도구로 집계 → `phases.txt` | Suspend/resume phase breakdown |
@@ -42,13 +43,27 @@
 | 업로드 대기와 실제 작업의 분리 | `analyze_uploads.py` | 파일별 업로드 로그와 예약 크기 식(소스에서 옮김)으로 계산 | 없음 |
 | 판정 (`OK`/`LIMIT`/`FAILURES`/`RESOURCE`/`BROKEN`) | `check_run.py` | **기준값(목표의 80%, 가용 메모리 1 GiB 등)은 이 저장소가 정한 것**이며 substrate의 합격 기준이 아님 | 없음 |
 | 단계 계획 T, A~F와 자동 진행 | `stage.sh`, `bg.sh` | 어떤 조건을 몇 번 돌릴지, 재시도와 건너뛰기 규칙 | 사다리 shape, 야간 자동화(5절) |
+| S 단계 (기본 제공 시나리오를 먼저 실행) | `stage.sh`의 `S_*` 행 | **조건은 substrate 것 그대로**(아래 "S 단계" 절). 실행 방법과 수집·판정만 이 저장소의 것 | 야간 시험 목록 `benchmarking/automation/tests.yaml`, 문서의 기본 실행 |
 | 결과 표 | `report.py` | 실행들을 표 하나로 | 없음 |
 | 업로드 한도 전환 | `upload_budget.sh` | DaemonSet을 patch. 옵션 자체는 substrate 것 | 없음 |
-| 대본 2개 | `workloads/smoke-5step.yaml`, `workloads/agent-1g.yaml` | substrate의 형식으로 **이 저장소가 쓴 대본**. 모든 측정이 이 둘로 한 것 | 내장 대본 3종 |
+| 대본 2개 | `workloads/smoke-5step.yaml`, `workloads/agent-1g.yaml` | substrate의 형식으로 **이 저장소가 쓴 대본**. T 이하 단계와, README·발표 자료에 실린 Mac 측정(업로드 한도 분석 포함)이 이 둘로 한 것 | 내장 대본 3종 |
 | 문서와 발표 자료 | `README.md`, `docs/` | | |
 | 측정 결과와 해석 | `results/`, README의 "Mac에서 확인한 것" | "지연의 대부분이 업로드 메모리 한도의 대기"라는 결론 포함. substrate 문서에 있는 내용이 아니라 이 저장소의 측정과 소스 분석으로 얻은 것 | |
 
+## S 단계: substrate 기본 제공 시나리오
+
+신뢰도를 위해 서버 검증은 substrate가 제공하는 시나리오를 값 그대로 먼저 돌립니다.
+
+| 실행 | 출처 | substrate 값 그대로인 것 | 이 저장소가 정한 것 |
+|---|---|---|---|
+| `S_glutton_*` 11개 | `benchmarking/automation/tests.yaml`의 gVisor glutton 항목 (야간 자동 시험이 도는 목록) | 부하 종류(glutton), 이름, 사용자 수, worker 수, Actor 메모리, 실행 시간, 옵션(`lifecycle-mode`, `min/max-wait-time`, `mem-target`, `mem-churn`, `mem-read`) | 없음. microVM 항목 2개는 뺌 |
+| `S_coding_1`, `S_coding_4` | `docs/guides/benchmarking.md` "Agent-Session Benchmark"의 기본 실행 명령 | 부하 종류(agentsession), 내장 대본 `coding-session`, Actor 메모리 1Gi, worker 수 기본값 1, 실행 옵션 없음(재우기 async, 깨우기는 Locust 기본값 explicit) | 세션 수(1, 4)와 실행 시간(5분). 문서에 정해진 값이 없음 |
+
+차이가 남는 부분: substrate의 야간 시험은 `runner.py`로 실행하고 시험마다 substrate를 새로 설치합니다. 이 저장소는 Locust의 HTTP API로 시작하고, 한 번 설치한 클러스터에서 벤치마크 배포만 바꿉니다. 디스크·CPU·메모리 수치와 판정은 이 저장소의 수집기와 규칙에서 나옵니다.
+
 ## 4. 기본값과 다르게 쓴 설정
+
+아래는 T 이하 단계(이 저장소가 정한 조건)에 해당합니다. S 단계는 해당하지 않습니다.
 
 결과를 substrate의 기본 동작으로 읽으면 안 되는 부분입니다.
 
@@ -71,8 +86,9 @@
 | Prometheus 기반 서버 지표 | 노드·pod의 pressure, snapshot 크기 분포, atelet이 잰 재우기·깨우기 시간, worker 재시작과 OOM | Server ground truth |
 | 밀도 지표 | 코어당·GB당 Actor 수 | Density frontiers |
 | 부하 모양 (사다리, 버스트) | 시간에 따라 사용자 수나 `target_rps`를 바꿈 | Analyzing a ResumePaused Ladder Run 등 |
-| 다른 부하 종류 | `glutton`, `sweperf`, `resumepaused`, `spawn`, `durdir`, `ate_env` | 각 Benchmark 절 |
-| 내장 대본 3종의 부하 실행 | 검사기로 구성만 확인 | Built-in script variants |
+| 다른 부하 종류 | `sweperf`, `resumepaused`, `spawn`, `durdir`, `ate_env` (`glutton`은 S 단계에서 사용) | 각 Benchmark 절 |
+| 내장 대본 `personal-assistant`, `personal-assistant-light`의 부하 실행 | 검사기로 구성만 확인 (`coding-session`은 S 단계에서 사용) | Built-in script variants |
+| 야간 시험 목록의 microVM, durdir, spawn, resumepaused, 관측성 항목 | gVisor glutton 항목만 S 단계로 옮김 | `benchmarking/automation/tests.yaml` |
 | Isolate 모드, 추적(Jaeger) 보기, Grafana, 야간 자동화 | | Isolate Mode, Viewing Traces 등 |
 
 ## 6. substrate 문서가 권하지만 이 저장소가 반영하지 않은 것

@@ -46,7 +46,7 @@ def load(d):
         rows = {}
     pct = lambda x, k: (x.get(f"response_time_percentile_{k}") or 0) / 1000
     sus = rows.get("SuspendActor") or rows.get("SuspendActorAsync")
-    wake = rows.get("TimeToWake")
+    wake = rows.get("TimeToWake") or rows.get("ResumeActor")     # glutton 부하에는 TimeToWake 행이 없다
     if sus:
         r["suspends"] = sus["num_requests"]
         r["suspend_p50_s"], r["suspend_p95_s"] = sus["median_response_time"] / 1000, pct(sus, "0.95")

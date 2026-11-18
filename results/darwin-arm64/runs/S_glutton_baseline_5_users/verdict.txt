@@ -1,0 +1,6 @@
+VERDICT=OK
+run=S_glutton_baseline_5_users
+reason=-
+flags=-
+suspend_p50_s=0.26 suspend_p95_s=0.41 wake_p50_s=0.07 wake_p95_s=0.12
+failures=0 suspends_per_s=3.33 target_rps=0 mem_min_MiB=3822 worker_restarts=0

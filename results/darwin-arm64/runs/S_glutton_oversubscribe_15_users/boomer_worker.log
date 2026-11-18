@@ -1,0 +1,37 @@
+{"time":"2026-11-18T04:53:19.588160981Z","level":"INFO","msg":"dynconfig fetch enabled","url":"http://127.0.0.1:8089/boomer-config","poll_interval":10000000000}
+{"time":"2026-11-18T04:53:19.588235355Z","level":"INFO","msg":"registered boomer task","user_class":"GluttonUser","user_class_flag":"glutton"}
+{"time":"2026-11-18T04:53:19.58825823Z","level":"INFO","msg":"new slave runner"}
+{"time":"2026-11-18T04:53:19.588285229Z","level":"INFO","msg":"Boomer is built with gomq support."}
+{"time":"2026-11-18T04:53:20.091202398Z","level":"INFO","msg":"Boomer is connected to master(tcp://127.0.0.1:5557) press Ctrl+c to quit."}
+{"time":"2026-11-18T04:53:25.785055548Z","level":"INFO","msg":"dynconfig applied","trigger":"spawn","trace_probability":0,"config":"{WaitTime:{MinWait:500ms MaxWait:1s} Lifecycle:{ResumeMode:explicit LifecycleMode:async} MinLive:0s MaxLive:0s MemTarget: MemChurn: MemRead: CPUCores:0 CPUDutyCycle:0 MaxPingsPerWake:1}"}
+{"time":"2026-11-18T04:53:25.785155047Z","level":"INFO","msg":"The total number of clients required is  1"}
+{"time":"2026-11-18T04:53:25.785169213Z","level":"INFO","msg":"The current number of clients is 0, 1 clients will be added"}
+{"time":"2026-11-18T04:53:26.786701061Z","level":"INFO","msg":"The total number of clients required is  2"}
+{"time":"2026-11-18T04:53:26.786732311Z","level":"INFO","msg":"The current number of clients is 1, 1 clients will be added"}
+{"time":"2026-11-18T04:53:27.787791414Z","level":"INFO","msg":"The total number of clients required is  3"}
+{"time":"2026-11-18T04:53:27.787811581Z","level":"INFO","msg":"The current number of clients is 2, 1 clients will be added"}
+{"time":"2026-11-18T04:53:28.788851643Z","level":"INFO","msg":"The total number of clients required is  4"}
+{"time":"2026-11-18T04:53:28.788922267Z","level":"INFO","msg":"The current number of clients is 3, 1 clients will be added"}
+{"time":"2026-11-18T04:53:29.788718261Z","level":"INFO","msg":"The total number of clients required is  5"}
+{"time":"2026-11-18T04:53:29.78872851Z","level":"INFO","msg":"The current number of clients is 4, 1 clients will be added"}
+{"time":"2026-11-18T04:53:30.790005361Z","level":"INFO","msg":"The total number of clients required is  6"}
+{"time":"2026-11-18T04:53:30.790045403Z","level":"INFO","msg":"The current number of clients is 5, 1 clients will be added"}
+{"time":"2026-11-18T04:53:31.791329045Z","level":"INFO","msg":"The total number of clients required is  7"}
+{"time":"2026-11-18T04:53:31.791350753Z","level":"INFO","msg":"The current number of clients is 6, 1 clients will be added"}
+{"time":"2026-11-18T04:53:32.796154728Z","level":"INFO","msg":"The total number of clients required is  8"}
+{"time":"2026-11-18T04:53:32.796168603Z","level":"INFO","msg":"The current number of clients is 7, 1 clients will be added"}
+{"time":"2026-11-18T04:53:33.798520816Z","level":"INFO","msg":"The total number of clients required is  9"}
+{"time":"2026-11-18T04:53:33.798613106Z","level":"INFO","msg":"The current number of clients is 8, 1 clients will be added"}
+{"time":"2026-11-18T04:53:34.799831499Z","level":"INFO","msg":"The total number of clients required is  10"}
+{"time":"2026-11-18T04:53:34.799839333Z","level":"INFO","msg":"The current number of clients is 9, 1 clients will be added"}
+{"time":"2026-11-18T04:53:35.806565659Z","level":"INFO","msg":"The total number of clients required is  11"}
+{"time":"2026-11-18T04:53:35.806622575Z","level":"INFO","msg":"The current number of clients is 10, 1 clients will be added"}
+{"time":"2026-11-18T04:53:36.805660828Z","level":"INFO","msg":"The total number of clients required is  12"}
+{"time":"2026-11-18T04:53:36.80567262Z","level":"INFO","msg":"The current number of clients is 11, 1 clients will be added"}
+{"time":"2026-11-18T04:53:37.809591564Z","level":"INFO","msg":"The total number of clients required is  13"}
+{"time":"2026-11-18T04:53:37.80960573Z","level":"INFO","msg":"The current number of clients is 12, 1 clients will be added"}
+{"time":"2026-11-18T04:53:38.811275785Z","level":"INFO","msg":"The total number of clients required is  14"}
+{"time":"2026-11-18T04:53:38.811287451Z","level":"INFO","msg":"The current number of clients is 13, 1 clients will be added"}
+{"time":"2026-11-18T04:53:39.811660813Z","level":"INFO","msg":"The total number of clients required is  15"}
+{"time":"2026-11-18T04:53:39.811678396Z","level":"INFO","msg":"The current number of clients is 14, 1 clients will be added"}
+{"time":"2026-11-18T04:55:26.036478232Z","level":"INFO","msg":"Recv stop message from master, all the goroutines are stopped"}

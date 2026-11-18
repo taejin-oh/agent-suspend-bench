@@ -1,0 +1,18 @@
+## node /var/lib/ate/snapshots/<actor-uid> (KB)
+6536	/var/lib/ate/snapshots/066dfaea-87fc-4bdc-a12f-5b1bcb987b78
+6508	/var/lib/ate/snapshots/139ff606-cff5-4896-a22a-ee5dece4d253
+6520	/var/lib/ate/snapshots/1b71ef76-030d-4006-b392-508102997457
+6392	/var/lib/ate/snapshots/1cb90b11-2d44-4669-beba-2549c4438534
+6436	/var/lib/ate/snapshots/3d859012-2d0b-4ad0-bb9f-f092ae807d77
+6544	/var/lib/ate/snapshots/4f96ae4c-53b7-4638-b6f5-cb0c57b3117c
+6124	/var/lib/ate/snapshots/517b9799-ae56-4a85-bac3-8a40e4b7673b
+6508	/var/lib/ate/snapshots/554400e1-0e04-42bc-bf0e-4d2a1e459101
+6568	/var/lib/ate/snapshots/57479d72-2853-4bd0-a46d-615672c10946
+12172	/var/lib/ate/snapshots/a2f84aaa-889e-4fe2-81fe-6a7b2924239b
+13100	/var/lib/ate/snapshots/db9fa456-629c-421a-a710-7c36985ea6f7
+6524	/var/lib/ate/snapshots/e8a3277d-853b-4c68-a484-7eb885be1582
+13132	/var/lib/ate/snapshots/f5ec2886-6ebf-44a7-b3ae-6ec9aaf613a9
+6480	/var/lib/ate/snapshots/fd4e9b9f-dc5c-49c8-8665-7be51856bc1c
+6476	/var/lib/ate/snapshots/fe92c191-8368-48df-aa68-07118608887d
+## object store atespaces/benchmark/actors/<actor-uid> (KB)
+command terminated with exit code 1

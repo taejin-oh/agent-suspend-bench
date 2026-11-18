@@ -1,0 +1,6 @@
+VERDICT=OK
+run=S_glutton_oversubscribe_15_users
+reason=-
+flags=-
+suspend_p50_s=0.05 suspend_p95_s=0.10 wake_p50_s=0.07 wake_p95_s=0.13
+failures=0 suspends_per_s=15.45 target_rps=0 mem_min_MiB=3448 worker_restarts=0

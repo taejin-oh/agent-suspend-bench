@@ -1,0 +1,10 @@
+name=S_glutton_mem_1gi_gvisor_pause users=1 duration_s=60 extra=lifecycle_mode=async mem_target=1Gi mem_churn=64Mi mem_read=all min_wait_time=1.0 max_wait_time=1.0
+deployed=user_class=glutton script=builtin actor_memory=1536Mi worker_count=1
+objectstore_plugin_args=["node","--socket=/run/objectstore-plugin/node.sock","--root=/var/lib/ate","--asset-staging-dir=/var/lib/objectstore-plugin/asset-staging","--asset-staging-capacity=8Gi","--preview="]
+start=2026-11-18T04:58:09Z
+{
+  "host": null,
+  "message": "Swarming started",
+  "success": true
+}
+end=2026-11-18T04:59:10Z

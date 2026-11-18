@@ -1,0 +1,70 @@
+name=S_coding_4 users=4 duration_s=300 extra=
+deployed=user_class=agentsession script=builtin actor_memory=1Gi worker_count=1
+objectstore_plugin_args=["node","--socket=/run/objectstore-plugin/node.sock","--root=/var/lib/ate","--asset-staging-dir=/var/lib/objectstore-plugin/asset-staging","--asset-staging-capacity=8Gi","--preview="]
+start=2026-11-18T05:06:30Z
+{
+  "host": null,
+  "message": "Swarming started",
+  "success": true
+}
+
+end=2026-11-18T05:11:31Z
+## requests
+name                                 reqs  fail    p50ms    p95ms    p99ms    maxms
+CreateActor                             4     0        9       12       12       12
+CreateAtespace                          4     0        5        6        6        6
+ResumeActor                           199     0      450     1400     2800     3348
+Step_01_read_task                      12     0       80      120      120      124
+Step_02_clone_repo                     12     0      620      760      760      759
+Step_03_explore_tree                   12     0      240      330      330      327
+Step_04_read_key_files                 12     0      160      210      210      213
+Step_05_install_deps                   12     0     1700     1900     1900     1901
+Step_06_first_build                    12     0     3400     3700     3700     3677
+Step_07_run_unit_tests                 12     0     2600     2800     2800     2812
+Step_08_reason_about_failure           12     0       32      190      190      192
+Step_09_edit_source                    11     0      130      890      890      890
+Step_10_incremental_build              10     0     1300     1400     1400     1436
+Step_11_rerun_failed_test              10     0      810      920      920      916
+Step_12_write_new_tests                 8     0       96      130      130      128
+Step_13_run_new_tests                   8     0     1011     1100     1100     1099
+Step_14_full_test_suite                 8     0     4100     4200     4200     4186
+Step_15_lint_format                     8     0      920     1000     1000     1008
+Step_16_refactor                        8     0      650      720      720      723
+Step_17_rebuild                         8     0     2200     2200     2200     2244
+Step_18_final_test_suite                8     0     3504     3700     3700     3672
+Step_19_package_artifact                8     0     1113     1300     1300     1305
+Step_20_commit_and_summarize            8     0      250      350      350      353
+SuspendActorAsync                     203     0      580     1000     1900     3111
+TimeToWake                            199     0      510     1600     2800     3361
+WakeFirstTouch                        199     0       31      170      660      685
+Aggregated                           1007     0      440     2200     3600     4186
+## storage / memory / cpu
+duration_s=321 samples=319 device=vdb
+written_MiB_by_device: vdb=74508
+write_MiB_per_s: mean=232.5 p50=214.0 p95=660.1 p99=883.9 peak_1s=964.5
+write_MiB_per_s_busy_seconds_only(>1MiB/s): n=224 mean=329.6
+disk_util_pct: mean=24.0 p95=55.8 peak=81.7 seconds_over_90=0
+cpu_pct_all_cores: busy_mean=23.1 busy_p95=46.4 busy_peak=64.0 | iowait_mean=0.9 iowait_p95=2.8 iowait_peak=5.4
+mem_available_MiB: start=3234 min=1992 end=3187 | dirty_pagecache_MiB_peak=317
+node_snapshots_dir_MiB: start=0 peak=1943 end=1385
+object_store_atespaces_MiB: start=4 peak=1361 end=1361
+## suspend(checkpoint) / resume(restore) phases, ms (atelet)
+layer   op          class    kind    scope           phase                n      p50      p90      p95      max
+atelet  checkpoint  gvisor   local   -               worker_checkpoint   208    437.1    716.9    920.0   2940.3
+atelet  checkpoint  gvisor   local   -               persist            208      1.2      2.7      4.6    125.7
+atelet  checkpoint  gvisor   local   -               total              208    442.4    720.2    956.9   2941.8
+atelet  restore     gvisor   latest  -               download             4      0.6      2.4      2.8      3.2
+atelet  restore     gvisor   latest  -               worker_restore       4     57.4     91.8     97.6    103.5
+atelet  restore     gvisor   latest  -               total                4     59.0     95.7    102.1    108.4
+atelet  restore     gvisor   local   -               worker_restore     204    402.8    988.7   1324.1   3195.3
+atelet  restore     gvisor   local   -               total              204    406.3    991.2   1338.2   3204.0
+## snapshot size per actor, MiB
+node: actors=4 median=351 min=308 max=584 total=1594
+## load window only (부하가 걸린 구간: turnover 는 교체 구간)
+window=start..end duration_s=300 device=vdb
+written_MiB=71676 write_MiB_per_s_mean=239
+disk_util_pct: mean=24 p95=54 peak_1s=82
+cpu_pct_all_cores: busy_mean=23 iowait_mean=0.9
+suspends=203 suspends_per_s=0.68 written_MiB_per_suspend=353 suspend_p50_s=0.58 suspends_in_flight_mean(rate*p50)=0.4
+## worker pods after
+benchmark-worker-6f8c8b9657-g95qm   1/1   Running   1 (42m ago)   18h

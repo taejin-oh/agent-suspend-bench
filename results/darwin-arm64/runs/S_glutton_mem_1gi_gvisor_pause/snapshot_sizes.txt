@@ -1,0 +1,4 @@
+## node /var/lib/ate/snapshots/<actor-uid> (KB)
+1055128	/var/lib/ate/snapshots/4f3dc354-9efa-40f4-9baa-3001cf0fe0b7
+## object store atespaces/benchmark/actors/<actor-uid> (KB)
+command terminated with exit code 1

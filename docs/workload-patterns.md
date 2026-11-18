@@ -24,12 +24,12 @@ Agent Substrate의 부하 도구로 만들 수 있는 워크로드 패턴을 정
 |---|---|---|---|---|
 | `agentsession` 일반 모드 | Actor 1개로 대본을 한 단계씩 실행. 단계 사이에는 재워 두고, 다음 단계에서 깨움 | 코딩 Agent 여러 개가 각자 일하는 상황 | 지원 | 실행 |
 | `agentsession` turnover 모드 | N개를 만들어 모두 재운 뒤 K개만 깨워 두고, 초당 R개씩 깨어 있는 것과 자는 것을 교체 | 많은 Agent 중 일부만 활성인 상태에서 계속 바뀌는 상황 | 지원 | 실행 |
-| `glutton` | 깨우기 → (메모리 채우기) → ping → 재우기 → 잠깐 대기를 반복 | 재우기/깨우기 자체의 비용 (플랫폼 기준선) | 미지원 (배포 옵션만 바꾸면 가능) | 소스 |
+| `glutton` | 깨우기 → (메모리 채우기) → ping → 재우기 → 잠깐 대기를 반복 | 재우기/깨우기 자체의 비용 (플랫폼 기준선) | 지원 (`scripts/stage.sh S`. substrate 야간 시험 목록의 값 그대로) | 실행 |
 | `sweperf` | 녹화된 SWE-Perf 작업을 4번에 나눠 실행하고, 사이마다 재웠다 깨움 | 실제 코딩 작업에 가까운 CPU·디스크 사용 | 미지원 | 소스 |
 | `resumepaused` | Actor에 요청은 보내지 않고, 정해진 속도로 깨우기/재우기만 호출 | 제어부(API 서버)가 초당 몇 번을 감당하는가 | 미지원 | 소스 |
 | `spawn`, `durdir`, `ate_env` 등 | 일괄 생성 시간, 영속 디렉터리, 명령 실행 | 특정 기능 | 미지원 | 소스 |
 
-이 저장소의 `scripts/05_deploy_benchmark.sh`는 `agentsession`으로 고정해 배포합니다. 다른 클래스를 쓰려면 substrate의 `benchmarking/locust/deploy.sh --user-class <이름>`을 직접 호출해야 합니다.
+이 저장소의 `scripts/05_deploy_benchmark.sh`는 기본으로 `agentsession`을 배포하고, `USER_CLASS=glutton scripts/05_deploy_benchmark.sh builtin`처럼 주면 다른 클래스를 배포합니다. 실행으로 확인한 것은 `agentsession`과 `glutton`입니다. substrate가 자체 야간 시험(`benchmarking/automation/tests.yaml`)에서 기준으로 쓰는 것은 `glutton`이고, `scripts/stage.sh S`가 그 항목을 값 그대로 돌립니다.
 
 ## 3. 조절하는 방법
 
@@ -130,21 +130,20 @@ steps:
 
 ### 4.3 대본 다섯 가지
 
-이 저장소의 대본 둘과 substrate에 내장된 대본 셋입니다. 단계 수, 메모리, 디스크, 필요한 Actor 메모리는 검사기 출력으로 확인했습니다(실행). 대기 시간 합계와 CPU 시간은 대본 파일에서 계산했습니다(소스). 실제 부하로 돌려 본 것은 `smoke-5step`과, 세션 1개로만 돌린 `agent-1g`입니다(snapshot이 Actor당 약 1 GiB, 재우기 중앙값 4.4~4.5초).
+이 저장소의 대본 둘과 substrate에 내장된 대본 셋입니다. 단계 수, 메모리, 디스크, 필요한 Actor 메모리는 검사기 출력으로 확인했습니다(실행). 대기 시간 합계와 CPU 시간은 대본 파일에서 계산했습니다(소스). 실제 부하로 돌려 본 것은 `smoke-5step`, 세션 1개로만 돌린 `agent-1g`(snapshot이 Actor당 약 1 GiB, 재우기 중앙값 4.4~4.5초), 그리고 내장 `coding-session`(세션 1개와 4개, 각 5분, 옵션 없음)입니다.
 
 | 대본 | 단계 | 한 바퀴의 대기 시간 | 메모리 | 디스크 | 필요한 Actor 메모리 | 무엇을 흉내 내나 | 돌려 봤나 |
 |---|---|---|---|---|---|---|---|
 | `workloads/smoke-5step.yaml` | 5 | 9초 | 64Mi | 약 24Mi | 512Mi | 동작 확인용 작은 Agent | 실행 |
 | `workloads/agent-1g.yaml` | 5 | — | 640Mi | 약 96Mi | 1536Mi | 메모리가 큰 Agent | 세션 1개만 실행 (2회) |
-| 내장 `coding-session` | 20 | 69초 (단계당 2~8초) | 96Mi | 약 98Mi | 1Gi | 코딩 Agent의 작업 한 건. CPU 약 40초 사용 | 검사만 |
+| 내장 `coding-session` | 20 | 69초 (단계당 2~8초) | 96Mi | 약 98Mi | 1Gi | 코딩 Agent의 작업 한 건. CPU 약 40초 사용 | 실행 (세션 1개, 4개) |
 | 내장 `personal-assistant` | 61 | 24시간 (2분~3시간) | 960Mi | 약 29Mi | 1536Mi | 항상 켜져 있는 비서형 Agent의 하루 | 검사만 |
 | 내장 `personal-assistant-light` | 61 | 24시간 | 28Mi | 약 29Mi | 256Mi | 같은 하루, 메모리만 작게 | 검사만 |
 
-내장 대본을 이 저장소 스크립트로 쓰려면 파일 경로를 주면 됩니다.
+내장 대본은 대본 파일을 주지 않고 배포하면 쓰입니다(기본이 `coding-session`). 다른 내장 대본은 실행할 때 `agentsession_script=<이름>`으로 고릅니다(문서).
 
 ```bash
-ACTOR_MEMORY=1Gi scripts/05_deploy_benchmark.sh \
-  src/substrate/internal/benchmarking/boomer/agentsession/scripts/coding-session.yaml
+WORKER_COUNT=1 ACTOR_MEMORY=1Gi scripts/05_deploy_benchmark.sh builtin
 ```
 
 - `personal-assistant` 계열은 하루를 그대로 재현하므로 `agentsession_think_scale=0.02`와 함께 쓰도록 만들어졌습니다(문서). 이 배율은 대기 시간에만 적용됩니다. 깨어서 기다리는 시간(`dwell`)과 CPU 사용 시간은 줄지 않으므로, 한 바퀴는 약 30분보다 깁니다(소스).
@@ -181,6 +180,7 @@ ACTOR_MEMORY=1Gi scripts/05_deploy_benchmark.sh \
 - **동작.** 깨우기 → (한 번만 메모리 채우기) → ping → 재우기 → 0~0.5초 대기를 반복합니다(소스).
 - **특징.** 대본이 없고 옵션으로만 조절합니다(`--mem-target`, `--mem-churn`, `--max-pings-per-wake`, 대기 시간). 동작 한 번이 밀리초 단위라, 워크로드가 아닌 플랫폼 자체의 재우기/깨우기 비용이 드러납니다.
 - **맞는 질문.** 워크로드 영향을 뺀 재우기/깨우기의 최소 비용. 메모리 크기만 바꿔 가며 snapshot 비용이 어떻게 느는지.
+- **Mac에서 돌린 결과 (실행, substrate 야간 시험 목록의 값 그대로, 각 1회 1~2분).** sync 재우기 중앙값은 사용자 1명 0.16초, 5명 0.26초, 10명 0.38초였습니다. 메모리 1Gi를 채우면 5.1초(snapshot 약 1 GiB)였고, async로는 1.3초였습니다. 15명을 worker 10개에 올린 초과 배정 실행도 실패가 없었습니다. 메모리 2Gi 항목은 Mac의 메모리가 모자라 돌리지 못했습니다.
 
 ### 5.4 sweperf
 
@@ -268,7 +268,8 @@ substrate 문서에는 몇 번 반복하라는 기준이나 편차에 관한 언
 | worker 하나에 Actor 여러 개 | 실행 (1회) + 소스 |
 | 업로드 한도에 따른 차이와 그 원인 | 실행 (기본 3회, 2Gi 2회) + 소스 |
 | 내장 대본 셋의 구성 | 검사기 출력으로 확인. 부하 실행은 안 함 |
-| glutton, sweperf, resumepaused, shape | 소스만 |
+| glutton (substrate 야간 시험 목록의 gVisor 항목 11개 중 9개), 내장 `coding-session` | 실행 (각 1회) |
+| sweperf, resumepaused, shape | 소스만 |
 | Linux 서버, microVM, 12개 초과 규모 | 미확인 |
 
 ## 8. 서버 검증에서 권하는 순서

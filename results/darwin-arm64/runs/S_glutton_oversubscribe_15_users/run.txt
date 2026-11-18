@@ -1,0 +1,10 @@
+name=S_glutton_oversubscribe_15_users users=15 duration_s=120 extra=min_wait_time=0.5 max_wait_time=1.0
+deployed=user_class=glutton script=builtin actor_memory=256Mi worker_count=10
+objectstore_plugin_args=["node","--socket=/run/objectstore-plugin/node.sock","--root=/var/lib/ate","--asset-staging-dir=/var/lib/objectstore-plugin/asset-staging","--asset-staging-capacity=8Gi","--preview="]
+start=2026-11-18T04:53:25Z
+{
+  "host": null,
+  "message": "Swarming started",
+  "success": true
+}
+end=2026-11-18T04:55:27Z

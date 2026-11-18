@@ -1,0 +1,12 @@
+## node /var/lib/ate/snapshots/<actor-uid> (KB)
+5656	/var/lib/ate/snapshots/5f4cd6a5-2b13-4d5f-bba2-a88bff948a72
+5644	/var/lib/ate/snapshots/63888b65-fb76-4105-848f-f9b5801ede90
+5592	/var/lib/ate/snapshots/6eef059a-0dd1-4c5b-af55-692bf1eb2187
+5616	/var/lib/ate/snapshots/beeabb8d-6c8c-4637-a600-43f8a5764f8b
+5592	/var/lib/ate/snapshots/e4d859f5-4c1a-408a-9f8c-d8208d5e1577
+## object store atespaces/benchmark/actors/<actor-uid> (KB)
+684	/data/ate-snapshots/atespaces/benchmark/actors/5f4cd6a5-2b13-4d5f-bba2-a88bff948a72
+720	/data/ate-snapshots/atespaces/benchmark/actors/63888b65-fb76-4105-848f-f9b5801ede90
+684	/data/ate-snapshots/atespaces/benchmark/actors/6eef059a-0dd1-4c5b-af55-692bf1eb2187
+684	/data/ate-snapshots/atespaces/benchmark/actors/beeabb8d-6c8c-4637-a600-43f8a5764f8b
+688	/data/ate-snapshots/atespaces/benchmark/actors/e4d859f5-4c1a-408a-9f8c-d8208d5e1577

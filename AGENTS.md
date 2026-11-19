@@ -30,3 +30,4 @@ scripts/stage.sh status                             # 진행 상태와 다음에
 | `README.md` | 절차 설명, 결과 파일 읽는 법, Mac 결과 |
 | `docs/workload-patterns.md` | 부하 조절값의 뜻, 결과를 어디까지 믿을 수 있는가 |
 | `docs/origin.md` | Agent Substrate가 기본 제공하는 것과 이 저장소가 추가한 것의 구분 |
+| `docs/agent-memory/` | 사용자가 앞에서 한 질문과 그 답의 기록. 이미 정해진 것을 다시 묻지 않도록 먼저 읽고, 새 질문과 답은 그 폴더의 `README.md` 규칙대로 이어서 적음 |

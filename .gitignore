@@ -11,3 +11,6 @@
 /site.env
 /kubeconfig
 __pycache__/
+
+# 회사 내부 정보가 들어 있는 문서. 이 저장소는 공개이므로 올리지 않음
+/docs/planning/

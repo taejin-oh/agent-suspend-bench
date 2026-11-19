@@ -35,11 +35,12 @@ Agent Substrate의 부하 도구로 만들 수 있는 워크로드 패턴을 정
 
 ### 3.1 배포할 때 정하는 값
 
-`scripts/05_deploy_benchmark.sh [대본.yaml]`로 정합니다. 환경 변수로 줄 수 있는 것은 `WORKER_COUNT`, `ACTOR_MEMORY`, `SKIP_BUILD`뿐입니다. 격리 방식과 Actor CPU는 스크립트를 고치거나 substrate의 `deploy_locust.sh`를 직접 호출해야 합니다. 값을 바꾸면 다시 배포해야 합니다. Actor 템플릿은 한번 만들면 바꿀 수 없기 때문입니다(소스).
+`scripts/05_deploy_benchmark.sh [대본.yaml]`로 정합니다. 환경 변수로 줄 수 있는 것은 `WORKER_COUNT`, `ACTOR_MEMORY`, `WORKER_MEMORY`, `SKIP_BUILD`뿐입니다. 격리 방식과 Actor CPU는 스크립트를 고치거나 substrate의 `deploy_locust.sh`를 직접 호출해야 합니다. 값을 바꾸면 다시 배포해야 합니다. Actor 템플릿은 한번 만들면 바꿀 수 없기 때문입니다(소스).
 
 | 무엇 | 어떻게 | 기본 | 영향 | 근거 |
 |---|---|---|---|---|
 | worker 수 | `WORKER_COUNT=N` | 4 | Actor를 받는 worker pod의 수. worker 하나가 여러 Actor를 받으므로(기본 최대 1000개) 동시 활성 수의 상한은 아님. 상한은 Actor의 CPU·메모리 한도를 worker 용량에 예약하는 방식으로 정해짐 | 실행 / 소스 |
+| worker 메모리 한도 | `WORKER_MEMORY=5Gi` | 없음(제한 없음) | worker pod 하나의 메모리 한도. 주면 worker가 보고하는 용량이 줄어 동시에 깨어 있을 수 있는 Actor 수가 제한됨. G 단계가 씀(`docs/capacity-eval.md`) | 소스. 실행은 `docs/capacity-eval.md` 10절 |
 | Actor 메모리 한도 | `ACTOR_MEMORY=1536Mi` | 512Mi | 대본의 `min_actor_memory` 이상이어야 함. 클수록 snapshot에 딸려 들어가는 페이지 캐시도 커진다고 함 | 512Mi만 실행 / 소스 |
 | 대본 | 인자로 YAML 파일 | `workloads/smoke-5step.yaml` | Agent가 하는 일 전체 (4절) | 실행 |
 | 격리 방식 | substrate `--sandbox-class gvisor\|microvm` | gvisor | microvm은 `/dev/kvm` 필요 | gvisor만 실행 |

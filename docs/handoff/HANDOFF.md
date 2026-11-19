@@ -103,7 +103,7 @@ cat site.env
 
 `WARN:` 줄은 진행을 막지 않습니다. 내용을 읽고 보고에 포함합니다. `FAIL:` 줄이 있으면 `PREFLIGHT=FAIL`이 되고 status가 STOP을 알립니다.
 
-### 부하 단계 (S, T, A~F)
+### 부하 단계 (S, T, A~G)
 
 **순서의 원칙: substrate가 기본 제공하는 시나리오(S)를 먼저 돌리고, 이 저장소가 정한 조건(T 이하)은 그 뒤에 돌립니다.** 처음부터 임의의 설정으로 측정하면 결과의 신뢰도가 떨어지기 때문입니다. S 단계의 값은 바꾸지 않습니다. 보고할 때도 두 묶음을 섞지 않습니다(`REPORT.md`가 두 표로 나눠 줍니다).
 
@@ -119,10 +119,17 @@ cat site.env
 | D | 메모리가 큰 Agent(약 640 MiB)로 snapshot 크기를 키움 | 세션 1개 ×2, 세션 4개, turnover 12개 (각 7분) | 약 35분 |
 | E | async 모드(업로드를 나중에 하는 substrate 기본 방식) | 세션 4개 10분, turnover 12개 15분 | 약 30분 |
 | F | 업로드 메모리 한도를 2Gi로 올렸을 때의 차이 (Mac에서 찾은 지연 원인의 재확인) | 2Gi ×2, 기본값 ×1 | 약 25분 |
+| G | **자리가 모자란 환경.** worker 1개의 메모리를 5Gi로 제한해 깨어 있을 수 있는 수를 작게 고정하고, 재우기 방식에 따라 받을 수 있는 Agent 수가 어떻게 달라지는지 봄. 설계는 `docs/capacity-eval.md` | 재우지 않음 ×2(세션 8, 16), sync·async·sync+2Gi 각각 세션 8, 16, 32, 48, 64 | Mac에서는 작은 규모로만 확인. 서버에서 약 2~3시간 |
 
 S 단계의 출처: `S_glutton_*`은 substrate의 `benchmarking/automation/tests.yaml`에 있는 항목과 이름, 사용자 수, worker 수, Actor 메모리, 실행 시간, 옵션이 같습니다(microVM 항목만 뺐습니다). **glutton**은 substrate의 기본 부하 종류로, 가상 사용자 하나가 "깨우기 → (메모리 채우기) → ping → 재우기 → 잠깐 대기"를 반복합니다. `_pause`가 붙은 항목은 async 재우기입니다. `S_coding_*`은 substrate 문서(`docs/guides/benchmarking.md`의 Agent-Session Benchmark 절)의 기본 실행 명령을 따른 것이고, 세션 수와 실행 시간은 문서에 없어 이 저장소가 정했습니다. 실행 방법(Locust API 호출)과 지표 수집, 판정은 S 단계에서도 이 저장소의 것입니다.
 
 T 이하 단계는 이 저장소가 쓴 대본(`workloads/smoke-5step.yaml`, `workloads/agent-1g.yaml`)과 이 저장소가 정한 조건입니다.
+
+**G 단계는 다른 단계와 세 가지가 다릅니다.**
+
+1. `FAILURES` 판정이 나오는 것이 정상입니다. 자리가 모자라 깨우기가 실패하는 지점을 찾는 단계이기 때문입니다. G 단계는 실패 판정이 나와도 멈추지 않고(한 번 다시 돌린 뒤) 다음 실행으로 넘어갑니다. STOP이 아니면 사용자에게 묻지 않고 계속합니다.
+2. G 단계의 배포가 `Insufficient memory`로 실패하면(로그 `results/<HOST_LABEL>/05_deploy_last.log` 또는 `kubectl describe pod`의 Events) worker에 준 메모리 5Gi가 노드의 여유보다 큰 것입니다. 멈추고 사용자에게 보고합니다. 사용자가 값을 정해 주면 `site.env`에 `export ASB_CAP_WORKER_MEMORY=<값>`을 넣고 `scripts/stage.sh resume` 뒤 다시 진행합니다.
+3. 끝난 뒤 `python3 scripts/report.py`에 더해 `python3 scripts/capacity_report.py`를 실행합니다. `results/<HOST_LABEL>/CAPACITY.md`가 생기고, 맨 아래 "요약" 절에 갈래별 "기준을 지킨 최대 세션 수"가 나옵니다. 보고할 때는 이 요약 절을 그대로 옮깁니다. 숫자를 보고 원인을 스스로 판단하지 않습니다.
 
 용어: **세션** = 가상 Agent 하나(Actor 하나). **turnover** = N개를 만들어 전부 재운 뒤 K개만 깨워 두고, 초당 R개씩 "깨어 있는 것과 자는 것"을 맞바꾸는 방식. **sync** = 재울 때 객체 저장소 업로드가 끝날 때까지 기다림. **async** = 노드 디스크에 쓰면 끝나고 업로드는 나중(기본 5분 뒤).
 
@@ -276,7 +283,7 @@ S의 첫 항목이나 T, A 단계에서 문제가 나면 STOP하는 이유: S의
 | 1 | 서버에서 외부 인터넷으로 직접 나갈 수 있는가. 프록시나 사내 미러가 있으면 그 내용 | | 직접 통신 가능 | 0단계가 확인. 막혀 있으면 STOP하고 보고 |
 | 2 | 서버를 다른 사람이나 다른 작업과 함께 쓰는가 | | 함께 쓴다고 가정 | 다른 컨테이너·클러스터를 건드리지 않음. 측정값에 잡음이 있을 수 있다고 보고에 적음 |
 | 3 | 현재 계정이 `docker` 명령을 쓸 수 있는가 | | 쓸 수 있음 | 0단계가 확인 |
-| 4 | 돌릴 단계 (`S T A B C D E F` 중. S는 substrate 기본 제공 시나리오) | | 전부 | 전부 |
+| 4 | 돌릴 단계 (`S T A B C D E F G` 중. S는 substrate 기본 제공 시나리오) | | 전부 | 전부 |
 | 5 | 꼭 보고 싶은 규모 (전체 Agent 수 / 깨어 있는 수 / 초당 교체 수) | | 없음 | 정해진 단계만. 6.5절 참고 |
 | 6 | 실제 Agent 하나의 메모리 크기 (snapshot 크기를 맞추기 위한 값) | | 모름 | 준비된 대본 두 가지(약 80 MiB, 약 640 MiB)만 사용 |
 | 7 | 서버 결과를 git으로 커밋·푸시해도 되는가. 안 되면 결과를 가져갈 방법 | | 안 됨 | 커밋·푸시하지 않고 `results/<HOST_LABEL>/` 위치만 보고 |

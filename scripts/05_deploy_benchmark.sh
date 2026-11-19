@@ -5,6 +5,7 @@
 #       USER_CLASS=glutton scripts/05_deploy_benchmark.sh builtin    (substrate 의 기본 부하 종류 glutton)
 # 환경변수: WORKER_COUNT(기본 4) = worker pod 수 (worker 하나가 여러 actor 를 받는다. 동시 활성 수의 상한은 아님),
 #           ACTOR_MEMORY(기본 512Mi) = Agent 1개의 메모리 한도. 대본의 min_actor_memory 이상이어야 한다.
+#           WORKER_MEMORY(기본 없음) = worker pod 1개의 메모리 한도. 주면 worker 가 받을 수 있는 Actor 수가 이 값으로 제한된다 (G 단계).
 #           USER_CLASS(기본 agentsession) = 부하 종류. substrate 의 locust/deploy.sh --user-class 로 그대로 전달한다.
 set -euo pipefail
 source "$(dirname "$0")/env.sh"
@@ -21,9 +22,9 @@ cd "$SUBSTRATE_DIR"
 [ -x "$ROOT/bin/boomer-worker" ] || go build -o "$ROOT/bin/boomer-worker" ./cmd/benchmarking/boomer-worker
 [ -z "$script" ] || boomer-worker --check-agentsession-script "$script"
 { time ./benchmarking/deploy_locust.sh --deploy --sandbox-class gvisor \
-    --actor-memory "${ACTOR_MEMORY:-512Mi}" --worker-count "${WORKER_COUNT:-4}" ${SKIP_BUILD:+--skip-build}
+    --actor-memory "${ACTOR_MEMORY:-512Mi}" --worker-count "${WORKER_COUNT:-4}" ${WORKER_MEMORY:+--worker-memory "$WORKER_MEMORY"} ${SKIP_BUILD:+--skip-build}
   time ./benchmarking/locust/deploy.sh --deploy --user-class "$USER_CLASS" ${script:+--agentsession-script "$script"}
 } 2>&1 | tee "$RESULTS/05_deploy_benchmark.log"
 kubectl --context "$KCTX" get pods -n benchmark-workloads -n benchmarking -o wide || true
-echo "user_class=$USER_CLASS script=$(basename "${script:-builtin}") actor_memory=${ACTOR_MEMORY:-512Mi} worker_count=${WORKER_COUNT:-4}" > "$RESULTS/deployed.txt"
+echo "user_class=$USER_CLASS script=$(basename "${script:-builtin}") actor_memory=${ACTOR_MEMORY:-512Mi} worker_count=${WORKER_COUNT:-4}${WORKER_MEMORY:+ worker_memory=$WORKER_MEMORY}" > "$RESULTS/deployed.txt"
 kubectl --context "$KCTX" get pods -n benchmarking; kubectl --context "$KCTX" get pods -n benchmark-workloads

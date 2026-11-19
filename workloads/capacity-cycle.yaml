@@ -1,0 +1,18 @@
+# Capacity evaluation script (stage G): every step keeps the Agent awake for about 5 s,
+# then the Agent is suspended for a 30 s "thinking" gap. Two steps, repeated.
+# Active time A ~= 5 s (dwell), idle time I ~= 30 s (think, +-20% jitter).
+name: capacity-cycle
+min_actor_memory: 512Mi
+steps:
+  - name: 01_work
+    agent: loads context, then stays awake working
+    think: 30s
+    ops:
+      - fill_ram: {key: ctx, size: 128Mi}
+      - dwell: {millis: 5000}
+  - name: 02_work
+    agent: changes part of its memory, then stays awake working
+    think: 30s
+    ops:
+      - churn_ram: {key: ctx, size: 32Mi}
+      - dwell: {millis: 5000}

@@ -15,6 +15,13 @@ start)
       echo "T $(date +%s) rustfs_kb $(kubectl --context "$KCTX" exec -n ate-system deploy/rustfs -- du -sk /data/ate-snapshots/atespaces 2>/dev/null | cut -f1)"
       sleep 5; done ) > "$d/sizes_5s.txt" 2>&1 &
   echo $! > "$d/.pid_sizes"
+  # 10초: worker 가 Actor 에 내준 자리(ACTORS, CPU, MEMORY = 쓴 양/용량), Actor 상태별 개수, kind 노드 cgroup 의 메모리 내역
+  ( while :; do
+      echo "T $(date +%s) workers $(kubectl ate --context "$KCTX" get workers 2>/dev/null | awk '$2=="benchmark-worker"{printf "actors=%s cpu=%s mem=%s ; ",$4,$5,$6}')"
+      echo "T $(date +%s) actors $(kubectl ate --context "$KCTX" get actors -a benchmark 2>/dev/null | awk '$1=="benchmark"{c[$4]++} END{for(k in c) printf "%s=%d ",k,c[k]}')"
+      echo "T $(date +%s) cgroup $(docker exec "$NODE" sh -c 'printf "current=%s " "$(cat /sys/fs/cgroup/memory.current 2>/dev/null)"; awk "\$1==\"anon\"||\$1==\"file\"||\$1==\"file_dirty\"||\$1==\"file_writeback\"{printf \"%s=%s \",\$1,\$2}" /sys/fs/cgroup/memory.stat 2>/dev/null; tr "\n" " " < /sys/fs/cgroup/memory.events 2>/dev/null')"
+      sleep 10; done ) > "$d/cap_10s.txt" 2>&1 &
+  echo $! > "$d/.pid_cap"
   echo "collecting into $d";;
 stop)
   for f in "$d"/.pid_*; do kill "$(cat "$f")" 2>/dev/null; rm -f "$f"; done

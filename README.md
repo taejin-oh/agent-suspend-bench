@@ -52,7 +52,7 @@ cp site.env.example site.env          # 서버별 설정: 결과 폴더 이름(H
 
 ```bash
 scripts/stage.sh status                              # 진행 상태와 다음에 할 일(NEXT)
-scripts/stage.sh plan                                # 단계(S, T, A~F)별 실행 목록
+scripts/stage.sh plan                                # 단계(S, T, A~G)별 실행 목록
 scripts/bg.sh start stage_A scripts/stage.sh A       # A 단계를 백그라운드로 실행
 scripts/bg.sh wait                                   # 끝나거나 240초가 지날 때까지 대기
 python3 scripts/report.py                            # 모든 실행을 표로: results/<HOST_LABEL>/REPORT.md

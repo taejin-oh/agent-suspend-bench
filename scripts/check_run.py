@@ -70,8 +70,8 @@ def load(d):
     r["worker_restarts"] = restarts(read(f"{d}/workers_after.txt")) - restarts(read(f"{d}/workers_before.txt"))
 
     v = "OK"
-    if rows and r["mode"] == "none" and not r["failures"]:
-        pass    # 재우지 않는 실행: 재우기 기록이 없는 것이 정상
+    if rows and r["mode"] == "none":    # 재우지 않는 실행: 재우기 기록이 없는 것이 정상
+        if r["failures"]: v = "FAILURES"; r["reasons"].append("실패한 요청: " + ", ".join(r["failed_rows"]))
     elif not rows or not sus or not sus["num_requests"]:
         v = "BROKEN"; r["reasons"].append("통계가 없거나 재우기 기록이 0건")
     elif "not enough samples" in summ:

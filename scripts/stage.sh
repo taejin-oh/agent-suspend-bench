@@ -7,7 +7,7 @@
 #       scripts/stage.sh resume [실행이름]  STOP 상태를 푼다. 사용자가 원인을 해결했다고 확인한 뒤에만 쓴다
 source "$(dirname "$0")/env.sh"
 NODE="${KIND_CLUSTER_NAME:-kind}-control-plane"; RUNS="$RESULTS/runs"; STOPF="$RESULTS/STOP.txt"
-STAGES="${ASB_STAGES:-S T A B C D E F}"
+STAGES="${ASB_STAGES:-S T A B C D E F G}"
 SYNC="lifecycle_mode=sync"; TURN() { echo "agentsession_awake=$1 target_rps=$2"; }
 
 # 단계|실행이름|배포|업로드 한도|세션 수|실행 시간(초)|추가 인자
@@ -19,7 +19,10 @@ SYNC="lifecycle_mode=sync"; TURN() { echo "agentsession_awake=$1 target_rps=$2";
 #   T 이하는 이 저장소가 정한 조건 (자체 대본 smoke-5step / agent-1g)
 #   T 배관 점검 (짧게)            A Mac 과 같은 조건 + 반복      B 일반 모드에서 겹침 늘리기
 #   C turnover 규모 늘리기        D 메모리가 큰 Agent 대본       E async 모드      F 업로드 메모리 한도 비교
-GL="min_wait_time=1.0 max_wait_time=1.0"; GM="mem_churn=64Mi mem_read=all $GL"
+#   G 자리가 모자란 환경 (docs/capacity-eval.md): worker 1개의 메모리를 제한해 깨어 있을 수 있는 수(K)를 작게 고정하고,
+#     세션 수를 늘려 가며 "재우기가 자리를 얼마나 오래 잡고 있는가"에 따라 받을 수 있는 Agent 수가 어떻게 달라지는지 본다.
+#     none = 재우지 않음(K 를 실측), sync = 기본, async, 2g = sync + 업로드 한도 2Gi. 실패가 나오는 것이 정상인 단계다.
+PH="agentsession_phase_in=35"; GL="min_wait_time=1.0 max_wait_time=1.0"; GM="mem_churn=64Mi mem_read=all $GL"
 PLAN="
 S|S_glutton_baseline_1_user|g1|default|1|60|$SYNC $GL
 S|S_glutton_baseline_1_user_pause|g1|default|1|60|lifecycle_mode=async $GL
@@ -59,6 +62,23 @@ E|E_async_turn12|smoke|default|12|900|lifecycle_mode=async $(TURN 3 1)
 F|F_2g_turn12_r1|smoke|2Gi|12|300|$SYNC $(TURN 3 1)
 F|F_2g_turn12_r2|smoke|2Gi|12|300|$SYNC $(TURN 3 1)
 F|F_def_turn12|smoke|default|12|300|$SYNC $(TURN 3 1)
+G|G_none_n8|cap|default|8|240|lifecycle_mode=none $PH
+G|G_none_n16|cap|default|16|240|lifecycle_mode=none $PH
+G|G_sync_n8|cap|default|8|300|$SYNC $PH
+G|G_sync_n16|cap|default|16|300|$SYNC $PH
+G|G_sync_n32|cap|default|32|300|$SYNC $PH
+G|G_sync_n48|cap|default|48|300|$SYNC $PH
+G|G_sync_n64|cap|default|64|300|$SYNC $PH
+G|G_async_n8|cap|default|8|300|lifecycle_mode=async $PH
+G|G_async_n16|cap|default|16|300|lifecycle_mode=async $PH
+G|G_async_n32|cap|default|32|300|lifecycle_mode=async $PH
+G|G_async_n48|cap|default|48|300|lifecycle_mode=async $PH
+G|G_async_n64|cap|default|64|300|lifecycle_mode=async $PH
+G|G_2g_n8|cap|2Gi|8|300|$SYNC $PH
+G|G_2g_n16|cap|2Gi|16|300|$SYNC $PH
+G|G_2g_n32|cap|2Gi|32|300|$SYNC $PH
+G|G_2g_n48|cap|2Gi|48|300|$SYNC $PH
+G|G_2g_n64|cap|2Gi|64|300|$SYNC $PH
 ${ASB_EXTRA_PLAN:-}"
 PLAN="$(printf '%s\n' "$PLAN" | grep '|')"
 
@@ -72,8 +92,11 @@ spec() { local w="${WORKER_COUNT:-4}"; case "$1" in
   g10)   echo "glutton builtin 256Mi 10 150 300";;
   gm1)   echo "glutton builtin 1536Mi 1 1400 4500";;
   gm2)   echo "glutton builtin 2560Mi 1 2500 9000";;
-  cs)    echo "agentsession builtin 1Gi 1 450 1200";;    # 문서의 기본 실행: --actor-memory 1Gi, worker 수는 substrate 기본값 1
+  cs)    echo "agentsession builtin 1Gi 1 450 1200";;
+  cap)   echo "agentsession workloads/capacity-cycle.yaml 512Mi 1 250 700";;   # G 단계. worker 1개, worker 메모리는 아래 wmem    # 문서의 기본 실행: --actor-memory 1Gi, worker 수는 substrate 기본값 1
   *)     echo "";; esac; }
+# worker pod 메모리 한도를 주는 배포 종류 (없으면 빈 값 = 제한 없음). 값은 site.env 의 ASB_CAP_WORKER_MEMORY 로 바꿀 수 있다.
+wmem() { case "$1" in cap) echo "${ASB_CAP_WORKER_MEMORY:-5Gi}";; esac; }
 verdict_of() { sed -n 's/^VERDICT=//p' "$1/verdict.txt" 2>/dev/null | head -1; }
 stopping() { case "$1" in BROKEN|RESOURCE|FAILURES) return 0;; *) return 1;; esac; }
 row_state() {   # 실행 하나의 상태를 한 단어로
@@ -88,20 +111,22 @@ healthy() {
   [ "$(bad_pods ate-system)" = 0 ] && [ "$(bad_pods benchmark-workloads)" = 0 ]; }
 wait_healthy() { local i; for i in $(seq 1 30); do healthy && return 0; sleep 10; done; return 1; }
 
+want_of() { local wm; wm="$(wmem "$1")"; set -- $(spec "$1"); echo "user_class=$1 script=$(basename "$2") actor_memory=$3 worker_count=$4${wm:+ worker_memory=$wm}"; }
 ensure_deploy() {   # $1 = 배포 종류
-  set -- $(spec "$1"); local want="user_class=$1 script=$(basename "$2") actor_memory=$3 worker_count=$4"
+  local wm want; wm="$(wmem "$1")"; want="$(want_of "$1")"; set -- $(spec "$1")
   [ "$(cat "$RESULTS/deployed.txt" 2>/dev/null)" = "$want" ] && return 0
   echo "## 벤치마크 배포를 바꾼다: $want"
   [ -f "$RESULTS/deployed.txt" ] && "$ROOT/scripts/cleanup_actors.sh" >/dev/null 2>&1
   if [ -f "$RESULTS/deployed.txt" ]; then export SKIP_BUILD=1; else unset SKIP_BUILD; fi
   local arg="$ROOT/$2"; [ "$2" = builtin ] && arg=builtin
-  USER_CLASS="$1" ACTOR_MEMORY="$3" WORKER_COUNT="$4" "$ROOT/scripts/05_deploy_benchmark.sh" "$arg" > "$RESULTS/05_deploy_last.log" 2>&1 \
+  USER_CLASS="$1" ACTOR_MEMORY="$3" WORKER_COUNT="$4" WORKER_MEMORY="$wm" "$ROOT/scripts/05_deploy_benchmark.sh" "$arg" > "$RESULTS/05_deploy_last.log" 2>&1 \
     || { tail -n 20 "$RESULTS/05_deploy_last.log"; return 1; }
   [ "$(cat "$RESULTS/deployed.txt" 2>/dev/null)" = "$want" ]; }
 
 guard() {   # 자원이 모자라면 이유를 출력하고 1 을 돌려준다. $1=배포 $2=한도 $3=세션 수 $4=추가 인자
-  set -- $(spec "$1") "$2" "$3" "$4"; local ram="$5" disk="$6" budget="$7" users="$8" extra="$9"
+  local capped; capped="$(wmem "$1")"; set -- $(spec "$1") "$2" "$3" "$4"; local ram="$5" disk="$6" budget="$7" users="$8" extra="$9"
   local awake; awake="$(printf '%s' "$extra" | sed -n 's/.*agentsession_awake=\([0-9]*\).*/\1/p')"; [ -n "$awake" ] || awake="$users"
+  [ -n "$capped" ] && [ "$awake" -gt 12 ] && awake=12     # worker 메모리를 제한한 배포: 동시에 깨어 있는 수가 그 한도를 넘지 못한다
   local mem_av disk_free need_mem need_disk
   mem_av="$(docker exec "$NODE" awk '/MemAvailable/{print int($2/1024)}' /proc/meminfo)"
   disk_free="$(docker exec "$NODE" df -Pm /var/lib/ate | awk 'NR==2{print $4}')"
@@ -114,7 +139,8 @@ guard() {   # 자원이 모자라면 이유를 출력하고 1 을 돌려준다. 
 do_run() {   # 반환: 0 실행함, 10 자원 부족으로 건너뜀
   local name="$1" sp="$2" budget="$3" users="$4" dur="$5" extra="$6" out="$RUNS/$1" why
   [ -n "$(spec "$sp")" ] || stop_all "계획표의 배포 종류 '$sp' 를 모른다 (실행 $name). scripts/stage.sh 의 spec 에 있는 이름이어야 한다."
-  wait_healthy || stop_all "클러스터 상태 이상: 5분을 기다려도 ate-system / benchmark-workloads 의 pod 가 모두 Running 이 아니다 (실행 $name 직전)."
+  # 배포를 바꿔야 하는 경우에는 먼저 기다리지 않는다: 직전 배포가 실패해 남은 pod 는 새 배포가 바꿔 놓는다
+  [ "$(cat "$RESULTS/deployed.txt" 2>/dev/null)" != "$(want_of "$sp")" ] || wait_healthy || stop_all "클러스터 상태 이상: 5분을 기다려도 ate-system / benchmark-workloads 의 pod 가 모두 Running 이 아니다 (실행 $name 직전)."
   ensure_deploy "$sp" || stop_all "벤치마크 배포 실패 (실행 $name 직전). 로그: $RESULTS/05_deploy_last.log"
   "$ROOT/scripts/upload_budget.sh" "$budget" || stop_all "업로드 한도 변경 실패 (실행 $name 직전)."
   wait_healthy || stop_all "클러스터 상태 이상: 배포/설정 변경 뒤 pod 가 Running 으로 돌아오지 않는다 (실행 $name 직전)."
@@ -142,7 +168,7 @@ run_stage() {
            if [ ! -d "$out.bad1" ]; then echo "## $name 판정 $v → 한 번 다시 실행한다"; mv "$out" "$out.bad1"; sleep 30
            elif [ "$v" = BROKEN ] || [ "$st" = T ] || [ "$st" = A ] || [ "$name" = S_glutton_baseline_1_user ]; then
              stop_all "실행 $name 이 두 번 연속 $v ($(sed -n 's/^reason=//p' "$out/verdict.txt"))."
-           elif [ "$st" = S ]; then echo "## $name 이 두 번 연속 $v. S 단계의 항목은 서로 독립이므로 다음 항목으로 넘어간다"; break
+           elif [ "$st" = S ] || [ "$st" = G ]; then echo "## $name 이 두 번 연속 $v. $st 단계의 항목은 서로 독립이므로 다음 항목으로 넘어간다"; break
            else ended="앞 실행 $name 이 두 번 연속 $v 여서 $st 단계를 여기서 끝냄"; echo "## $ended"; break; fi;;
       esac
     done
